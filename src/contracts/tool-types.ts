@@ -24,12 +24,33 @@ export interface LoadedTool {
   filename: string;
 }
 
+export type ToolUpdateCallback = AgentToolUpdateCallback<unknown>;
+
+/**
+ * Pi's runtime currently invokes tool executors as:
+ *   execute(toolCallId, params, signal, onUpdate, ctx)
+ * Keep the internal registry aligned with that runtime order so builtins,
+ * extension tools, and active-tool overrides share one callable path.
+ */
+export type InternalToolExecute = (
+  toolCallId: string,
+  params: unknown,
+  signal?: AbortSignal,
+  onUpdate?: ToolUpdateCallback,
+  ctx?: ExtensionContext
+) => Promise<unknown>;
+
 export type ToolSource = "builtin" | "alias" | "extension";
 
 export interface ToolInfo extends ExtensionToolInfo {
-  execute: ToolDefinition["execute"];
+  execute: InternalToolExecute;
   source: ToolSource;
   isReadOnly: boolean;
+  ptc?: PtcToolOptions;
+}
+
+export interface ActivePiToolInfo extends ExtensionToolInfo {
+  execute?: InternalToolExecute;
   ptc?: PtcToolOptions;
 }
 
@@ -44,5 +65,3 @@ export interface ExecuteToolContext {
   signal?: AbortSignal;
   caller?: CallerMetadata;
 }
-
-export type ToolUpdateCallback = AgentToolUpdateCallback<unknown>;

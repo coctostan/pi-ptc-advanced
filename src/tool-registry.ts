@@ -12,11 +12,29 @@ import type { TSchema } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { classifyBuiltinTool, validatePythonHelperNames } from "./tools/python-tool-contract";
 import type { PtcSettings } from "./contracts/settings";
-import type { CallerMetadata, ExecuteToolContext, PtcToolDefinition, PtcToolOptions, ToolInfo } from "./contracts/tool-types";
+import type {
+  ActivePiToolInfo,
+  CallerMetadata,
+  ExecuteToolContext,
+  InternalToolExecute,
+  PtcToolDefinition,
+  PtcToolOptions,
+  ToolInfo,
+} from "./contracts/tool-types";
 import { logWarning } from "./utils";
 
 function classifyTool(name: string, ptc?: PtcToolOptions): { isReadOnly: boolean } {
   return classifyBuiltinTool(name, ptc);
+}
+
+function hasInternalExecute(tool: ActivePiToolInfo): tool is ActivePiToolInfo & { execute: InternalToolExecute } {
+  return typeof tool.execute === "function";
+}
+
+function createUnavailableExecute(toolName: string): InternalToolExecute {
+  return async () => {
+    throw new Error(`Tool ${toolName} execute function not available`);
+  };
 }
 
 export interface CallableToolRuntime {
@@ -62,7 +80,7 @@ export class ToolRegistry {
       name: tool.name,
       description: tool.description,
       parameters: tool.parameters,
-      execute: tool.execute,
+      execute: tool.execute as unknown as InternalToolExecute,
       ptc,
       source: "extension",
       isReadOnly: classification.isReadOnly,
@@ -89,7 +107,7 @@ export class ToolRegistry {
     for (const { name, create } of factories) {
       try {
         const tool = create(cwd);
-        const executeBuiltin = tool.execute as ToolInfo["execute"];
+        const executeBuiltin = tool.execute as unknown as InternalToolExecute;
         const classification = classifyTool(tool.name);
         builtins.set(name, {
           name: tool.name,
@@ -123,6 +141,7 @@ export class ToolRegistry {
   private buildToolMap(cwd?: string): Map<string, ToolInfo> {
     const allTools = new Map<string, ToolInfo>();
     const builtinTools = this.createBuiltinTools(cwd || process.cwd());
+    const activeToolNames = new Set(this.pi.getActiveTools());
 
     for (const builtin of builtinTools.values()) {
       allTools.set(builtin.name, builtin);
@@ -132,29 +151,37 @@ export class ToolRegistry {
       allTools.set(customTool.name, customTool);
     }
 
-    for (const piTool of this.pi.getAllTools()) {
+    for (const piTool of this.pi.getAllTools() as ActivePiToolInfo[]) {
       if (this.extensionOwnedToolNames.has(piTool.name) && !this.customTools.has(piTool.name)) {
         continue;
       }
 
       const existing = allTools.get(piTool.name);
+      const existingIsBuiltin = existing?.source === "builtin" || existing?.source === "alias";
+      const shouldUsePiOverride = activeToolNames.has(piTool.name);
+
       if (existing) {
+        if (existingIsBuiltin && !shouldUsePiOverride) {
+          continue;
+        }
+
         allTools.set(piTool.name, {
           ...existing,
           description: piTool.description,
           parameters: piTool.parameters,
+          ptc: piTool.ptc ?? existing.ptc,
+          execute: shouldUsePiOverride && hasInternalExecute(piTool) ? piTool.execute : existing.execute,
         });
         continue;
       }
 
-      const classification = classifyTool(piTool.name);
+      const classification = classifyTool(piTool.name, piTool.ptc);
       allTools.set(piTool.name, {
         name: piTool.name,
         description: piTool.description,
         parameters: piTool.parameters,
-        execute: async () => {
-          throw new Error(`Tool ${piTool.name} execute function not available`);
-        },
+        execute: shouldUsePiOverride && hasInternalExecute(piTool) ? piTool.execute : createUnavailableExecute(piTool.name),
+        ptc: piTool.ptc,
         source: "extension",
         isReadOnly: classification.isReadOnly,
       });
