@@ -61,6 +61,35 @@ function createUnavailableExecute(toolName: string): InternalToolExecute {
   };
 }
 
+function getConfiguredCallers(tool: ToolInfo): Set<"direct" | "code_execution"> {
+  const configured = tool.ptc?.callers;
+  if (configured && configured.length > 0) {
+    return new Set(configured);
+  }
+
+  if (tool.name === "code_execution") {
+    return new Set(["direct"]);
+  }
+
+  if (tool.source === "builtin" || tool.source === "alias") {
+    return new Set(["direct", "code_execution"]);
+  }
+
+  if (tool.ptc?.enabled === true) {
+    return new Set(["direct", "code_execution"]);
+  }
+
+  return new Set(["direct"]);
+}
+
+function toolAllowsDirectCaller(tool: ToolInfo): boolean {
+  return getConfiguredCallers(tool).has("direct");
+}
+
+function toolAllowsCodeExecutionCaller(tool: ToolInfo): boolean {
+  return getConfiguredCallers(tool).has("code_execution");
+}
+
 export interface CallableToolRuntime {
   tools: ToolInfo[];
   runTool(toolName: string, params: unknown, nestedCallId: string): Promise<unknown>;
@@ -309,11 +338,20 @@ export class ToolRegistry {
         }
       }
 
-      return isBuiltin || normalizedPtc?.callable === true;
+      return toolAllowsCodeExecutionCaller(tool) && (isBuiltin || normalizedPtc?.callable === true);
     });
 
     validatePythonHelperNames(callableTools);
     return callableTools;
+  }
+
+  getAutoRoutableToolNames(cwd: string, settings: PtcSettings): string[] {
+    const callableNames = new Set(this.getCallableTools(cwd, settings).map((tool) => tool.name));
+    return this.getAllTools(cwd)
+      .filter((tool) => tool.name !== "code_execution")
+      .filter((tool) => toolAllowsDirectCaller(tool))
+      .filter((tool) => callableNames.has(tool.name))
+      .map((tool) => tool.name);
   }
 
   createCallableToolRuntime(

@@ -171,26 +171,21 @@ export class CustomToolManager {
       this.fileSignatures.delete(filename);
       return;
     }
-
     const stat = fs.statSync(filePath);
     this.fileSignatures.set(filename, `${stat.mtimeMs}:${stat.size}`);
   }
-
   private scanForMissedChanges(): void {
     this.ensureToolsDir();
     const filenames = fs.readdirSync(this.toolsDir).filter((entry) => entry.endsWith(".js"));
     const present = new Set(filenames);
-
     for (const filename of filenames) {
       const previousSignature = this.fileSignatures.get(filename);
       this.refreshFileSignature(filename);
       const currentSignature = this.fileSignatures.get(filename);
-
       if (previousSignature !== currentSignature) {
         void this.reconcileFile(filename);
       }
     }
-
     for (const filename of Array.from(this.fileSignatures.keys())) {
       if (!present.has(filename)) {
         this.fileSignatures.delete(filename);
@@ -198,19 +193,20 @@ export class CustomToolManager {
       }
     }
   }
-
   private startPolling(): void {
     if (this.pollTimer) {
       return;
     }
-
     this.pollTimer = setInterval(() => {
       this.scanForMissedChanges();
     }, 250);
     this.pollTimer.unref?.();
   }
+  private setToolActive(toolName: string, tool: PtcToolDefinition): void {
+    if (Array.isArray(tool.ptc?.callers) && !tool.ptc.callers.includes("direct")) {
+      return;
+    }
 
-  private setToolActive(toolName: string): void {
     const activeTools = this.pi.getActiveTools();
     if (!activeTools.includes(toolName)) {
       this.pi.setActiveTools([...activeTools, toolName]);
@@ -232,7 +228,7 @@ export class CustomToolManager {
 
     this.toolRegistry.upsertTool(loadedTool.tool);
     this.pi.registerTool(loadedTool.tool);
-    this.setToolActive(loadedTool.tool.name);
+    this.setToolActive(loadedTool.tool.name, loadedTool.tool);
     this.fileToTool.set(loadedTool.filename, loadedTool.tool.name);
     this.onToolSetChanged?.();
     debugLog(`Registered custom tool ${loadedTool.tool.name} from ${loadedTool.filename}`);

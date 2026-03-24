@@ -84,6 +84,7 @@ function baseSettings(overrides = {}) {
     useDocker: false,
     allowUnsandboxedSubprocess: true,
     debugLogging: false,
+    autoRoute: true,
     trustedReadOnlyTools: undefined,
     callableTools: undefined,
     blockedTools: undefined,
@@ -231,10 +232,9 @@ test("ToolRegistry uses the active Pi executor for overridden builtin tool names
     ["read", false],
     ["grep", false],
     ["edit", true],
-  ]) {
+  ] as const) {
     let capturedArgs: unknown[] | null = null;
     const signal = { type: `signal:${toolName}` };
-
     const registry = createRegistry({
       getAllTools() {
         return [
@@ -260,15 +260,14 @@ test("ToolRegistry uses the active Pi executor for overridden builtin tool names
     });
     const result = await runtime.runTool(toolName, { value: toolName }, `nested:${toolName}`);
     const callable = runtime.tools.find((tool) => tool.name === toolName);
-    assert.ok(callable);
     if (!capturedArgs) {
       throw new Error("override executor was not called");
     }
     const args = capturedArgs;
-    assert.equal(result.content[0].text, `override:${toolName}`);
+    assert.equal((result as { content: Array<{ text: string }> }).content[0].text, `override:${toolName}`);
     assert.equal(callable.description, `override:${toolName}`);
-    assert.equal(callable.parameters.type, "object");
-    assert.equal(callable.parameters.properties.value.type, "string");
+    assert.equal((callable.parameters as { type: string }).type, "object");
+    assert.equal((callable.parameters as { properties: { value: { type: string } } }).properties.value.type, "string");
     assert.equal(args[0], `nested:${toolName}`);
     assert.deepEqual(args[1], { value: toolName });
     assert.equal(args[2], signal);
@@ -281,7 +280,6 @@ test("ToolRegistry uses the active Pi executor for overridden builtin tool names
     });
   }
 });
-
 test("ToolRegistry keeps builtin fallback when an override is not active", async () => {
   const registry = createRegistry({
     getAllTools() {
@@ -304,14 +302,11 @@ test("ToolRegistry keeps builtin fallback when an override is not active", async
   const runtime = registry.createCallableToolRuntime(process.cwd(), baseSettings(), {
     ctx: { cwd: process.cwd() },
   });
-
   const result = await runtime.runTool("read", { value: "fallback" }, "nested:read");
   const callable = runtime.tools.find((tool) => tool.name === "read");
-
-  assert.equal(result.content[0].text, "builtin:read");
-  assert.equal(callable.description, "read");
+  assert.equal((result as { content: Array<{ text: string }> }).content[0].text, "builtin:read");
+  assert.equal(callable?.description, "read");
 });
-
 test("ToolRegistry still excludes code_execution from nested callable tools", () => {
   const registry = createRegistry({
     getAllTools() {
@@ -330,12 +325,9 @@ test("ToolRegistry still excludes code_execution from nested callable tools", ()
       return ["code_execution"];
     },
   });
-
   const callable = registry.getCallableTools(process.cwd(), baseSettings({ allowMutations: true }));
-
   assert.ok(!callable.some((tool) => tool.name === "code_execution"));
 });
-
 test("ToolRegistry overlays extension executors from globalThis onto builtins", async () => {
   let capturedArgs: unknown[] | null = null;
   const mockExecute = async (...args: unknown[]) => {
@@ -343,7 +335,7 @@ test("ToolRegistry overlays extension executors from globalThis onto builtins", 
     return { content: [{ type: "text", text: "hashline:read" }], details: { ptcValue: { tool: "read", lines: [] } } };
   };
 
-  (globalThis as any).__hashlineToolExecutors = {
+  (globalThis as typeof globalThis & { __hashlineToolExecutors?: unknown }).__hashlineToolExecutors = {
     read: {
       name: "read",
       execute: mockExecute,
@@ -358,16 +350,14 @@ test("ToolRegistry overlays extension executors from globalThis onto builtins", 
       ctx: { cwd: process.cwd() },
       parentToolCallId: "parent:bridge",
     });
-
     const result = await runtime.runTool("read", { value: "test" }, "nested:bridge");
     assert.ok(capturedArgs, "hashline executor was not called");
-    assert.equal(result.content[0].text, "hashline:read");
-    assert.deepEqual(result.details, { ptcValue: { tool: "read", lines: [] } });
+    assert.equal((result as { content: Array<{ text: string }> }).content[0].text, "hashline:read");
+    assert.deepEqual((result as { details: unknown }).details, { ptcValue: { tool: "read", lines: [] } });
   } finally {
-    delete (globalThis as any).__hashlineToolExecutors;
+    delete (globalThis as typeof globalThis & { __hashlineToolExecutors?: unknown }).__hashlineToolExecutors;
   }
 });
-
 test("ToolRegistry overlays extension executors from EventBus subscription", () => {
   let eventHandler: ((data: unknown) => void) | null = null;
   const registry = createRegistry({
@@ -383,7 +373,6 @@ test("ToolRegistry overlays extension executors from EventBus subscription", () 
   });
 
   assert.ok(eventHandler, "EventBus handler was not registered");
-
   const mockExecute = async () => ({ content: [{ type: "text", text: "hashline:grep" }] });
   eventHandler!({
     grep: {
@@ -393,21 +382,60 @@ test("ToolRegistry overlays extension executors from EventBus subscription", () 
       parameters: stringParamSchema(),
     },
   });
-
   const callable = registry.getCallableTools(process.cwd(), baseSettings());
   const grepTool = callable.find((tool) => tool.name === "grep");
   assert.ok(grepTool, "grep tool not found in callable tools");
   assert.equal(grepTool.execute, mockExecute, "grep execute should be the extension executor");
 });
-
 test("ToolRegistry preserves builtin fallback when no extension executors exist", async () => {
-  delete (globalThis as any).__hashlineToolExecutors;
+  delete (globalThis as typeof globalThis & { __hashlineToolExecutors?: unknown }).__hashlineToolExecutors;
 
   const registry = createRegistry();
   const runtime = registry.createCallableToolRuntime(process.cwd(), baseSettings(), {
     ctx: { cwd: process.cwd() },
   });
-
   const result = await runtime.runTool("read", { value: "fallback" }, "nested:fallback");
-  assert.equal(result.content[0].text, "builtin:read");
+  assert.equal((result as { content: Array<{ text: string }> }).content[0].text, "builtin:read");
+});
+test("ToolRegistry respects code_execution-only callers for custom tools", () => {
+  const registry = createRegistry();
+  registry.upsertTool({
+    name: "query_db",
+    description: "Query DB",
+    parameters: stringParamSchema(),
+    ptc: { enabled: true, readOnly: true, callers: ["code_execution"] },
+    async execute() {
+      return { content: [{ type: "text", text: "ok" }], details: undefined };
+    },
+  });
+  const callable = registry.getCallableTools(
+    process.cwd(),
+    baseSettings({ trustedReadOnlyTools: ["query_db"] })
+  );
+  assert.ok(callable.some((tool) => tool.name === "query_db"));
+  const routable = registry.getAutoRoutableToolNames(
+    process.cwd(),
+    baseSettings({ trustedReadOnlyTools: ["query_db"] })
+  );
+  assert.ok(!routable.includes("query_db"));
+});
+test("ToolRegistry auto-routing only hides tools callable both directly and from code_execution", () => {
+  const registry = createRegistry();
+  registry.upsertTool({
+    name: "query_db",
+    description: "Query DB",
+    parameters: stringParamSchema(),
+    ptc: { enabled: true, readOnly: true, callers: ["direct", "code_execution"] },
+    async execute() {
+      return { content: [{ type: "text", text: "ok" }], details: undefined };
+    },
+  });
+
+  const routable = registry.getAutoRoutableToolNames(
+    process.cwd(),
+    baseSettings({ trustedReadOnlyTools: ["query_db"] })
+  );
+  assert.ok(routable.includes("read"));
+  assert.ok(routable.includes("query_db"));
+  assert.ok(!routable.includes("code_execution"));
 });

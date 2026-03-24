@@ -2,12 +2,25 @@ import { Type } from "@sinclair/typebox";
 import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
 import { Text, type Component } from "@mariozechner/pi-tui";
 import { CodeExecutor } from "./code-executor";
+import { PtcPythonError } from "./execution/execution-errors";
 import { CustomToolManager } from "./custom-tool-manager";
+import { buildCodeExecutionRecoveryPrompt, classifyCodeExecutionFailure } from "./recovery-classifier";
+import {
+  armAutomaticRecovery,
+  buildPtcExecutionTelemetry,
+  buildPtcRecoveryDetails,
+  createPtcRecoveryState,
+  noteAutomaticRouting,
+  noteCodeExecutionAttempt,
+  noteCodeExecutionFailure,
+  noteCodeExecutionSuccess,
+  type PtcRecoveryState,
+} from "./recovery-state";
 import { createSandbox } from "./sandbox-manager";
 import { describePythonHelpers } from "./tools/python-tool-contract";
 import { ToolRegistry } from "./tool-registry";
 import type { ExecutionDetails, PtcSettings, PtcToolDefinition, SandboxManager, ToolInfo } from "./types";
-import { loadSettingsFromEnv } from "./utils";
+import { debugLog, isMutationPrompt, loadSettingsFromEnv, shouldAutoRoutePromptToCodeExecution } from "./utils";
 
 function renderExecutingCode(
   codeLines: string[],
@@ -62,9 +75,17 @@ function buildToolDescription(currentSettings: PtcSettings, callableTools: ToolI
   const dockerBehavior = currentSettings.useDocker
     ? "- Docker isolation is required for this session; if Docker is unavailable, execution fails instead of falling back to subprocess."
     : "- Local subprocess mode is active because PTC_ALLOW_UNSANDBOXED_SUBPROCESS=true. Nested tool policy still applies, but Python itself is not isolated by Docker in this mode.";
-
   return `Execute Python code with local programmatic tool calling.
-Use this tool when you need 3+ dependent tool calls, loops, filtering, aggregation, or large intermediate results that should stay out of the chat context. Avoid it for a single simple tool call.
+
+Prefer this tool first for repo-wide analysis, repeated lookups, loops, grouping, ranking, counting, filtering, or any task with 3+ dependent tool calls. Use direct tools instead for one-file reads, one-off grep/find calls, or tiny lookups.
+Strong signals to use code_execution:
+- Scan many files and return counts, grouped summaries, rankings, or compact JSON
+- Run the same tool across many inputs and aggregate the results
+- Keep large intermediate results out of the chat context
+Examples:
+- Count imports across src/**/*.ts and return the top 10 packages
+- Analyze the first 8 test files and return compact JSON only
+- Check many endpoints or records, then return only the failures
 Important rules:
 - Top-level await is already available. Do not call asyncio.run(...).
 - Use generated helpers such as read(), glob(), find(), grep(), ls(), and ptc.* helpers. Do not call _rpc_call(...) directly.
@@ -106,10 +127,29 @@ function getExtensionRoot(): string {
     : __dirname;
 }
 
+function getRequestRecoveryState(sessionState: PtcSessionState): PtcRecoveryState {
+  if (!sessionState.recoveryState) {
+    sessionState.recoveryState = createPtcRecoveryState();
+  }
+
+  return sessionState.recoveryState;
+}
+
+function buildRecoveryContextMessage(content: string) {
+  return {
+    role: "custom" as const,
+    customType: "ptc-recovery",
+    content,
+    display: true,
+    timestamp: Date.now(),
+  };
+}
+
 function buildCodeExecutionTool(
   currentSettings: PtcSettings,
   callableTools: ToolInfo[],
-  codeExecutor: CodeExecutor
+  codeExecutor: CodeExecutor,
+  sessionState: PtcSessionState
 ): PtcToolDefinition {
   return {
     name: "code_execution",
@@ -122,18 +162,39 @@ function buildCodeExecutionTool(
       }),
     }),
     execute: async (toolCallId, { code }, signal, onUpdate, ctx) => {
-      const result = await codeExecutor.execute(code, {
-        cwd: ctx.cwd,
-        ctx,
-        signal,
-        onUpdate,
-        parentToolCallId: toolCallId,
-      });
+      const recoveryState = getRequestRecoveryState(sessionState);
+      noteCodeExecutionAttempt(recoveryState);
 
-      return {
-        content: [{ type: "text" as const, text: result.output || "(No output)" }],
-        details: result.details,
-      };
+      try {
+        const result = await codeExecutor.execute(code, {
+          cwd: ctx.cwd,
+          ctx,
+          signal,
+          onUpdate,
+          parentToolCallId: toolCallId,
+          recoveryState,
+        });
+
+        noteCodeExecutionSuccess(recoveryState);
+        return {
+          content: [{ type: "text" as const, text: result.output || "(No output)" }],
+          details: {
+            ...result.details,
+            telemetry: buildPtcExecutionTelemetry(recoveryState),
+            recovery: buildPtcRecoveryDetails(recoveryState),
+          },
+        };
+      } catch (error) {
+        if (error instanceof PtcPythonError) {
+          const failureClass = classifyCodeExecutionFailure(error.rawMessage, error.traceback, code);
+          if (sessionState.recoveryAllowed && failureClass && armAutomaticRecovery(recoveryState, currentSettings, failureClass)) {
+            sessionState.pendingRecoveryPrompt = buildCodeExecutionRecoveryPrompt(failureClass);
+          }
+        }
+
+        noteCodeExecutionFailure(recoveryState);
+        throw error;
+      }
     },
     renderResult(result, { isPartial }, theme) {
       const details = result.details as ExecutionDetails | undefined;
@@ -159,6 +220,65 @@ function buildCodeExecutionTool(
 interface PtcSessionState {
   currentCwd: string;
   customToolsStarted: boolean;
+  activeToolsBeforeRouting: string[] | null;
+  pendingRecoveryPrompt: string | null;
+  recoveryAllowed: boolean;
+  recoveryState: PtcRecoveryState | null;
+}
+
+function areToolListsEqual(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function applyAutoRouting(
+  pi: ExtensionAPI,
+  toolRegistry: ToolRegistry,
+  settings: PtcSettings,
+  sessionState: PtcSessionState,
+  prompt: string,
+  currentSystemPrompt: string
+): { systemPrompt?: string } | undefined {
+  if (!settings.autoRoute || !shouldAutoRoutePromptToCodeExecution(prompt)) {
+    return undefined;
+  }
+
+  const allTools = pi.getAllTools();
+  if (!allTools.some((tool) => tool.name === "code_execution")) {
+    return undefined;
+  }
+
+  noteAutomaticRouting(getRequestRecoveryState(sessionState));
+
+  const activeTools = pi.getActiveTools();
+  const routableToolNames = new Set(toolRegistry.getAutoRoutableToolNames(sessionState.currentCwd, settings));
+  const nextActiveTools = activeTools.filter((name) => !routableToolNames.has(name));
+  if (!nextActiveTools.includes("code_execution")) {
+    nextActiveTools.push("code_execution");
+  }
+
+  if (!areToolListsEqual(activeTools, nextActiveTools)) {
+    sessionState.activeToolsBeforeRouting = activeTools;
+    pi.setActiveTools(nextActiveTools);
+    debugLog("Auto-routed prompt to code_execution", { prompt, activeTools, nextActiveTools });
+  }
+
+  return {
+    systemPrompt:
+      `${currentSystemPrompt}\n\n` +
+      "This request is a strong fit for code_execution. Prefer calling code_execution first and keep large intermediate results inside Python unless the user explicitly asked to see them.",
+  };
+}
+
+function restoreActiveToolsAfterRouting(pi: ExtensionAPI, sessionState: PtcSessionState): void {
+  if (!sessionState.activeToolsBeforeRouting) {
+    return;
+  }
+
+  pi.setActiveTools(sessionState.activeToolsBeforeRouting);
+  debugLog("Restored active tools after code_execution routing", {
+    restored: sessionState.activeToolsBeforeRouting,
+  });
+  sessionState.activeToolsBeforeRouting = null;
 }
 
 function registerCodeExecutionTool(
@@ -166,10 +286,11 @@ function registerCodeExecutionTool(
   toolRegistry: ToolRegistry,
   settings: PtcSettings,
   codeExecutor: CodeExecutor,
-  currentCwd: string
+  currentCwd: string,
+  sessionState: PtcSessionState
 ): void {
   const callableTools = toolRegistry.getCallableTools(currentCwd, settings);
-  pi.registerTool(buildCodeExecutionTool(settings, callableTools, codeExecutor));
+  pi.registerTool(buildCodeExecutionTool(settings, callableTools, codeExecutor, sessionState));
 }
 
 function registerCodeExecutionToolForState(
@@ -179,7 +300,7 @@ function registerCodeExecutionToolForState(
   codeExecutor: CodeExecutor,
   sessionState: PtcSessionState
 ): void {
-  registerCodeExecutionTool(pi, toolRegistry, settings, codeExecutor, sessionState.currentCwd);
+  registerCodeExecutionTool(pi, toolRegistry, settings, codeExecutor, sessionState.currentCwd, sessionState);
 }
 
 async function handleSessionStart(
@@ -198,7 +319,42 @@ async function handleSessionStart(
     sessionState.customToolsStarted = true;
   }
 
-  registerCodeExecutionTool(pi, toolRegistry, settings, codeExecutor, sessionState.currentCwd);
+  registerCodeExecutionTool(pi, toolRegistry, settings, codeExecutor, sessionState.currentCwd, sessionState);
+}
+
+function handleBeforeAgentStart(
+  pi: ExtensionAPI,
+  toolRegistry: ToolRegistry,
+  settings: PtcSettings,
+  sessionState: PtcSessionState,
+  event: { prompt?: string; systemPrompt: string }
+): { systemPrompt?: string } | undefined {
+  sessionState.pendingRecoveryPrompt = null;
+  sessionState.recoveryAllowed = typeof event.prompt === "string" ? !isMutationPrompt(event.prompt) : true;
+  sessionState.recoveryState = createPtcRecoveryState();
+
+  if (typeof event.prompt !== "string") {
+    return undefined;
+  }
+
+  return applyAutoRouting(pi, toolRegistry, settings, sessionState, event.prompt, event.systemPrompt);
+}
+
+function handleContext(sessionState: PtcSessionState, event: { messages: Array<Record<string, unknown>> }) {
+  if (!sessionState.pendingRecoveryPrompt) {
+    return undefined;
+  }
+
+  const messages = [...event.messages, buildRecoveryContextMessage(sessionState.pendingRecoveryPrompt)];
+  sessionState.pendingRecoveryPrompt = null;
+  return { messages };
+}
+
+function handleAgentEnd(pi: ExtensionAPI, sessionState: PtcSessionState): void {
+  restoreActiveToolsAfterRouting(pi, sessionState);
+  sessionState.pendingRecoveryPrompt = null;
+  sessionState.recoveryAllowed = true;
+  sessionState.recoveryState = null;
 }
 
 async function handleSessionShutdown(
@@ -218,6 +374,10 @@ export default async function ptcExtension(pi: ExtensionAPI, context?: Extension
   const sessionState: PtcSessionState = {
     currentCwd: context?.cwd ?? process.cwd(),
     customToolsStarted: false,
+    activeToolsBeforeRouting: null,
+    pendingRecoveryPrompt: null,
+    recoveryAllowed: true,
+    recoveryState: null,
   };
 
   const onToolSetChanged = registerCodeExecutionToolForState.bind(
@@ -239,8 +399,14 @@ export default async function ptcExtension(pi: ExtensionAPI, context?: Extension
     settings,
     codeExecutor
   );
+  const onBeforeAgentStart = handleBeforeAgentStart.bind(undefined, pi, toolRegistry, settings, sessionState);
+  const onContext = handleContext.bind(undefined, sessionState);
+  const onAgentEnd = handleAgentEnd.bind(undefined, pi, sessionState);
   const onSessionShutdown = handleSessionShutdown.bind(undefined, customToolManager, sandboxManager);
 
   pi.on("session_start", onSessionStart);
+  pi.on("before_agent_start", onBeforeAgentStart);
+  (pi as unknown as { on(event: "context", handler: typeof onContext): void }).on("context", onContext);
+  pi.on("agent_end", onAgentEnd);
   pi.on("session_shutdown", onSessionShutdown);
 }

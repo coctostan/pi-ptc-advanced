@@ -5,9 +5,9 @@ import type {
   ToolInfo as ExtensionToolInfo,
 } from "@mariozechner/pi-coding-agent";
 import type { TSchema } from "@sinclair/typebox";
-
 export type PtcExecutionPolicy = "read-only" | "mutating";
 export type PtcToolDefaultExposure = "safe-by-default" | "opt-in" | "not-safe-by-default";
+export type PtcCaller = "direct" | "code_execution";
 export interface PtcToolOptions {
   enabled?: boolean;
   callable?: boolean;
@@ -15,6 +15,7 @@ export interface PtcToolOptions {
   policy?: PtcExecutionPolicy;
   pythonName?: string;
   defaultExposure?: PtcToolDefaultExposure;
+  callers?: PtcCaller[];
 }
 export interface NormalizedPtcToolOptions {
   callable: boolean;
@@ -23,15 +24,12 @@ export interface NormalizedPtcToolOptions {
   pythonName?: string;
   defaultExposure?: PtcToolDefaultExposure;
 }
-
 export function normalizePtcToolOptions(ptc?: PtcToolOptions): NormalizedPtcToolOptions | undefined {
   if (!ptc) {
     return undefined;
   }
-
   const callable = ptc.callable ?? ptc.enabled ?? false;
   const executionPolicy = ptc.policy ?? (ptc.readOnly === true ? "read-only" : "mutating");
-
   return {
     callable,
     executionPolicy,
@@ -40,7 +38,6 @@ export function normalizePtcToolOptions(ptc?: PtcToolOptions): NormalizedPtcTool
     defaultExposure: ptc.defaultExposure,
   };
 }
-
 export type PtcToolDefinition<
   TParams extends TSchema = TSchema,
   TDetails = unknown,

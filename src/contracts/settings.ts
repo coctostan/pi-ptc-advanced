@@ -7,6 +7,9 @@ export interface PtcSettings {
   useDocker: boolean;
   allowUnsandboxedSubprocess: boolean;
   debugLogging: boolean;
+  autoRoute: boolean;
+  autoRecover?: boolean;
+  autoRecoverMaxAttempts?: number;
   trustedReadOnlyTools?: string[];
   callableTools?: string[];
   blockedTools?: string[];

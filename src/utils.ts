@@ -26,6 +26,19 @@ function parsePositiveIntEnv(value: string | undefined, fallback: number): numbe
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function parseClampedIntEnv(value: string | undefined, fallback: number, min: number, max: number): number {
+  if (value === undefined || value === "") {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, parsed));
+}
+
 function parseListEnv(value: string | undefined): string[] | undefined {
   if (!value) {
     return undefined;
@@ -57,6 +70,9 @@ export function loadSettingsFromEnv(): PtcSettings {
     useDocker: parseBooleanEnv(process.env.PTC_USE_DOCKER, false),
     allowUnsandboxedSubprocess: parseBooleanEnv(process.env.PTC_ALLOW_UNSANDBOXED_SUBPROCESS, false),
     debugLogging: parseBooleanEnv(process.env.PTC_DEBUG, false),
+    autoRoute: parseBooleanEnv(process.env.PTC_AUTO_ROUTE, true),
+    autoRecover: parseBooleanEnv(process.env.PTC_AUTO_RECOVER, false),
+    autoRecoverMaxAttempts: parseClampedIntEnv(process.env.PTC_AUTO_RECOVER_MAX_ATTEMPTS, 1, 0, 1),
     trustedReadOnlyTools: parseListEnv(process.env.PTC_TRUSTED_READ_ONLY_TOOLS),
     callableTools: parseListEnv(process.env.PTC_CALLABLE_TOOLS),
     blockedTools: parseListEnv(process.env.PTC_BLOCKED_TOOLS),
@@ -64,6 +80,44 @@ export function loadSettingsFromEnv(): PtcSettings {
 
   debugLoggingEnabled = settings.debugLogging;
   return settings;
+}
+
+export function isMutationPrompt(prompt: string): boolean {
+  return /\b(edit|write|modify|change|update|fix|create|delete|rename|refactor|patch|implement|add|remove)\b/.test(
+    prompt.trim().toLowerCase()
+  );
+}
+
+export function shouldAutoRoutePromptToCodeExecution(prompt: string): boolean {
+  const normalized = prompt.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  if (/\b(?:use|call|run|invoke) (?:the )?code_execution\b/.test(normalized)) {
+    return true;
+  }
+
+  if (isMutationPrompt(normalized)) {
+    return false;
+  }
+
+  const hasFanout =
+    /(?:\*\*\/|\*\.[a-z0-9]+\b|\bglob\b|\bcodebase\b|\brepo\b|\brepository\b|\ball files\b|\bevery file\b|\bentire codebase\b|\bentire repo\b|\bacross (?:the )?(?:repo|codebase)\b|\bfirst \d+\b.*\bfiles?\b|\bmany files\b|\bmultiple files\b|\bfor each\b|\bfor every\b|\beach file\b)/.test(
+      normalized
+    );
+
+  const hasProcessing =
+    /\b(count|group|aggregate|rank|sort|top \d+|summari[sz]e|compare|statistics|histogram|frequency|frequencies|distribution|dedup|filter|tabulate)\b/.test(
+      normalized
+    );
+
+  const hasContextPressure =
+    /\b(compact json|json only|summary only|summaries only|keep intermediate|keep intermediates|stay out of chat|out of chat|without flooding|don't flood)\b/.test(
+      normalized
+    );
+
+  return (hasFanout && (hasProcessing || hasContextPressure)) || (hasProcessing && hasContextPressure);
 }
 
 export function truncateOutput(output: string, maxOutputChars: number = DEFAULT_MAX_OUTPUT_SIZE): string {
