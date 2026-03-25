@@ -126,6 +126,10 @@ class EditNoop(TypedDict, total=False):
     editIndex: int
     loc: str
     currentContent: str
+class SemanticSummary(TypedDict, total=False):
+    classification: str
+    difftasticAvailable: bool
+    movedBlocks: int
 class AnchoredEditResult(TypedDict, total=False):
     tool: str
     ok: bool
@@ -135,6 +139,7 @@ class AnchoredEditResult(TypedDict, total=False):
     firstChangedLine: Optional[int]
     warnings: List[str]
     noopEdits: List[EditNoop]
+    semanticSummary: Optional[SemanticSummary]
 class WriteResult(TypedDict):
     ok: bool
     summary: str

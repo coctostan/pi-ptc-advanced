@@ -1,5 +1,5 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
+const nodeTest = require("node:test");
+const nodeAssert = require("node:assert/strict");
 const {
   buildInlinePythonSignature,
   buildMultilinePythonSignature,
@@ -12,7 +12,7 @@ const {
   schemaToPythonType,
   validatePythonHelperNames,
 } = require("../dist/tools/python-tool-contract.js");
-const { generateToolWrappers } = require("../dist/tools/tool-wrapper.js");
+const { generateToolWrappers: generateToolWrappersForTests } = require("../dist/tools/tool-wrapper.js");
 
 function createTool(overrides = {}) {
   return {
@@ -34,41 +34,41 @@ function createTool(overrides = {}) {
   };
 }
 
-test("builtin contracts preserve read-only classification and return types", () => {
-  assert.deepEqual(getBuiltinToolContract("read"), {
+nodeTest("builtin contracts preserve read-only classification and return types", () => {
+  nodeAssert.deepEqual(getBuiltinToolContract("read"), {
     isReadOnly: true,
     pythonReturnType: "Union[str, ReadResult]",
     helperSignature:
       "read(path: str, *, offset: Optional[int] = None, limit: Optional[int] = None, symbol: Optional[str] = None, map: Optional[bool] = None) -> Union[str, ReadResult]",
   });
-  assert.deepEqual(classifyBuiltinTool("bash"), { isReadOnly: false });
-  assert.deepEqual(classifyBuiltinTool("bash", { readOnly: true }), { isReadOnly: true });
-  assert.equal(getPythonReturnType(createTool({ name: "custom" })), "Any");
-  assert.equal(getPythonReturnType(createTool({ name: "grep" })), "Union[List[GrepMatch], GrepResult]");
-  assert.equal(getPythonReturnType(createTool({ name: "edit" })), "AnchoredEditResult");
+  nodeAssert.deepEqual(classifyBuiltinTool("bash"), { isReadOnly: false });
+  nodeAssert.deepEqual(classifyBuiltinTool("bash", { readOnly: true }), { isReadOnly: true });
+  nodeAssert.equal(getPythonReturnType(createTool({ name: "custom" })), "Any");
+  nodeAssert.equal(getPythonReturnType(createTool({ name: "grep" })), "Union[List[GrepMatch], GrepResult]");
+  nodeAssert.equal(getPythonReturnType(createTool({ name: "edit" })), "AnchoredEditResult");
 });
 
-test("schemaToPythonType and parameter metadata handle unions, arrays, and keyword-only params", () => {
-  assert.equal(schemaToPythonType({ type: "string" }), "str");
-  assert.equal(schemaToPythonType({ anyOf: [{ type: "string" }, { type: "integer" }, { type: "null" }] }), "Union[str, int]");
-  assert.equal(schemaToPythonType({ type: "array", items: { type: "boolean" } }), "List[bool]");
+nodeTest("schemaToPythonType and parameter metadata handle unions, arrays, and keyword-only params", () => {
+  nodeAssert.equal(schemaToPythonType({ type: "string" }), "str");
+  nodeAssert.equal(schemaToPythonType({ anyOf: [{ type: "string" }, { type: "integer" }, { type: "null" }] }), "Union[str, int]");
+  nodeAssert.equal(schemaToPythonType({ type: "array", items: { type: "boolean" } }), "List[bool]");
 
   const params = buildPythonParamMetadata(createTool());
-  assert.deepEqual(params, [
+  nodeAssert.deepEqual(params, [
     { name: "query", keywordOnly: false, signature: "query: str" },
     { name: "limit", keywordOnly: true, signature: "limit: Optional[int] = None" },
     { name: "tags", keywordOnly: true, signature: "tags: Optional[List[str]] = None" },
   ]);
 });
 
-test("signature helpers render required and optional parameters consistently", () => {
+nodeTest("signature helpers render required and optional parameters consistently", () => {
   const params = buildPythonParamMetadata(createTool());
 
-  assert.equal(
+  nodeAssert.equal(
     buildInlinePythonSignature("search", "Any", params),
     "search(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> Any"
   );
-  assert.equal(
+  nodeAssert.equal(
     buildMultilinePythonSignature("search", "Any", params),
     [
       "async def search(",
@@ -81,13 +81,13 @@ test("signature helpers render required and optional parameters consistently", (
   );
 });
 
-test("helper descriptions and wrappers expose read(symbol=..., map=...) passthrough", () => {
-  assert.equal(
+nodeTest("helper descriptions and wrappers expose read(symbol=..., map=...) passthrough", () => {
+  nodeAssert.equal(
     describePythonHelper(createTool({ name: "read", ptc: { pythonName: "read_text" } })),
     "read_text(path: str, *, offset: Optional[int] = None, limit: Optional[int] = None, symbol: Optional[str] = None, map: Optional[bool] = None) -> Union[str, ReadResult]"
   );
 
-  const wrapperCode = generateToolWrappers([
+  const wrapperCode = generateToolWrappersForTests([
     createTool({
       name: "read",
       parameters: {
@@ -102,41 +102,50 @@ test("helper descriptions and wrappers expose read(symbol=..., map=...) passthro
     }),
   ]);
 
-  assert.match(wrapperCode, /symbol: Optional\[str\] = None/);
-  assert.match(wrapperCode, /map: Optional\[bool\] = None/);
-  assert.match(wrapperCode, /"symbol": symbol/);
-  assert.match(wrapperCode, /"map": map/);
+  nodeAssert.match(wrapperCode, /symbol: Optional\[str\] = None/);
+  nodeAssert.match(wrapperCode, /map: Optional\[bool\] = None/);
+  nodeAssert.match(wrapperCode, /"symbol": symbol/);
+  nodeAssert.match(wrapperCode, /"map": map/);
 
-  assert.deepEqual(describePythonHelpers([
+  nodeAssert.deepEqual(describePythonHelpers([
     createTool(),
     createTool({ name: "search_alt", ptc: { pythonName: "search_alt_py" } }),
   ]), [
     "search(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> Any",
     "search_alt_py(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> Any",
   ]);
-  assert.equal(describePythonHelper(createTool({ name: "grep" })), "grep(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> Union[List[GrepMatch], GrepResult]");
-  assert.equal(describePythonHelper(createTool({ name: "edit" })), "edit(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> AnchoredEditResult");
+  nodeAssert.equal(describePythonHelper(createTool({ name: "grep" })), "grep(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> Union[List[GrepMatch], GrepResult]");
+  nodeAssert.equal(describePythonHelper(createTool({ name: "edit" })), "edit(query: str, *, limit: Optional[int] = None, tags: Optional[List[str]] = None) -> AnchoredEditResult");
 });
 
-test("validatePythonHelperNames rejects duplicates and reserved aliases", () => {
-  assert.throws(
+nodeTest("generated wrappers expose edit semantic summary metadata", () => {
+  const wrapperCode = generateToolWrappersForTests([]);
+  nodeAssert.match(wrapperCode, /class SemanticSummary\(TypedDict, total=False\):/);
+  nodeAssert.match(wrapperCode, /classification: str/);
+  nodeAssert.match(wrapperCode, /difftasticAvailable: bool/);
+  nodeAssert.match(wrapperCode, /movedBlocks: int/);
+  nodeAssert.match(wrapperCode, /semanticSummary: Optional\[SemanticSummary\]/);
+});
+
+nodeTest("validatePythonHelperNames rejects duplicates and reserved aliases", () => {
+  nodeAssert.throws(
     () => validatePythonHelperNames([createTool(), createTool({ name: "other", ptc: { pythonName: "search" } })]),
     /Duplicate Python helper name 'search'/
   );
 
-  assert.throws(
+  nodeAssert.throws(
     () => validatePythonHelperNames([createTool({ name: "other", ptc: { pythonName: "read" } })]),
     /Python helper name 'read' is reserved/
   );
 
-  assert.doesNotThrow(() => validatePythonHelperNames([
+  nodeAssert.doesNotThrow(() => validatePythonHelperNames([
     createTool({ name: "read" }),
     createTool({ name: "other", ptc: { pythonName: "search_other" } }),
   ]));
 });
 
 
-test("sg helper descriptions use a typed SgResult contract and reserve the sg helper name", () => {
+nodeTest("sg helper descriptions use a typed SgResult contract and reserve the sg helper name", () => {
   const sgTool = createTool({
     name: "sg",
     description: "AST grep",
@@ -150,16 +159,16 @@ test("sg helper descriptions use a typed SgResult contract and reserve the sg he
       required: ["pattern"],
     },
   });
-  assert.equal(getPythonReturnType(sgTool), "SgResult");
-  assert.equal(
+  nodeAssert.equal(getPythonReturnType(sgTool), "SgResult");
+  nodeAssert.equal(
     describePythonHelper(sgTool),
     "sg(pattern: str, *, lang: Optional[str] = None, path: Optional[str] = None) -> SgResult"
   );
-  assert.equal(
+  nodeAssert.equal(
     describePythonHelper({ ...sgTool, ptc: { pythonName: "sg_search" } }),
     "sg_search(pattern: str, *, lang: Optional[str] = None, path: Optional[str] = None) -> SgResult"
   );
-  assert.throws(
+  nodeAssert.throws(
     () => validatePythonHelperNames([createTool({ name: "other", ptc: { pythonName: "sg" } })]),
     /Python helper name 'sg' is reserved/
   );

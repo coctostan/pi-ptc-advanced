@@ -130,6 +130,9 @@ test("edit live payload shape and TypedDict coverage stay aligned", () => {
   assert.equal(payload.firstChangedLine, 2);
   assert.ok(Array.isArray(payload.warnings));
   assert.ok(Array.isArray(payload.noopEdits));
+  assert.equal(typeof payload.semanticSummary?.classification, "string");
+  assert.equal(typeof payload.semanticSummary?.difftasticAvailable, "boolean");
+  assert.match(wrapperCode, /class SemanticSummary\(TypedDict, total=False\):/);
   assert.match(wrapperCode, /class AnchoredEditResult\(TypedDict, total=False\):/);
   assert.match(wrapperCode, /tool: str/);
   assert.match(wrapperCode, /path: str/);
@@ -138,6 +141,9 @@ test("edit live payload shape and TypedDict coverage stay aligned", () => {
   assert.match(wrapperCode, /firstChangedLine: Optional\[int\]/);
   assert.match(wrapperCode, /warnings: List\[str\]/);
   assert.match(wrapperCode, /noopEdits: List\[EditNoop\]/);
+  assert.match(wrapperCode, /semanticSummary: Optional\[SemanticSummary\]/);
+  assert.match(wrapperCode, /classification: str/);
+  assert.match(wrapperCode, /difftasticAvailable: bool/);
   assert.match(wrapperCode, /ok: bool/);
 });
 

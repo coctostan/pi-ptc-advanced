@@ -10,6 +10,67 @@ Completed milestone log for this project.
 | Milestone 4 — Cross-Extension Tool Execution Bridge | 2026-03-18 | ~1 hour | 3 phases, 3 plans |
 | Milestone 5 — Python Helper Normalization | 2026-03-18 | ~15 minutes | 2 phases, 2 plans |
 | Milestone 6 — Review Findings Remediation | 2026-03-19 | ~20 minutes | 2 phases, 2 plans |
+| Milestone 7 — Upstream PR Preparation | 2026-03-24 | ~2 hours | 4 phases, 4 plans |
+| Milestone 8 — Personal Fork Hardening | 2026-03-24 | multi-session | 3 phases, 3 plans |
+
+---
+
+## ✅ Milestone 8 — Personal Fork Hardening (0.7.0)
+
+**Completed:** 2026-03-24
+**Duration:** multi-session
+
+### Stats
+
+| Metric | Value |
+|--------|-------|
+| Phases | 3 |
+| Plans | 3 |
+| Files changed | 15 |
+
+### Key Accomplishments
+- Restored a deterministic repo-local personal analysis profile and made allowlisted-but-unavailable tool gaps explicit instead of silently misleading `code_execution` users.
+- Added repo-local maintenance entrypoints plus a normal maintainer runbook for routine verification and manual sync/upgrade boundaries.
+- Demoted Milestone 7 upstream PR-prep artifacts behind a dedicated archive guide so personal maintenance is now the active operational path.
+- Revalidated the personal maintenance path with focused and full verification during Phase 21 closure.
+
+### Key Decisions
+- Personal fork ownership is now the primary path; upstream submission material remains historical reference only.
+- Keep `PTC_CALLABLE_TOOLS` as a filter over Pi-visible tools, not as a loader for missing tools.
+- Keep local maintenance automation repo-local and verification-focused while leaving git sync/upgrade actions manual.
+- Preserve upstream PR-prep context through a milestone-level archive guide instead of deleting it outright.
+
+---
+## ✅ Milestone 7 — Upstream PR Preparation (0.6.0)
+
+**Completed:** 2026-03-24
+**Duration:** approximately 2 hours
+**Archive guide:** `.paul/milestones/0.6.0-UPSTREAM-PR-ARTIFACTS.md`
+
+This milestone is preserved as historical reference only. The active operating path for this fork is the personal maintenance workflow documented in `README.md` and `docs/personal-fork-maintenance.md`.
+
+### Stats
+
+| Metric | Value |
+|--------|-------|
+| Phases | 4 |
+| Plans | 4 |
+| Files changed | 9 |
+
+### Key Accomplishments
+- Locked the upstream keep/exclude boundary and formalized a preferred 2-PR submission strategy for the mixed feature branch.
+- Turned the scope audit into a restore-based branch-isolation manifest and removed local-only review baggage from the active PR surface.
+- Reworked `README.md` so the combined-stack maintainer story stands on its own without local-only companion docs.
+- Aligned the live structured `edit` contract across docs, generated Python wrapper typings, and focused contract tests.
+- Revalidated the retained upstream evidence surface with green focused tests plus a green full suite.
+- Produced reviewer-ready local PR 1 / PR 2 narratives and a deterministic manual submission checklist for upstream opening.
+
+### Key Decisions
+- Prefer a 2-PR upstream split: runtime interop first, metadata/helper/docs second.
+- Build review branches from `origin/main` with explicit file restores instead of cherry-picking from the mixed working branch.
+- Keep personal launcher scripts, `.paul/**` artifacts, repo-specific shims, and heavier harness material out of the first upstream submission pass.
+- Reuse the smallest focused proof surface that already substantiates reviewer-facing docs instead of adding broader harness churn.
+- Keep review-branch creation, upstream PR opening, version bumping, and release tagging user-directed until the Release and Packaging milestone.
 
 ---
 

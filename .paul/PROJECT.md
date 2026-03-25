@@ -9,9 +9,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 ## Current State
 | Attribute | Value |
 |-----------|-------|
-| Version | 0.2.0 |
+| Version | 0.1.1 |
 | Status | Prototype |
-| Last Updated | 2026-03-17 |
+| Last Updated | 2026-03-24 |
 
 ## Requirements
 ### Validated (Shipped)
@@ -31,13 +31,14 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Extension tools now support explicit `ptc.callable` / `ptc.policy` metadata with legacy `enabled` / `readOnly` compatibility, aligned callable-tool policy behavior, and documented combined-stack setup guidance — Phase 6
 - [x] Added a canonical end-to-end search → inspect → edit demo workflow plus aligned combined-stack documentation for `pi-ptc-next` + `pi-hashline-readmap` — Phase 7
 - [x] Evaluated the heavier real two-extension loading harness and explicitly deferred it in favor of the lightweight smoke proof unless future packaging-level evidence justifies it — Phase 7
-
+- [x] Prepared reviewer-facing PR 1 / PR 2 narratives and a deterministic manual submission checklist for the approved 2-PR upstream split — Phase 18
+- [x] Restored a repo-local personal analysis launcher profile and made allowlisted-but-unavailable tool gaps explicit so personal `code_execution` sessions fail transparently instead of silently — Phase 19
+- [x] Added repo-local personal-fork maintenance entrypoints and a normal maintainer runbook for routine verification plus manual sync/upgrade boundaries — Phase 20
+- [x] Archived/demoted upstream PR-prep material behind a Milestone 7 archive guide so personal maintenance is the active workflow and the old submission path is historical reference only — Phase 21
 ### Active (In Progress)
-- (No active milestone-scoped requirements at the moment; Milestone 3 is complete pending next milestone definition)
-
+- [ ] None currently; Milestone 8 is complete
 ### Planned (Next)
-- (No items beyond Milestone 3 scope defined yet)
-
+- [ ] Revisit version bump / release packaging only if the personal fork actually needs it
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -60,7 +61,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 - Existing codebase detected: TypeScript npm package / Pi extension with Python runtime support
 - Package name: `@cegersdo/pi-ptc`
 - Key source areas: `src/index.ts`, `src/code-executor.ts`, `src/custom-tool-manager.ts`, `src/tool-registry.ts`, `src/tool-adapters.ts`, `src/rpc-protocol.ts`
-- Integration design docs exist under `docs/hashline-integration/`
+- Maintainer-facing integration docs now live in `README.md`; deeper local planning/history artifacts live under `.paul/`
 - Current branch is `feat/hashline-native-interop`
 
 ## Constraints
@@ -92,6 +93,14 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Model builtin helper ergonomics with explicit structured anchored result types instead of only generic fallback signatures | Makes Python-side hashline interop easier to understand and use without changing runtime behavior | 2026-03-17 | Active |
 | Prefer explicit `ptc.callable` / `ptc.policy` metadata for extension tools while normalizing legacy `enabled` / `readOnly` metadata | Clarifies callable intent and safety traits without breaking existing extension tools or operator workflows | 2026-03-17 | Active |
 | Close Milestone 3 with focused docs/demo artifacts and an explicit harness recommendation instead of automatically building heavier integration infrastructure | Keeps the final milestone slice reviewable and grounded in demonstrated runtime behavior while preserving a clear future trigger for deeper harnessing | 2026-03-17 | Active |
+| Prefer a 2-PR upstream packaging strategy for the current PTC interop work | Runtime interop and metadata/helper/docs are both upstream-worthy, but they review more cleanly as separate slices with clearer narratives | 2026-03-24 | Active |
+| Build upstream review branches from `origin/main` with explicit file restores instead of relying on mixed-branch cherry-picks | The current feature branch mixes upstream-worthy code, local-only PALS history, and optional harness/docs; explicit restore-based branch construction gives clean PR slices | 2026-03-24 | Active |
+| Acceptance hardening should align reviewer-facing docs and generated wrapper types to the live structured payloads while reusing the smallest focused proof set that already covers the claims | Keeps upstream acceptance work narrow, defensible, and grounded in the existing retained verification surface instead of adding broader harness churn | 2026-03-24 | Active |
+| Keep upstream submission execution manual and restore-based even after the PR materials are prepared | The working branch still mixes local-only history with upstream-worthy code, so clean review branches and user-directed PR opening remain the safest path | 2026-03-24 | Active |
+| Shift from upstream submission prep to personal fork maintainability as the primary delivery goal | The upstream project is no longer expected to move quickly, while the fork already works and will be maintained for personal use | 2026-03-24 | Active |
+| Treat `PTC_CALLABLE_TOOLS` as a filter over Pi-visible tools, not as a loader for missing tools | The personal analysis profile must be deterministic and honest about runtime visibility limits instead of implying the allowlist alone should materialize unavailable tools | 2026-03-24 | Active |
+| Keep personal fork maintenance automation repo-local and verification-focused while leaving git sync/upgrade actions manual | The fork needs repeatable local verification and operator guidance, but remote/branch/rebase/push/PR actions still depend on user-specific remotes and history choices | 2026-03-24 | Active |
+| Archive the old upstream PR-prep material behind a single milestone-level guide instead of deleting it outright | Preserves the historical upstream rationale while making the personal maintenance workflow unambiguous for future sessions | 2026-03-24 | Active |
 
 ## Success Metrics
 | Metric | Target | Current | Status |
@@ -103,7 +112,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Lightweight interop smoke proof for active hashline-style overrides and `ptcValue` passthrough | Yes | Added in `test/hashline-interop-smoke.test.ts` and documented in README/hashline docs | Achieved |
 | Python helper ergonomics for structured anchored builtin results | Yes | Builtin contracts, wrappers, and `code_execution` guidance now expose richer anchored result models | Achieved |
 | Explicit metadata/policy contract for extension tools | Yes | `ptc.callable` / `ptc.policy` normalization, legacy compatibility, policy tests, and combined-stack guidance landed | Achieved |
-| Full real two-extension loading smoke harness with `pi-hashline-readmap` | Optional | Explicitly evaluated and deferred in `docs/hashline-integration/HARNESS-EVALUATION.md` pending packaging-level need | Deferred |
+| Full real two-extension loading smoke harness with `pi-hashline-readmap` | Optional | Explicitly evaluated and deferred; lightweight smoke coverage remains the first-pass upstream verification point | Deferred |
 
 ## Tech Stack
 | Layer | Technology | Notes |
@@ -118,10 +127,10 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Resource | URL |
 |----------|-----|
 | Repository | https://github.com/edxeth/pi-ptc-next |
-| Start Here | `docs/hashline-integration/START-HERE.md` |
-| Roadmap | `docs/hashline-integration/ROADMAP.md` |
-| Milestone 1 | `docs/hashline-integration/MILESTONE-01.md` |
+| Maintainer Docs | `README.md` |
+| Local Roadmap | `.paul/ROADMAP.md` |
+| Milestone History | `.paul/MILESTONES.md` |
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-03-17 after Phase 7 completion*
+*Last updated: 2026-03-24 after Phase 21 completion*

@@ -36,6 +36,8 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
+    "verify:personal": "./scripts/verify-personal-fork.sh",
+    "verify:personal:full": "./scripts/verify-personal-fork.sh --full",
     "test": "npm run build && node --test test/*.test.ts"
   },
   "keywords": [

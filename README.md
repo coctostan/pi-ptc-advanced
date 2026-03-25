@@ -30,13 +30,32 @@ pi install git:github.com/edxeth/pi-ptc-next
 ```
 
 This fork is published publicly as **pi-ptc-next** to distinguish it from the original `pi-ptc` repository while preserving clear attribution to Chris Egersdoerfer's upstream work.
-## Combined stack quick start
 
-If you are pairing this extension with `pi-hashline-readmap`, use these docs together:
+## Personal fork maintenance
 
-- `docs/hashline-integration/START-HERE.md` — recommended combined setup and policy guidance
-- `docs/hashline-integration/DEMO.md` — canonical search -> inspect -> edit walkthrough
-- `docs/hashline-integration/HARNESS-EVALUATION.md` — why the lightweight smoke proof is currently the preferred verification point
+If this fork is primarily for your own workstation, use the repo-local maintenance workflow instead of relying on `.paul/**` history:
+
+```bash
+./scripts/start-pi-ptc-full-tools.sh
+npm run verify:personal
+npm run verify:personal:full
+```
+
+- `./scripts/start-pi-ptc-full-tools.sh` starts Pi with the preferred analysis-oriented personal profile
+- `npm run verify:personal` runs the focused maintenance verification bundle
+- `npm run verify:personal:full` runs the higher-confidence full verification path
+
+For the full maintainer runbook, including the explicit manual git sync/upgrade boundary, see [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
+## Combined stack notes
+
+If you pair this extension with `pi-hashline-readmap`, the first-pass maintainer story is:
+
+- active overridden `read` / `grep` / `edit` executors should be the same implementations users see in chat
+- structured `details.ptcValue` payloads should cross the RPC boundary unchanged when active tools provide them
+- explicit `ptc.callable` / `ptc.policy` metadata should describe extension-tool exposure and safety traits
+- the focused verification point is `npm run build && node --test test/hashline-interop-smoke.test.ts`
+
+Today that interop path is intentionally narrow: `src/tool-registry.ts` overlays active hashline executors through a `globalThis` fallback plus the EventBus channel `hashline:tool-executors`. This is a temporary bridge so `code_execution` can use the same active tool implementations users see in chat, and it should be removed once Pi exposes `getToolExecutor()` on `ExtensionAPI`.
 
 ## What using it feels like now
 
@@ -101,12 +120,15 @@ By default, Python code inside `code_execution` can call a safe built-in subset:
 
 Optional tools can be enabled via environment/config policy:
 
-- `sg(pattern, *, lang=None, path=None) -> SgResult` (requires explicit opt-in via `PTC_CALLABLE_TOOLS=...,sg`)
+- `sg(pattern, *, lang=None, path=None) -> SgResult` (requires explicit opt-in via `PTC_CALLABLE_TOOLS=...,sg` and Pi still has to expose it to PTC with callable runtime + metadata)
 - `bash(...) -> dict`
 - `edit(...) -> AnchoredEditResult`
 - `write(...) -> dict`
 
-Custom and extension tools are **not callable from Python by default**. Prefer `ptc.callable: true` to opt in and `ptc.policy: "read-only" | "mutating"` to describe safety traits (legacy `ptc.enabled` / `ptc.readOnly` still work).
+Custom and extension tools are **not callable from Python by default**. They must opt in with `ptc.callable: true`, and `ptc.policy: "read-only" | "mutating"` declares the safety class the registry enforces. That keeps the default surface conservative, leaves mutating tools unavailable unless both metadata and runtime policy allow them, and preserves legacy compatibility with `ptc.enabled` / `ptc.readOnly`.
+For personal use, this repo now also carries `scripts/start-pi-ptc-full-tools.sh`, an analysis-oriented launcher profile that keeps the surface read-only while requesting `sg` plus selected graph tools.
+
+If you opt into that profile, note the important limitation: `PTC_CALLABLE_TOOLS` is a filter, not a loader. It can only expose tools that Pi already makes visible to PTC in the current session. If a requested tool is missing from the active Pi tool set or lacks the expected `ptc.callable` metadata, PTC will warn and keep it out of `code_execution` rather than silently pretending the allowlist succeeded.
 
 ## Structured override payloads (`details.ptcValue`)
 
@@ -251,7 +273,11 @@ Representative structured payloads:
   "diff": "2:bd|const two = 2; → 2:86|const two = 22;",
   "firstChangedLine": 2,
   "warnings": [],
-  "noopEdits": []
+  "noopEdits": [],
+  "semanticSummary": {
+    "classification": "semantic",
+    "difftasticAvailable": true
+  }
 }
 ```
 
@@ -391,6 +417,26 @@ Recommended routing patterns:
 - `PTC_CALLABLE_TOOLS=read,glob,find,grep,ls` — explicit allowlist override
 - `PTC_BLOCKED_TOOLS=bash,write` — explicit denylist override
 - `PTC_EVALS_PATH=.pi/evals/ptc` — override the JSON eval/benchmark root used by the benchmark runner
+
+### Personal analysis profile
+If this fork is primarily for your own workstation, you can launch Pi with the bundled analysis-oriented profile:
+
+```bash
+./scripts/start-pi-ptc-full-tools.sh
+```
+
+That profile keeps mutations and shell access disabled, requests `sg` plus selected graph tools, and leaves `edit`, `write`, `bash`, `resolve_edge`, and `delete_edge` out of the Python surface on purpose.
+
+For the routine local maintenance flow, pair it with:
+
+```bash
+npm run verify:personal
+npm run verify:personal:full
+```
+
+The profile is still constrained by Pi runtime visibility: if Pi does not expose one of those requested tools to PTC with callable metadata in the current session, the tool will stay unavailable inside `code_execution` and PTC will emit a warning describing the gap.
+
+See [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md) for the full maintainer workflow and the explicit manual git sync/upgrade boundary.
 
 ## How it works
 

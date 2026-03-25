@@ -1,13 +1,12 @@
-const test = require("node:test");
-import type {} from "node:test";
-const assert = require("node:assert/strict");
-const {
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
   estimateTokensFromChars,
   loadSettingsFromEnv,
   shouldAutoRoutePromptToCodeExecution,
   truncateOutput,
   validateUserCode,
-} = require("../dist/utils.js");
+} from "../dist/utils.js";
 
 test("estimateTokensFromChars uses simple 4-char heuristic", () => {
   assert.equal(estimateTokensFromChars(1), 1);

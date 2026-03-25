@@ -170,12 +170,55 @@ test("ToolRegistry requires explicit callable metadata for extension tools", () 
     },
   });
 
-  const callable = registry.getCallableTools(
-    process.cwd(),
-    baseSettings({ allowMutations: true, trustedReadOnlyTools: ["hidden_tool"] })
-  );
+  const warnings: string[] = [];
+  const originalEmitWarning = process.emitWarning;
+  process.emitWarning = ((warning: string | Error) => {
+    warnings.push(String(warning));
+  }) as typeof process.emitWarning;
 
+  try {
+    const callable = registry.getCallableTools(
+      process.cwd(),
+      baseSettings({
+        allowMutations: true,
+        callableTools: ["hidden_tool"],
+        trustedReadOnlyTools: ["hidden_tool"],
+      })
+    );
   assert.ok(!callable.some((tool) => tool.name === "hidden_tool"));
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /hidden_tool \(missing ptc\.callable metadata\)/);
+  } finally {
+    process.emitWarning = originalEmitWarning;
+  }
+});
+
+test("ToolRegistry warns when allowlisted tools are absent from the current Pi tool set", () => {
+  const registry = createRegistry();
+  const warnings: string[] = [];
+  const originalEmitWarning = process.emitWarning;
+  process.emitWarning = ((warning: string | Error) => {
+    warnings.push(String(warning));
+  }) as typeof process.emitWarning;
+
+  try {
+    const callable = registry.getCallableTools(
+      process.cwd(),
+      baseSettings({
+        callableTools: ["read", "sg", "symbol_graph"],
+        trustedReadOnlyTools: ["sg", "symbol_graph"],
+      })
+    );
+
+    assert.ok(callable.some((tool) => tool.name === "read"));
+    assert.ok(!callable.some((tool) => tool.name === "sg"));
+    assert.ok(!callable.some((tool) => tool.name === "symbol_graph"));
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /sg \(not present in the current Pi tool set\)/);
+    assert.match(warnings[0], /symbol_graph \(not present in the current Pi tool set\)/);
+  } finally {
+    process.emitWarning = originalEmitWarning;
+  }
 });
 
 test("ToolRegistry blocks mutating extension tools when mutations are disabled even if metadata opts them in", () => {
