@@ -1,7 +1,10 @@
 // @ts-nocheck
 const test = module.require("node:test");
 const assert = module.require("node:assert/strict");
-const { normalizeToolResult } = module.require("../dist/tool-adapters.js");
+const {
+  extractSupportedHandles,
+  normalizeToolResult,
+} = module.require("../dist/tool-adapters.js");
 
 const hashlineReadValue = {
   path: "src/tool-adapters.ts",
@@ -16,8 +19,8 @@ const hashlineReadValue = {
 
 const hashlineGrepValue = {
   matches: [
-    { path: "src/tool-adapters.ts", anchor: "79:aa11", line: 79, text: "function extractPtcValue(details: unknown)", kind: "match" },
-    { path: "src/tool-adapters.ts", anchor: "80:bb22", line: 80, text: 'if (!isRecord(details) || !("ptcValue" in details)) {', kind: "context" },
+    { path: "src/tool-adapters.ts", anchor: "80:aa11", line: 80, text: "function extractPtcValue(details: unknown)", kind: "match" },
+    { path: "src/tool-adapters.ts", anchor: "81:bb22", line: 81, text: 'if (!isRecord(details) || !("ptcValue" in details)) {', kind: "context" },
   ],
 };
 
@@ -126,4 +129,67 @@ test("normalizeToolResult keeps custom tool fallback on text only", () => {
   });
 
   assert.equal(result.value, "Returned 1 rows");
+});
+
+test("extractSupportedHandles returns response and file handles for fetch_content payloads", () => {
+  const handles = extractSupportedHandles("fetch_content", {
+    responseId: "resp_fetch_123",
+    urls: [
+      {
+        url: "https://example.com/page",
+        title: "Example",
+        filePath: "/tmp/pi-web-example.txt",
+      },
+    ],
+    successCount: 1,
+    totalCount: 1,
+  });
+
+  assert.deepEqual(handles, [
+    { kind: "response", responseId: "resp_fetch_123" },
+    { kind: "file", filePath: "/tmp/pi-web-example.txt" },
+  ]);
+});
+
+test("extractSupportedHandles deduplicates repeated response and file handles", () => {
+  const handles = extractSupportedHandles("fetch_content", {
+    responseId: "resp_fetch_123",
+    urls: [
+      { filePath: "/tmp/pi-web-example.txt" },
+      { responseId: "resp_fetch_123", filePath: "/tmp/pi-web-example.txt" },
+    ],
+  });
+
+  assert.deepEqual(handles, [
+    { kind: "response", responseId: "resp_fetch_123" },
+    { kind: "file", filePath: "/tmp/pi-web-example.txt" },
+  ]);
+});
+
+test("extractSupportedHandles supports web_search response handles without requiring file handles", () => {
+  const handles = extractSupportedHandles("web_search", {
+    responseId: "resp_search_123",
+    queries: [{ query: "vitest", results: [{ url: "https://vitest.dev" }] }],
+  });
+
+  assert.deepEqual(handles, [{ kind: "response", responseId: "resp_search_123" }]);
+});
+
+test("extractSupportedHandles returns empty for unsupported tool names", () => {
+  const handles = extractSupportedHandles("query_db", {
+    responseId: "resp_fetch_123",
+    filePath: "/tmp/pi-web-example.txt",
+  });
+
+  assert.deepEqual(handles, []);
+});
+
+test("extractSupportedHandles returns empty when supported tool payload has no responseId or filePath", () => {
+  const handles = extractSupportedHandles("fetch_content", {
+    urls: [{ url: "https://example.com/page", title: "Example" }],
+    successCount: 1,
+    totalCount: 1,
+  });
+
+  assert.deepEqual(handles, []);
 });

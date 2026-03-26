@@ -63,10 +63,22 @@ const RESERVED_PYTHON_HELPER_NAMES = new Set([
   "write",
 ]);
 
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+
 export interface PythonParamMetadata {
   name: string;
   signature: string;
   keywordOnly: boolean;
+}
+
+export interface PythonCallableToolMetadata {
+  name: string;
+  pythonName: string;
+  description: string;
+  source: ToolInfo["source"];
+  isReadOnly: boolean;
+  parameters: JsonValue;
 }
 
 export function getBuiltinToolContract(toolName: string): BuiltinToolContract | undefined {
@@ -139,8 +151,43 @@ export function schemaToPythonType(schema: TSchema): string {
   }
 }
 
+function sortJsonValue(value: JsonValue): JsonValue {
+  if (Array.isArray(value)) {
+    return value.map((entry) => sortJsonValue(entry));
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, sortJsonValue((value as Record<string, JsonValue>)[key])])
+    );
+  }
+  return value;
+}
+
+function toJsonValue(value: unknown): JsonValue {
+  const serialized = JSON.stringify(value ?? null);
+  const parsed = JSON.parse(serialized === undefined ? "null" : serialized) as JsonValue;
+  return sortJsonValue(parsed);
+}
+
 export function getPythonHelperName(tool: ToolInfo): string {
   return tool.ptc?.pythonName || tool.name;
+}
+
+export function buildPythonCallableToolMetadata(tool: ToolInfo): PythonCallableToolMetadata {
+  return {
+    name: tool.name,
+    pythonName: getPythonHelperName(tool),
+    description: tool.description || "",
+    source: tool.source,
+    isReadOnly: tool.isReadOnly,
+    parameters: toJsonValue(tool.parameters ?? {}),
+  };
+}
+
+export function buildPythonCallableToolMetadataList(tools: ToolInfo[]): PythonCallableToolMetadata[] {
+  return tools.map((tool) => buildPythonCallableToolMetadata(tool));
 }
 
 export function validatePythonHelperNames(tools: ToolInfo[]): void {

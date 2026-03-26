@@ -17,6 +17,11 @@ import type {
   RpcMessage as InternalRpcMessage,
   SandboxManager as InternalSandboxManager,
 } from "./contracts/execution-types";
+import type {
+  FileHandle as InternalFileHandle,
+  ResponseHandle as InternalResponseHandle,
+  SupportedHandle as InternalSupportedHandle,
+} from "./contracts/handle-types";
 import type { PtcSettings as InternalPtcSettings } from "./contracts/settings";
 
 export type CallerMetadata = InternalCallerMetadata;
@@ -35,5 +40,8 @@ export type NormalizedToolResult = InternalNormalizedToolResult;
 export type RpcErrorPayload = InternalRpcErrorPayload;
 export type RpcMessage = InternalRpcMessage;
 export type SandboxManager = InternalSandboxManager;
+export type FileHandle = InternalFileHandle;
+export type ResponseHandle = InternalResponseHandle;
+export type SupportedHandle = InternalSupportedHandle;
 
 export type PtcSettings = InternalPtcSettings;

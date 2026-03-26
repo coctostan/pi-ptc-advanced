@@ -107,7 +107,18 @@ Python helpers currently available in this session:
 - ptc.find_files(pattern='**/*', path='.', max_files=1000) -> list[str]
 - ptc.find_files_abs(pattern='**/*', path='.', max_files=1000) -> list[str]
 - ptc.read_text(path, offset=None, limit=None) -> str
+- await ptc.batch_tool(calls, max_concurrency=None) -> list[Any]
+- await ptc.first_success(calls, max_concurrency=None) -> Any
+- await ptc.reduce_tool(calls, reducer, initial, max_concurrency=None) -> Any
+- ptc.fit_output(value, max_chars=None, max_items=None, max_depth=None) -> dict[str, Any]
+- ptc.expect_kind(value, kind) -> Any
+- ptc.list_callable_tools() -> list[dict[str, Any]]
+- ptc.get_tool_schema(name) -> dict[str, Any]
+- ptc.extract_handles(value, kind=None) -> list[SupportedHandle]
+- ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]
 - ptc.json_dump(value) -> str
+- Use orchestration helpers for repeated multi-tool calls, ordered fallback logic, or bounded final-output shaping.
+- Inspect ptc.list_callable_tools() before branching on optional tools; only the current callable session surface is guaranteed.
 Prefer these for string content:
 - ptc.read_text(path) always returns str (extracts raw text from structured results)
 - ptc.read_many(paths) always returns list[str]

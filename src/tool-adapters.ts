@@ -1,9 +1,12 @@
 import type { NormalizedToolResult } from "./contracts/execution-types";
+import type { FileHandle, ResponseHandle, SupportedHandle } from "./contracts/handle-types";
 
 interface ToolExecutionResult {
   content?: Array<{ type?: string; text?: string } | Record<string, unknown>>;
   details?: unknown;
 }
+
+const HANDLE_CAPABLE_TOOLS = new Set(["web_search", "fetch_content", "get_search_content", "code_search"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -86,6 +89,80 @@ function extractPtcValue(details: unknown): { found: true; value: unknown } | nu
     value: details.ptcValue,
   };
 }
+
+function pushResponseHandle(handles: SupportedHandle[], seen: Set<string>, responseId: string): void {
+  const normalized = responseId.trim();
+  if (!normalized) {
+    return;
+  }
+
+  const key = `response:${normalized}`;
+  if (seen.has(key)) {
+    return;
+  }
+
+  const handle: ResponseHandle = {
+    kind: "response",
+    responseId: normalized,
+  };
+  seen.add(key);
+  handles.push(handle);
+}
+
+function pushFileHandle(handles: SupportedHandle[], seen: Set<string>, filePath: string): void {
+  const normalized = filePath.trim();
+  if (!normalized) {
+    return;
+  }
+
+  const key = `file:${normalized}`;
+  if (seen.has(key)) {
+    return;
+  }
+
+  const handle: FileHandle = {
+    kind: "file",
+    filePath: normalized,
+  };
+  seen.add(key);
+  handles.push(handle);
+}
+
+function collectSupportedHandles(value: unknown, handles: SupportedHandle[], seen: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      collectSupportedHandles(entry, handles, seen);
+    }
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  if (typeof value.responseId === "string") {
+    pushResponseHandle(handles, seen, value.responseId);
+  }
+
+  if (typeof value.filePath === "string") {
+    pushFileHandle(handles, seen, value.filePath);
+  }
+
+  for (const nested of Object.values(value)) {
+    collectSupportedHandles(nested, handles, seen);
+  }
+}
+
+export function extractSupportedHandles(toolName: string, normalizedValue: unknown): SupportedHandle[] {
+  if (!HANDLE_CAPABLE_TOOLS.has(toolName)) {
+    return [];
+  }
+
+  const handles: SupportedHandle[] = [];
+  collectSupportedHandles(normalizedValue, handles, new Set<string>());
+  return handles;
+}
+
 export function normalizeToolResult(toolName: string, result: ToolExecutionResult): NormalizedToolResult {
   const structuredValue = extractPtcValue(result.details);
   if (structuredValue) {

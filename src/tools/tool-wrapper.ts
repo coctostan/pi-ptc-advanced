@@ -1,6 +1,7 @@
 import type { ToolInfo } from "../contracts/tool-types";
 import {
   buildMultilinePythonSignature,
+  buildPythonCallableToolMetadataList,
   buildPythonParamMetadata,
   getPythonHelperName,
   getPythonReturnType,
@@ -48,7 +49,9 @@ function buildReadWrapper(): string {
 }
 
 export function generateToolWrappers(tools: ToolInfo[]): string {
-  const imports = `from typing import Optional, List, Dict, Any, TypedDict, Union`;
+  const metadataJson = JSON.stringify(buildPythonCallableToolMetadataList(tools));
+  const imports = `import json as _ptc_json
+from typing import Optional, List, Dict, Any, TypedDict, Union, Literal`;
   const helpers = `
 class HashlineLine(TypedDict):
     line: int
@@ -114,6 +117,20 @@ class GrepResult(TypedDict):
     summary: bool
     totalMatches: int
     records: List[GrepMatch]
+class ResponseHandle(TypedDict):
+    kind: Literal["response"]
+    responseId: str
+class FileHandle(TypedDict):
+    kind: Literal["file"]
+    filePath: str
+SupportedHandle = Union[ResponseHandle, FileHandle]
+class CallableToolMetadata(TypedDict):
+    name: str
+    pythonName: str
+    description: str
+    source: str
+    isReadOnly: bool
+    parameters: Dict[str, Any]
 class BashResult(TypedDict):
     stdout: str
     stderr: str
@@ -143,6 +160,8 @@ class AnchoredEditResult(TypedDict, total=False):
 class WriteResult(TypedDict):
     ok: bool
     summary: str
+
+_PTC_CALLABLE_TOOL_METADATA: List[CallableToolMetadata] = _ptc_json.loads(${JSON.stringify(metadataJson)})
 
 
 def _ptc_drop_none(params: Dict[str, Any]) -> Dict[str, Any]:

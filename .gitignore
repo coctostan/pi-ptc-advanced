@@ -7,3 +7,5 @@ package-lock.json
 .claude/
 .pi/
 .paul/handoffs/
+__pycache__/
+*.pyc

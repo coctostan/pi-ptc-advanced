@@ -12,6 +12,90 @@ Completed milestone log for this project.
 | Milestone 6 — Review Findings Remediation | 2026-03-19 | ~20 minutes | 2 phases, 2 plans |
 | Milestone 7 — Upstream PR Preparation | 2026-03-24 | ~2 hours | 4 phases, 4 plans |
 | Milestone 8 — Personal Fork Hardening | 2026-03-24 | multi-session | 3 phases, 3 plans |
+| Milestone 10 — Typed Response and File Handle Helpers | 2026-03-25 | approximately 2 hours 20 minutes | 2 phases, 2 plans |
+| Milestone 11 — Result-Kind and Tool Introspection Helpers | 2026-03-26 | approximately 1 hour 20 minutes | 3 phases, 3 plans |
+| Milestone 12 — High-Level Orchestration Helpers | 2026-03-26 | approximately 2 hours | 3 phases, 3 plans |
+
+---
+## ✅ Milestone 12 — High-Level Orchestration Helpers (0.11.0)
+
+**Completed:** 2026-03-26
+**Duration:** approximately 2 hours
+
+### Stats
+
+| Metric | Value |
+|--------|-------|
+| Phases | 3 |
+| Plans | 3 |
+| Files changed | 9 |
+
+### Key Accomplishments
+- Added bounded Python orchestration helpers `ptc.batch_tool(...)` and `ptc.first_success(...)` with shared call-spec validation and focused execution proof.
+- Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` and `ptc.fit_output(...)` aligned to the executor session output cap.
+- Closed the milestone with dedicated ecosystem-style `CodeExecutor` proof plus README and `code_execution` guidance for hashline-style reduction, ordered fallback, and web-handle follow-up workflows.
+- Finished milestone verification green at `132` passing / `0` failing while keeping the existing dependency audit baseline unchanged.
+
+### Key Decisions
+- Keep orchestration call specs bounded to `{tool, params}` and validate them inside the Python runtime.
+- Keep `ptc.first_success(...)` sequential and ordered for deterministic fallback semantics.
+- Keep `ptc.fit_output(...)` aligned with the executor session output cap and preserve structured preview metadata.
+- Close Milestone 12 with proof/docs alignment instead of reopening runtime semantics during the final phase.
+
+---
+## ✅ Milestone 11 — Result-Kind and Tool Introspection Helpers (0.10.0)
+
+**Completed:** 2026-03-26
+**Duration:** approximately 1 hour 20 minutes
+
+### Stats
+
+| Metric | Value |
+|--------|-------|
+| Phases | 3 |
+| Plans | 3 |
+| Files changed | 11 |
+
+### Key Accomplishments
+- Added strict Python result-kind assertions via `ptc.expect_kind(value, kind)` with focused runtime proof.
+- Added bounded callable-tool introspection via `ptc.list_callable_tools()` and `ptc.get_tool_schema(name)` using metadata derived from the live wrapper-generation surface.
+- Added dedicated contract and execution-level proof for the new helpers without expanding the large omnibus runtime suites.
+- Updated `README.md` and the `code_execution` tool description so safe optional-tool branching now checks `ptc.list_callable_tools()` before calling helpers like `sg`.
+- Closed the milestone with verification green at `119` passing / `0` failing while keeping the existing audit baseline unchanged.
+
+### Key Decisions
+- Keep `ptc.expect_kind(...)` limited to top-level `kind` assertions instead of broad schema validation.
+- Derive callable-tool introspection metadata from the live `ToolInfo[]` wrapper-generation path instead of adding a second registry.
+- Treat `ptc.list_callable_tools()` as the authoritative optional-tool branching surface in docs and examples.
+- Keep Milestone 11 as a capability/docs slice without changing the manual `0.8.0` release baseline or git-tag posture.
+
+---
+## ✅ Milestone 10 — Typed Response and File Handle Helpers (0.9.0)
+
+**Completed:** 2026-03-25
+**Duration:** approximately 2 hours 20 minutes
+
+### Stats
+
+| Metric | Value |
+|--------|-------|
+| Phases | 2 |
+| Plans | 2 |
+| Files changed | 13 |
+
+### Key Accomplishments
+- Added an explicit response/file handle contract around existing `responseId` / `filePath` flows without changing normalized tool result shapes.
+- Added bounded Python helper ergonomics via `ptc.extract_handles()` and `ptc.first_handle()` plus generated `ResponseHandle` / `FileHandle` / `SupportedHandle` typing coverage.
+- Proved supported response/file follow-up workflows end-to-end inside the real `code_execution` runtime using deterministic nested-tool fixtures.
+- Updated `README.md` and the model-facing `code_execution` guidance so the supported response/file-only workflow is explicit.
+- Closed the milestone with green verification at `112` passing / `0` failing while keeping graph-handle ergonomics intentionally deferred.
+
+### Key Decisions
+- Support only response and file handles for the current contract surface; defer graph-handle standardization until adjacent repos expose a stable public contract.
+- Keep handle extraction separate from normalized result values so existing `normalizeToolResult()` passthrough/fallback consumers remain unchanged.
+- Expose exactly two bounded Python helpers: `ptc.extract_handles()` and `ptc.first_handle()`.
+- Keep helper filtering limited to `kind="response"` / `kind="file"`.
+- Keep the published release baseline at `0.8.0`; Milestone 10 completed as a capability/documentation slice without changing the manual release/tag posture.
 
 ---
 

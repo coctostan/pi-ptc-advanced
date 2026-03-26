@@ -7,6 +7,7 @@ type SessionHandler = (...args: unknown[]) => unknown | Promise<unknown>;
 type RegisteredTool = {
   name: string;
   description: string;
+  execute: (...args: unknown[]) => any;
   [key: string]: unknown;
 };
 
@@ -169,7 +170,7 @@ test("ptc extension bootstraps and cleans up runtime components", async () => {
     const extensionModule = require("../dist/index.js");
     const ptcExtension = extensionModule.default || extensionModule;
 
-    const eventHandlers = new Map<string, SessionHandler>();
+    const eventHandlers = new Map();
     const registered: RegisteredTool[] = [];
     const pi = {
       registerTool(tool: RegisteredTool) {
@@ -200,8 +201,19 @@ test("ptc extension bootstraps and cleans up runtime components", async () => {
     assert.ok(latestCodeExecutionTool);
     assert.match(latestCodeExecutionTool.description, /ptc\.read_many.*-> list\[str\]/i);
     assert.match(latestCodeExecutionTool.description, /ptc\.read_text.*-> str/);
+    assert.match(latestCodeExecutionTool.description, /await ptc\.batch_tool\(calls, max_concurrency=None\) -> list\[Any\]/);
+    assert.match(latestCodeExecutionTool.description, /await ptc\.first_success\(calls, max_concurrency=None\) -> Any/);
+    assert.match(latestCodeExecutionTool.description, /await ptc\.reduce_tool\(calls, reducer, initial, max_concurrency=None\) -> Any/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.fit_output\(value, max_chars=None, max_items=None, max_depth=None\) -> dict\[str, Any\]/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.expect_kind\(value, kind\) -> Any/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.list_callable_tools\(\) -> list\[dict\[str, Any\]\]/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.get_tool_schema\(name\) -> dict\[str, Any\]/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.extract_handles\(value, kind=None\) -> list\[SupportedHandle\]/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.first_handle\(value, kind=None\) -> Optional\[SupportedHandle\]/);
+    assert.match(latestCodeExecutionTool.description, /Use orchestration helpers for repeated multi-tool calls, ordered fallback logic, or bounded final-output shaping\./);
     assert.match(latestCodeExecutionTool.description, /Prefer these for string content/);
     assert.match(latestCodeExecutionTool.description, /Use read\(path\) directly when you need structured anchored data/);
+    assert.match(latestCodeExecutionTool.description, /Inspect ptc\.list_callable_tools\(\) before branching on optional tools/);
     assert.match(latestCodeExecutionTool.description, /Do not call _rpc_call/);
     assert.doesNotMatch(latestCodeExecutionTool.description, /details\.ptcValue/);
     assert.doesNotMatch(latestCodeExecutionTool.description, /PTC_BLOCKED_TOOLS/);
@@ -286,7 +298,7 @@ test("ptc extension auto-routes repo-wide analysis prompts toward code_execution
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const activeTools = ["read", "grep"];
+    const activeTools: string[] = ["read", "grep"];
     const pi = {
       registerTool() {},
       on(event, handler) {
@@ -384,8 +396,8 @@ test("ptc extension does not auto-route or auto-recover mutation prompts", async
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
-    const activeTools = ["read", "grep"];
+    const registered: RegisteredTool[] = [];
+    const activeTools: string[] = ["read", "grep"];
     const pi = {
       registerTool(tool) {
         registered.push(tool);
@@ -471,7 +483,7 @@ test("ptc extension resets recovery state for each user request", async () => {
     }
   }
 
-  const seenStates = [];
+  const seenStates: any[] = [];
   class FakeCodeExecutor {
     async execute(_code, options) {
       seenStates.push(options.recoveryState);
@@ -509,7 +521,7 @@ test("ptc extension resets recovery state for each user request", async () => {
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
+    const registered: RegisteredTool[] = [];
     const pi = {
       registerTool(tool) {
         registered.push(tool);
@@ -633,7 +645,7 @@ test("ptc extension appends one targeted recovery message on the next turn after
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
+    const registered: RegisteredTool[] = [];
     const pi = {
       registerTool(tool) {
         registered.push(tool);
@@ -760,7 +772,7 @@ test("ptc extension does not append a second automatic recovery message after re
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
+    const registered: RegisteredTool[] = [];
     const pi = {
       registerTool(tool) {
         registered.push(tool);
@@ -903,7 +915,7 @@ test("ptc extension includes recovery telemetry in successful code_execution det
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
+    const registered: RegisteredTool[] = [];
     const pi = {
       registerTool(tool) {
         registered.push(tool);
@@ -1037,8 +1049,8 @@ test("ptc extension includes first-path telemetry in non-recovered code_executio
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
-    const activeTools = ["read", "grep"];
+    const registered: RegisteredTool[] = [];
+    const activeTools: string[] = ["read", "grep"];
     const pi = {
       registerTool(tool) {
         registered.push(tool);
@@ -1155,7 +1167,7 @@ test("ptc extension does not auto-recover literal zero-match path failures", asy
     const ptcExtension = extensionModule.default || extensionModule;
 
     const eventHandlers = new Map();
-    const registered = [];
+    const registered: RegisteredTool[] = [];
     const pi = {
       registerTool(tool) {
         registered.push(tool);

@@ -26,26 +26,32 @@ If you are looking for the original version or the starting point for this fork,
 Install directly from GitHub:
 
 ```bash
-pi install git:github.com/edxeth/pi-ptc-next
+pi install git:github.com/coctostan/pi-ptc-next
 ```
 
 This fork is published publicly as **pi-ptc-next** to distinguish it from the original `pi-ptc` repository while preserving clear attribution to Chris Egersdoerfer's upstream work.
 
 ## Personal fork maintenance
 
-If this fork is primarily for your own workstation, use the repo-local maintenance workflow instead of relying on `.paul/**` history:
+If this fork is primarily for your own workstation, use the repo-local maintenance workflow instead of relying on `.paul/**` history.
 
+The current release target for that workflow is **0.8.0**. Routine maintenance, CI-parity verification, and release-surface checks now live in the repo:
 ```bash
 ./scripts/start-pi-ptc-full-tools.sh
 npm run verify:personal
 npm run verify:personal:full
+npm run verify:ci
+npm run verify:release-package
 ```
-
 - `./scripts/start-pi-ptc-full-tools.sh` starts Pi with the preferred analysis-oriented personal profile
 - `npm run verify:personal` runs the focused maintenance verification bundle
 - `npm run verify:personal:full` runs the higher-confidence full verification path
-
-For the full maintainer runbook, including the explicit manual git sync/upgrade boundary, see [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
+- `npm run verify:ci` runs the repo-owned CI parity bundle used by `.github/workflows/ci.yml`
+- `npm run verify:release-package` validates the package metadata and `npm pack --dry-run` tarball surface for the 0.8.0 release baseline
+For the full maintainer runbook, including the explicit manual git sync/upgrade boundary and how the verification-only workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) fits beside still-manual release/publish concerns, see [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
+Release docs for this baseline:
+- [`CHANGELOG.md`](CHANGELOG.md)
+- [`docs/releases/0.8.0.md`](docs/releases/0.8.0.md)
 ## Combined stack notes
 
 If you pair this extension with `pi-hashline-readmap`, the first-pass maintainer story is:
@@ -129,6 +135,7 @@ Custom and extension tools are **not callable from Python by default**. They mus
 For personal use, this repo now also carries `scripts/start-pi-ptc-full-tools.sh`, an analysis-oriented launcher profile that keeps the surface read-only while requesting `sg` plus selected graph tools.
 
 If you opt into that profile, note the important limitation: `PTC_CALLABLE_TOOLS` is a filter, not a loader. It can only expose tools that Pi already makes visible to PTC in the current session. If a requested tool is missing from the active Pi tool set or lacks the expected `ptc.callable` metadata, PTC will warn and keep it out of `code_execution` rather than silently pretending the allowlist succeeded.
+If Python needs to branch on optional tools, inspect `ptc.list_callable_tools()` first. The live session surface is authoritative; config and allowlists do not guarantee that a helper is callable in the current run.
 
 ## Structured override payloads (`details.ptcValue`)
 
@@ -338,15 +345,122 @@ The runtime also exposes a `ptc` helper object:
 - `await ptc.find_files(pattern, path='.', max_files=1000)`
 - `await ptc.find_files_abs(pattern, path='.', max_files=1000)`
 - `await ptc.read_text(path, offset=None, limit=None)`
+- `await ptc.batch_tool(calls, max_concurrency=None) -> list[Any]`
+- `await ptc.first_success(calls, max_concurrency=None) -> Any`
+- `await ptc.reduce_tool(calls, reducer, initial, max_concurrency=None) -> Any`
+- `ptc.fit_output(value, max_chars=None, max_items=None, max_depth=None) -> dict[str, Any]`
+- `ptc.expect_kind(value, kind) -> Any`
+- `ptc.list_callable_tools() -> list[dict[str, Any]]`
+- `ptc.get_tool_schema(name) -> dict[str, Any]`
+- `ptc.extract_handles(value, kind=None) -> list[SupportedHandle]`
+- `ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]`
 - `ptc.json_dump(value)`
+`SupportedHandle = Union[ResponseHandle, FileHandle]`
+`kind` is bounded to `"response"` or `"file"`.
+`ptc.expect_kind(...)` is a bounded top-level kind assertion for structured payloads that already expose `kind`.
+Use orchestration helpers when you have repeated multi-tool calls, ordered fallback logic, or large intermediate results that should stay local to Python.
+For one simple tool call, call the tool directly.
+Optional tools should be detected from `ptc.list_callable_tools()`, not assumed from env/config alone.
+Use these helpers for structured tool results that already carry `responseId` and/or `filePath`; they avoid custom recursive JSON walking while keeping the contract intentionally narrow.
+Response/file handles are supported now; graph handles are still out of scope.
+Handle workflow example:
 
-Example:
+```python
+result = await fetch_content(url="https://example.com/page")
+response_handle = ptc.first_handle(result, kind="response")
+file_handle = ptc.first_handle(result, kind="file")
+return {
+    "all_handles": ptc.extract_handles(result),
+    "response_preview": await get_search_content(responseId=response_handle["responseId"], urlIndex=0)
+    if response_handle
+    else None,
+    "file_preview": await ptc.read_text(file_handle["filePath"], limit=20)
+    if file_handle
+    else None,
+}
+```
+
+General helper example:
 
 ```python
 entries = await ptc.read_tree(pattern="**/*.ts", path="src", concurrency=6)
 return {
     "files": len(entries),
     "sample_lengths": [len(entry["content"]) for entry in entries[:3]],
+}
+```
+
+Hashline-style reduction example:
+
+```python
+search_calls = [
+    {"tool": "grep", "params": {"pattern": "TODO", "path": "src", "glob": "**/*.ts"}},
+    {"tool": "grep", "params": {"pattern": "FIXME", "path": "src", "glob": "**/*.ts"}},
+]
+searches = await ptc.batch_tool(search_calls, max_concurrency=2)
+summary = await ptc.reduce_tool(
+    search_calls,
+    lambda acc, entry: acc
+    + [{
+        "matches": len(entry),
+        "sample": entry[0]["line"] if entry else None,
+    }],
+    initial=[],
+    max_concurrency=2,
+)
+return ptc.fit_output({"searches": searches, "summary": summary}, max_chars=1500, max_items=3, max_depth=3)
+```
+
+Codegraph-style ordered fallback example:
+
+```python
+tools_by_name = {tool["name"]: tool for tool in ptc.list_callable_tools()}
+
+if "symbol_card" in tools_by_name and "symbol_search" in tools_by_name:
+    graph_result = await ptc.first_success([
+        {"tool": "symbol_card", "params": {"name": "CodeExecutor"}},
+        {"tool": "symbol_search", "params": {"query": "CodeExecutor", "limit": 1}},
+    ])
+    return ptc.fit_output(graph_result, max_chars=1500, max_items=3, max_depth=3)
+
+return {"used_tool": None, "available_tools": sorted(tools_by_name)}
+```
+
+Web-handle follow-up with bounded output example:
+
+```python
+result = await fetch_content(url="https://example.com/page")
+response_handle = ptc.first_handle(result, kind="response")
+file_handle = ptc.first_handle(result, kind="file")
+payload = {
+    "all_handles": ptc.extract_handles(result),
+    "response_preview": await get_search_content(responseId=response_handle["responseId"], urlIndex=0)
+    if response_handle
+    else None,
+    "file_preview": await ptc.read_text(file_handle["filePath"], limit=20)
+    if file_handle
+    else None,
+}
+return ptc.fit_output(payload, max_chars=1500, max_items=3, max_depth=3)
+```
+
+Safe branching/introspection example:
+
+```python
+tools_by_name = {tool["name"]: tool for tool in ptc.list_callable_tools()}
+
+if "sg" in tools_by_name:
+    sg_schema = ptc.get_tool_schema("sg")
+    matches = await sg(pattern="console.log($$$ARGS)", lang="typescript", path="src")
+    return {
+        "used_tool": tools_by_name["sg"]["pythonName"],
+        "schema_type": sg_schema["type"],
+        "files_with_matches": len(matches["files"]),
+    }
+
+return {
+    "used_tool": None,
+    "available_tools": sorted(tools_by_name),
 }
 ```
 
@@ -428,14 +542,14 @@ If this fork is primarily for your own workstation, you can launch Pi with the b
 That profile keeps mutations and shell access disabled, requests `sg` plus selected graph tools, and leaves `edit`, `write`, `bash`, `resolve_edge`, and `delete_edge` out of the Python surface on purpose.
 
 For the routine local maintenance flow, pair it with:
-
 ```bash
 npm run verify:personal
 npm run verify:personal:full
+npm run verify:release-package
 ```
 
+The package check validates the current **0.8.0** release baseline without introducing changelog, CI, tagging, or publish automation.
 The profile is still constrained by Pi runtime visibility: if Pi does not expose one of those requested tools to PTC with callable metadata in the current session, the tool will stay unavailable inside `code_execution` and PTC will emit a warning describing the gap.
-
 See [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md) for the full maintainer workflow and the explicit manual git sync/upgrade boundary.
 
 ## How it works
