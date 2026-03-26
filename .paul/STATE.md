@@ -4,15 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Phase 35 UNIFY complete — loop closed. Phase transition required.
+**Current focus:** Milestone 13 complete — all 35 phases across 13 milestones finished.
 ## Current Position
-Milestone: Milestone 13 — Ecosystem Examples and Recipes
-Phase: 35 of 35 (Proof and Ecosystem Documentation) — Complete
-Plan: 35-01 complete (SUMMARY written)
-Status: Loop closed — ready for phase transition
-Last activity: 2026-03-26 — UNIFY complete for 35-01-PLAN.md
+Milestone: Milestone 13 — Ecosystem Examples and Recipes — ✅ COMPLETE
+Phase: 35 of 35 (Proof and Ecosystem Documentation) — ✅ COMPLETE
+Plan: 35-01 complete
+Status: Milestone 13 complete — no active milestone
+Last activity: 2026-03-26 — Milestone 13 closed (Phase 35 transition complete)
 Progress:
-- Milestone 13 — Ecosystem Examples and Recipes: [█████████░] 90%
+- Milestone 13 — Ecosystem Examples and Recipes: [██████████] 100% ✓
 - Phase 35 — Proof and Ecosystem Documentation: [██████████] 100% ✓
 - Phase 34 — Cross-Repo Recipes and Benchmark Fixtures: [██████████] 100% ✓
 - Phase 33 — Recipe Targets and Example Contracts: [██████████] 100% ✓
@@ -39,7 +39,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready for phase transition]
+  ✓        ✓        ✓     [Milestone 13 complete — define next milestone]
 ```
 
 ## Accumulated Context
@@ -92,9 +92,9 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - PR: not created (divergent history on long-lived fork branch)
 ## Session Continuity
 Last session: 2026-03-26
-Stopped at: UNIFY complete for plan 35-01 — phase transition pending
-Next action: Execute phase transition (Phase 35 is the last plan in the phase and the last phase in Milestone 13)
-Resume file: .paul/phases/35-proof-and-ecosystem-documentation/35-01-SUMMARY.md
+Stopped at: Milestone 13 complete — all phases finished
+Next action: Define next milestone via /paul:milestone, or pause
+Resume file: .paul/ROADMAP.md
 
 ---
 *STATE.md — Updated after every significant action (last updated: 2026-03-26)*
