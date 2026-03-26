@@ -1,0 +1,25 @@
+{
+  "id": "recipe-graph-compact-ranking",
+  "prompt": "Use Python to analyze many graph results, rank the top 5 symbols by impact, and return compact JSON only.",
+  "expected_first_path": "code_execution",
+  "acceptance": {
+    "type": "behavioral",
+    "rules": [
+      "observed_first_path=code_execution",
+      "success=true",
+      "output_json=true"
+    ]
+  },
+  "recipe_target": {
+    "repos": ["pi-codegraph"],
+    "workflow": "graph-compact-ranking",
+    "summary": "Analyze many graph results and return a compact ranking.",
+    "output_contract": {
+      "format": "json",
+      "style": "compact-ranking",
+      "focus": "Return only the top ranked symbols with compact impact evidence.",
+      "max_items": 5,
+      "max_chars": 1200
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "recipe-web-answer-comparison",
+  "prompt": "Use Python to compare answers from multiple URLs and return only the disagreements as compact JSON.",
+  "expected_first_path": "code_execution",
+  "acceptance": {
+    "type": "behavioral",
+    "rules": [
+      "observed_first_path=code_execution",
+      "success=true",
+      "output_json=true"
+    ]
+  },
+  "recipe_target": {
+    "repos": ["pi-web-tools"],
+    "workflow": "web-answer-comparison",
+    "summary": "Compare multiple fetched answers and keep only disagreement summaries.",
+    "output_contract": {
+      "format": "json",
+      "style": "disagreement-summary",
+      "focus": "Return only disagreements, shared conclusion, and minimal evidence pointers.",
+      "max_items": 3,
+      "max_chars": 1200
+    }
+  }
+}

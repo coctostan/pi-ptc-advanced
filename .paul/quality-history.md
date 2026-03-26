@@ -14,3 +14,4 @@
 | 2026-03-26 | 30-core-orchestration-primitives | 123 passing / 0 failing (`npm test`) | not run separately | clean via `npm run build` | n/a | ↑ improving |
 | 2026-03-26 | 31-bounded-reduction-and-output-budget-helpers | 127 passing / 0 failing (`npm test`) | not run separately | clean via `npm run build` | n/a | ↑ improving |
 | 2026-03-26 | 32-proof-and-ecosystem-docs | 132 passing / 0 failing (`npm test`) | not run separately | clean via `npm run build` | n/a | ↑ improving |
+| 2026-03-26 | 33-recipe-targets-and-example-contracts | 135 passing / 0 failing (`npm test`) | not run separately (IRIS/RUBY fallback: current ESLint no-config CLI path unsupported) | clean via `npm run build` | n/a | ↑ improving |

@@ -47,9 +47,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-- [ ] No active in-progress requirements. Milestone 12 is complete.
+- [ ] Add concrete cross-repo recipe artifacts and small benchmark-style examples for graph, web, anchored-file, and mixed evidence workflows — Phase 34
 ### Planned (Next)
-- [ ] No planned follow-up requirement is currently active. Define the next milestone before opening a new phase.
+- [ ] Finalize user-facing docs and focused ecosystem proof for the recipe workflow corpus once the concrete fixtures land — Phase 35
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -122,6 +122,8 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Keep `ptc.fit_output(...)` aligned with the executor session output cap by default | Output-fitting defaults should match the real executor output boundary so Python-side compaction stays trustworthy and does not imply a larger safe budget than the session actually has | 2026-03-26 | Active |
 | Prefer structured preview metadata over immediate opaque string compaction in `ptc.fit_output(...)` | Bounded previews are more useful when they preserve JSON-safe shape and truncation metadata, even though that adds some runtime-local complexity | 2026-03-26 | Active |
 | Close Milestone 12 with focused ecosystem proof and guidance instead of reopening runtime semantics | Phases 30-31 already shipped the helper behavior; the remaining gap was trustworthy proof and user-facing guidance aligned to the existing surface. | 2026-03-26 | Active |
+| Keep Phase 33 scoped to additive eval/benchmark recipe-target contracts and deterministic seeded cases | The first M4 slice needed stable machine-readable recipe targets and bounded output expectations without expanding runtime semantics or docs scope prematurely | 2026-03-26 | Active |
+| Convert the new recipe-contract test files to import-based syntax and `process.cwd()` path resolution instead of changing package module mode | The phase surfaced local diagnostics in touched test files, and the smallest fix was file-local syntax/path cleanup rather than a package-wide module-policy change | 2026-03-26 | Active |
 
 ## Success Metrics
 | Metric | Target | Current | Status |
@@ -138,6 +140,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Execution-level proof and user-facing docs for Milestone 11 helper ergonomics | Yes | Dedicated runtime proof, tool-description assertions, README updates, and doc-contract coverage landed in Phase 29 | Achieved |
 | Bounded reduction and output-budget helpers for Python orchestration flows | Yes | `ptc.reduce_tool(...)` and `ptc.fit_output(...)` landed with focused execution proof and executor-aligned output-budget defaults | Achieved |
 | Ecosystem-style proof and user-facing docs for Milestone 12 orchestration/output-budget helpers | Yes | Dedicated runtime proof, README examples, tool-description guidance, and doc-contract coverage landed in Phase 32 | Achieved |
+| Deterministic recipe-target contract and seeded M4 workflow corpus | Yes | Additive `recipe_target` metadata, benchmark-result passthrough, and four deterministic recipe cases landed in Phase 33 | Achieved |
 
 ## Tech Stack
 | Layer | Technology | Notes |
@@ -158,4 +161,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-03-26 after Phase 32 completion*
+*Last updated: 2026-03-26 after Phase 33 completion*

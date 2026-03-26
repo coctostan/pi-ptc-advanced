@@ -1,10 +1,10 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
-const { parseEvalCase, validateEvalCase } = require("../dist/eval-cases.js");
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { parseEvalCase, validateEvalCase } from "../dist/eval-cases.js";
 
-const casesDir = path.join(__dirname, "..", ".pi", "evals", "ptc", "cases");
+const casesDir = path.resolve(process.cwd(), ".pi", "evals", "ptc", "cases");
 const requiredCaseFiles = [
   "ptc-positive-multi-file-aggregation.json",
   "ptc-positive-repo-count-ranking.json",
@@ -12,15 +12,24 @@ const requiredCaseFiles = [
   "direct-negative-mutation-fix.json",
   "recovery-missing-await.json",
   "recovery-async-wrapper-iterated.json",
-];
+  "recipe-codegraph-web-evidence-merge.json",
+  "recipe-graph-compact-ranking.json",
+  "recipe-hashline-anomaly-summary.json",
+  "recipe-web-answer-comparison.json",
+] as const;
+const recipeCaseFiles = [
+  "recipe-codegraph-web-evidence-merge.json",
+  "recipe-graph-compact-ranking.json",
+  "recipe-hashline-anomaly-summary.json",
+  "recipe-web-answer-comparison.json",
+] as const;
 
 function readCase(fileName: string) {
-  const filePath = path.join(casesDir, fileName);
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return JSON.parse(readFileSync(path.join(casesDir, fileName), "utf8"));
 }
 
-test("seeded PTC eval case files exist for routing and recovery buckets", () => {
-  const caseFiles = new Set(fs.readdirSync(casesDir).filter((entry: string) => entry.endsWith(".json")));
+test("seeded PTC eval case files exist for routing, recovery, and recipe buckets", () => {
+  const caseFiles = new Set(readdirSync(casesDir).filter((entry) => entry.endsWith(".json")));
 
   assert.deepEqual([...caseFiles].sort(), [...requiredCaseFiles].sort());
 });
@@ -32,6 +41,18 @@ test("seeded PTC eval case files validate against the deterministic schema", () 
     assert.equal(parsed.id.length > 0, true);
     assert.equal(parsed.prompt.length > 0, true);
     assert.equal(parsed.acceptance.rules.length > 0, true);
+  }
+});
+
+test("seeded recipe cases expose compact recipe-target metadata for M4 workflows", () => {
+  for (const fileName of recipeCaseFiles) {
+    const parsed = parseEvalCase(readCase(fileName), fileName);
+
+    assert.ok(parsed.recipe_target);
+    assert.equal(parsed.recipe_target.repos.length > 0, true);
+    assert.equal(parsed.recipe_target.workflow.length > 0, true);
+    assert.equal(parsed.recipe_target.output_contract.format, "json");
+    assert.equal(parsed.recipe_target.output_contract.max_items > 0, true);
   }
 });
 
@@ -52,6 +73,40 @@ test("validateEvalCase rejects malformed cases deterministically", () => {
     'acceptance.type must be "exact", "structural", or "behavioral"',
     "acceptance.rules[0] must be a non-empty string",
     "acceptance.rules[1] must be a non-empty string",
+  ]);
+});
+
+test("validateEvalCase rejects malformed recipe-target metadata deterministically", () => {
+  const errors = validateEvalCase({
+    id: "recipe-broken",
+    prompt: "Use Python to compare many URLs and return compact JSON only.",
+    expected_first_path: "code_execution",
+    acceptance: {
+      type: "behavioral",
+      rules: ["observed_first_path=code_execution", "success=true", "output_json=true"],
+    },
+    recipe_target: {
+      repos: [],
+      workflow: " ",
+      summary: "",
+      output_contract: {
+        format: "",
+        style: "compact",
+        focus: "",
+        max_items: 0,
+        max_chars: -5,
+      },
+    },
+  });
+
+  assert.deepEqual(errors, [
+    "recipe_target.repos must be a non-empty array of strings",
+    "recipe_target.workflow must be a non-empty string",
+    "recipe_target.summary must be a non-empty string",
+    "recipe_target.output_contract.format must be a non-empty string",
+    "recipe_target.output_contract.focus must be a non-empty string",
+    "recipe_target.output_contract.max_items must be a positive integer",
+    "recipe_target.output_contract.max_chars must be a positive integer when provided",
   ]);
 });
 
