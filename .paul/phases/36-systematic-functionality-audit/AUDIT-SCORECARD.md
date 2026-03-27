@@ -96,4 +96,57 @@ The pi-ptc-next Python helper surface is **broadly functional**. 18 of 21 helper
 
 ---
 
-*Scorecard generated from live test execution on 2026-03-26*
+## Phase 37 Stress Test Results
+
+**Date:** 2026-03-26
+**Test file:** `test/live-audit-stress.test.ts` (15 tests)
+**Results:** 15/15 passing
+
+| # | Test | Category | Status | Evidence | Notes |
+|---|------|----------|--------|----------|-------|
+| 1 | batch_tool 10 parallel reads | Concurrency | ✅ Working | All 10 returned, no drops | RPC handles 10 concurrent tool calls cleanly |
+| 2 | batch_tool max_concurrency=2 | Concurrency | ✅ Working | maxActiveCalls ≤2 confirmed | Semaphore correctly bounds parallelism |
+| 3 | gather_limit 8 coros, limit=3 | Concurrency | ✅ Working | All 8 completed, maxActive ≤3 | Bounded concurrency works for coroutines |
+| 4 | batch_tool 2/5 failing | Concurrency | ✅ Working | Behavior: "raised" on first failure | batch_tool fails fast — does NOT collect partial results |
+| 5 | first_success 3 fail + 1 ok | Concurrency | ✅ Working | Falls back through all 3 failures | Sequential fallback chain confirmed |
+| 6 | read() 1000-line file | Large file | ✅ Working | length >50K, contains line 999 | No size issues with large reads |
+| 7 | read_many 5×500-line files | Large file | ✅ Working | All 5 returned, all >10K chars | Batch large reads work cleanly |
+| 8 | fit_output deeply nested (8 levels) | Output budget | ✅ Working | truncated=true, kind=fit_output | Deep nesting handled correctly |
+| 9 | fit_output max_chars=100 on 10K input | Output budget | ✅ Working | truncated=true, compact output | Aggressive truncation works |
+| 10 | batch_tool invalid tool name | Error handling | ✅ Working | Raised clear error | Invalid tools surface as exceptions |
+| 11 | get_tool_schema nonexistent tool | Error handling | ✅ Working | Returned empty/error gracefully | Returns empty dict, no crash |
+| 12 | expect_kind wrong kind | Error handling | ✅ Working | ValueError: "Expected kind" | Clear mismatch error |
+| 13 | reduce_tool all-failing calls | Error handling | ✅ Working | Raised error on first failure | reduce_tool propagates tool errors |
+| 14 | batch_tool([]) empty input | Edge case | ⚠️ Design choice | Raises: "non-empty sequence" | Rejects empty lists instead of returning [] |
+| 15 | read_many([]) empty input | Edge case | ✅ Working | Returns [] | Graceful empty result |
+
+### Stress Test Summary
+
+| Category | Tested | Working | Partial | Notes |
+|----------|--------|---------|---------|-------|
+| Concurrency (10+ parallel) | 5 | 5 | 0 | RPC bridge handles high concurrency well; max_concurrency semaphores work |
+| Large files (500-1000 lines) | 2 | 2 | 0 | No size limit issues found |
+| Output budget (fit_output) | 2 | 2 | 0 | Deep nesting and aggressive truncation both work |
+| Error handling | 4 | 4 | 0 | Invalid tools, wrong kinds, all-failing chains all surface clear errors |
+| Edge cases (empty inputs) | 2 | 1 | 1 | batch_tool rejects empty lists (design choice); read_many accepts them |
+
+### Key Stress Findings
+
+1. **batch_tool fails fast on partial failures** — if 2 of 5 calls fail, the entire batch raises instead of returning partial results. This is functional but models should wrap batch_tool in try/except when failure is expected.
+2. **batch_tool rejects empty call lists** — `batch_tool([])` raises ValueError. read_many([]) returns [] gracefully. Inconsistent empty-input handling.
+3. **Concurrency controls work correctly** — max_concurrency=2 with 6 calls shows maxActiveCalls=2. gather_limit(limit=3) with 8 coros shows maxActiveCalls≤3. No deadlocks or data corruption.
+4. **Large file handling is clean** — 1000-line files (~85KB) pass through RPC without issues. 5×500-line batch reads work.
+5. **reduce_tool propagates first failure** — if any call in the chain fails, the reduction stops and raises. Models should handle this.
+
+### Updated Summary Statistics (Combined Phase 36 + 37)
+
+| Metric | Phase 36 | Phase 37 | Combined |
+|--------|----------|----------|----------|
+| Total capabilities tested | 29 | 15 | 44 |
+| Working | 24 (83%) | 14 (93%) | 38 (86%) |
+| Partial | 2 (7%) | 1 (7%) | 3 (7%) |
+| Broken | 3 (10%) | 0 (0%) | 3 (7%) |
+
+---
+
+*Scorecard updated with stress test results on 2026-03-26*
