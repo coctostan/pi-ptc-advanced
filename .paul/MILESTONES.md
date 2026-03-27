@@ -15,6 +15,38 @@ Completed milestone log for this project.
 | Milestone 10 — Typed Response and File Handle Helpers | 2026-03-25 | approximately 2 hours 20 minutes | 2 phases, 2 plans |
 | Milestone 11 — Result-Kind and Tool Introspection Helpers | 2026-03-26 | approximately 1 hour 20 minutes | 3 phases, 3 plans |
 | Milestone 12 — High-Level Orchestration Helpers | 2026-03-26 | approximately 2 hours | 3 phases, 3 plans |
+| Milestone 13 — Ecosystem Examples and Recipes | 2026-03-26 | ~2 hours | 3 phases, 3 plans |
+
+---
+
+## ✅ Milestone 13 — Ecosystem Examples and Recipes (0.12.0)
+
+**Completed:** 2026-03-26
+**Duration:** ~2 hours
+
+### Stats
+
+| Metric | Value |
+|--------|-------|
+| Phases | 3 |
+| Plans | 3 |
+| Files changed | 15 |
+
+### Key Accomplishments
+
+- Added additive `recipe_target` metadata to the seeded eval/benchmark surface with four deterministic recipe cases covering graph, web, hashline, and mixed workflows
+- Shipped concrete recipe artifacts (`.pi/evals/ptc/recipes/*.py`) that compose bounded PTC helpers into real multi-tool analysis patterns without domain-specific imports
+- Created a deterministic recipe-only benchmark baseline fixture for regression-free recipe corpus validation
+- Added user-facing recipe workflow documentation to README.md with a 4-workflow reference table, CLI invocation guide, and extension instructions
+- Added focused ecosystem composition proof (13 tests) validating that all four workflow types compose through PTC helpers cleanly
+
+### Key Decisions
+
+- Use `ptc.fit_output(...)` as the final bounded return step in every recipe so large intermediate tool results stay local to Python
+- Keep recipe artifacts provider-agnostic and deterministic via seeded case metadata and static benchmark fixtures rather than live network/repo integration
+- Treat the recipe-suite baseline as a metadata-aligned fixture under the existing benchmark contract, not a new runner mode
+- Keep recipe documentation inside the existing evals section as a subsection to avoid README section proliferation
+- Match ecosystem proof to recipe filenames by stem rather than abstract workflow labels for stable test-to-artifact alignment
 
 ---
 ## ✅ Milestone 12 — High-Level Orchestration Helpers (0.11.0)
