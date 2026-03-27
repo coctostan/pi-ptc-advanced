@@ -4,13 +4,13 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Milestone 13 complete — all 35 phases across 13 milestones finished.
+**Current focus:** Awaiting next milestone. Milestone 13 finalized and tagged 0.12.0.
 ## Current Position
-Milestone: Milestone 13 — Ecosystem Examples and Recipes — ✅ COMPLETE
-Phase: 35 of 35 (Proof and Ecosystem Documentation) — ✅ COMPLETE
-Plan: 35-01 complete
-Status: Milestone 13 complete — no active milestone
-Last activity: 2026-03-26 — Milestone 13 closed (Phase 35 transition complete)
+Milestone: Awaiting next milestone
+Phase: None active
+Plan: None
+Status: Milestone 13 complete — ready for next
+Last activity: 2026-03-26 — Milestone 13 finalized, tagged 0.12.0, pushed to origin
 Progress:
 - Milestone 13 — Ecosystem Examples and Recipes: [██████████] 100% ✓
 - Phase 35 — Proof and Ecosystem Documentation: [██████████] 100% ✓
@@ -39,7 +39,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Milestone 13 complete — define next milestone]
+  ○        ○        ○     [Milestone complete — ready for next]
 ```
 
 ## Accumulated Context
@@ -86,15 +86,14 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Full-suite verification still includes the unrelated failing `test/hashline-real-interop.mjs`; Phase 34 kept the failure count unchanged while focused eval/benchmark proof passed
 
 ### Git State
-- Last committed checkpoint: Phase 35 APPLY commit `259872e` on `feat/hashline-native-interop`
+- Last committed checkpoint: Milestone 13 closure `37a1624` on `feat/hashline-native-interop`
 - Branch: `feat/hashline-native-interop`
+- Tag: `0.12.0` (pushed to origin)
 - Pushed to origin: yes
-- PR: not created (divergent history on long-lived fork branch)
-## Session Continuity
 Last session: 2026-03-26
-Stopped at: Milestone 13 complete — all phases finished
-Next action: Define next milestone via /paul:milestone, or pause
-Resume file: .paul/ROADMAP.md
+Stopped at: Milestone 13 complete and tagged
+Next action: /paul:milestone to define next milestone, or pause
+Resume file: .paul/MILESTONES.md
 
 ---
 *STATE.md — Updated after every significant action (last updated: 2026-03-26)*
