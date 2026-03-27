@@ -47,10 +47,12 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-_(No active requirements — Milestone 13 complete)_
+- [ ] Stress and edge case testing for all Python helpers and pipeline capabilities — Phase 37
+- [ ] Composition patterns and final audit scorecard — Phase 38
 ### Validated (Shipped)
-- [x] Added concrete cross-repo recipe artifacts plus a deterministic recipe-only benchmark baseline for graph, web, hashline, and mixed evidence workflows — Phase 34
+- [x] Systematic live-tool audit of all 21 Python helpers and 8 pipeline capabilities with real tool calls, producing per-capability ratings: 83% working, 7% partial, 10% broken (3 helpers share glob/limit bug) — Phase 36
 - [x] Added user-facing recipe workflow documentation and focused ecosystem composition proof validating all four workflow types compose through PTC helpers without domain-specific imports — Phase 35
+- [x] Added concrete cross-repo recipe artifacts plus a deterministic recipe-only benchmark baseline for graph, web, hashline, and mixed evidence workflows — Phase 34
 ### Planned (Next)
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
@@ -163,4 +165,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-03-26 after Phase 35 completion (Milestone 13 complete)*
+*Last updated: 2026-03-26 after Phase 36 completion*
