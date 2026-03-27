@@ -94,10 +94,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Branch: `feat/hashline-native-interop`
 - Tag: `0.13.0` (pushed to origin)
 - Pushed to origin: yes
+## Session Continuity
 Last session: 2026-03-26
-Stopped at: Milestone 14 complete and tagged
-Next action: /paul:milestone to define next milestone, or pause
-Resume file: .paul/MILESTONES.md
+Stopped at: Milestone 14 finalized — session paused
+Next action: /paul:resume → /paul:discuss for Milestone 15 (Bug Fixes and Helper Hardening)
+Resume file: .paul/HANDOFF-2026-03-26-m14-complete.md
+Resume context:
+- Milestone 14 is fully closed, tagged 0.13.0, and pushed
+- FINAL-AUDIT.md has the remediation priority list (P0: glob/limit fix)
+- No work is in progress — clean milestone boundary
 
 ---
 *STATE.md — Updated after every significant action (last updated: 2026-03-26)*
