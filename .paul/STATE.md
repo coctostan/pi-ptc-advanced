@@ -4,13 +4,13 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Milestone 14 complete — all 38 phases across 14 milestones finished.
+**Current focus:** Awaiting next milestone. Milestone 14 finalized and tagged 0.13.0.
 ## Current Position
-Milestone: Milestone 14 — Live Tool Audit and Stress Testing — ✅ COMPLETE
-Phase: 38 of 38 (Composition Patterns and Audit Scorecard) — ✅ COMPLETE
-Plan: 38-01 complete
-Status: Milestone 14 complete — no active milestone
-Last activity: 2026-03-26 — Milestone 14 closed
+Milestone: Awaiting next milestone
+Phase: None active
+Plan: None
+Status: Milestone 14 complete — ready for next
+Last activity: 2026-03-26 — Milestone 14 finalized, tagged 0.13.0, pushed
 Progress:
 - Milestone 14 — Live Tool Audit and Stress Testing: [██████████] 100% ✓
 - Phase 36 — Systematic Functionality Audit: [██████████] 100% ✓
@@ -90,14 +90,14 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Full-suite verification still includes the unrelated failing `test/hashline-real-interop.mjs`; Phase 34 kept the failure count unchanged while focused eval/benchmark proof passed
 
 ### Git State
-- Last committed checkpoint: Phase 38 APPLY `4a35c99` on `feat/hashline-native-interop`
+- Last committed checkpoint: Milestone 14 closure `43afdec` on `feat/hashline-native-interop`
 - Branch: `feat/hashline-native-interop`
+- Tag: `0.13.0` (pushed to origin)
 - Pushed to origin: yes
-## Session Continuity
 Last session: 2026-03-26
-Stopped at: Milestone 14 complete
-Next action: /paul:milestone to complete M14 and define next, or pause
-Resume file: .paul/phases/38-composition-patterns-and-audit-scorecard/FINAL-AUDIT.md
+Stopped at: Milestone 14 complete and tagged
+Next action: /paul:milestone to define next milestone, or pause
+Resume file: .paul/MILESTONES.md
 
 ---
 *STATE.md — Updated after every significant action (last updated: 2026-03-26)*
