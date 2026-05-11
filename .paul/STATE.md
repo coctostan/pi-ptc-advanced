@@ -130,8 +130,8 @@ PLAN ──▶ APPLY ──▶ UNIFY
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
-- Last committed checkpoint: `c3f7d06` (`Phase 46: Mario runtime compatibility alignment`) on `main`
-- Branch: `main` (synced with `origin/main` after PR #2 squash merge)
+- Last committed checkpoint: `f339028` (`docs(phase-46): transition to phase 47`) on `main`
+- Branch: `main` (pushed to `origin/main` after Phase 46 transition)
 - PR #2: merged via squash at `c3f7d06`; feature branch deleted on origin
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
 ## Session Continuity
