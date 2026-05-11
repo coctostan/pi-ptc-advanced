@@ -418,7 +418,10 @@ export default async function ptcExtension(pi: ExtensionAPI, context?: Extension
 
   pi.on("session_start", onSessionStart);
   pi.on("before_agent_start", onBeforeAgentStart);
-  (pi as unknown as { on(event: "context", handler: typeof onContext): void }).on("context", onContext);
+  // Mario-scope Pi 0.73.1 emits context but its public ExtensionAPI overloads do not
+  // include it yet. Keep the compatibility shim explicit until the local package scope
+  // moves to a typed context overload.
+  (pi as ExtensionAPI & { on(event: "context", handler: typeof onContext): void }).on("context", onContext);
   pi.on("agent_end", onAgentEnd);
   pi.on("session_shutdown", onSessionShutdown);
 }

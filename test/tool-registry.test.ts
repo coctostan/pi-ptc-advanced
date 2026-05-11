@@ -92,6 +92,49 @@ function baseSettings(overrides = {}) {
   };
 }
 
+test("ToolRegistry warns once when hashline bridge starts without pre-emitted executors", () => {
+  delete (globalThis as typeof globalThis & { __hashlineToolExecutors?: unknown }).__hashlineToolExecutors;
+  delete process.env.PTC_HASHLINE_BRIDGE_NO_EXECUTORS_WARNED;
+  const warnings: string[] = [];
+  const originalEmitWarning = process.emitWarning;
+  process.emitWarning = ((warning: string | Error) => {
+    warnings.push(String(warning));
+  }) as typeof process.emitWarning;
+
+  try {
+    createRegistry();
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /Hashline tool executor bridge started with no pre-emitted executors/);
+  } finally {
+    process.emitWarning = originalEmitWarning;
+  }
+});
+
+test("ToolRegistry does not warn when hashline executors are pre-emitted", () => {
+  const mockExecute = async () => createToolResult("hashline:read");
+  (globalThis as typeof globalThis & { __hashlineToolExecutors?: unknown }).__hashlineToolExecutors = {
+    read: {
+      name: "read",
+      execute: mockExecute,
+      ptc: { callable: true, policy: "read-only" },
+      parameters: stringParamSchema(),
+    },
+  };
+  const warnings: string[] = [];
+  const originalEmitWarning = process.emitWarning;
+  process.emitWarning = ((warning: string | Error) => {
+    warnings.push(String(warning));
+  }) as typeof process.emitWarning;
+
+  try {
+    createRegistry();
+    assert.deepEqual(warnings, []);
+  } finally {
+    process.emitWarning = originalEmitWarning;
+    delete (globalThis as typeof globalThis & { __hashlineToolExecutors?: unknown }).__hashlineToolExecutors;
+  }
+});
+
 test("ToolRegistry blocks untrusted custom read-only tools when mutations are disabled", () => {
   const registry = createRegistry();
   registry.upsertTool({
@@ -349,6 +392,33 @@ test("ToolRegistry keeps builtin fallback when an override is not active", async
   const callable = runtime.tools.find((tool) => tool.name === "read");
   assert.equal((result as { content: Array<{ text: string }> }).content[0].text, "builtin:read");
   assert.equal(callable?.description, "read");
+});
+
+test("ToolRegistry preserves Pi sourceInfo separately from internal source taxonomy", () => {
+  const sourceInfo = { source: "builtin" };
+  const registry = createRegistry({
+    getAllTools() {
+      return [
+        {
+          name: "read",
+          description: "override:read",
+          parameters: stringParamSchema(),
+          sourceInfo,
+          async execute() {
+            return createToolResult("override:read");
+          },
+        },
+      ];
+    },
+    getActiveTools() {
+      return ["read"];
+    },
+  });
+
+  const readTool = registry.getAllTools(process.cwd()).find((tool) => tool.name === "read");
+  assert.ok(readTool);
+  assert.equal(readTool.source, "builtin");
+  assert.equal(readTool.sourceInfo, sourceInfo);
 });
 test("ToolRegistry still excludes code_execution from nested callable tools", () => {
   const registry = createRegistry({
