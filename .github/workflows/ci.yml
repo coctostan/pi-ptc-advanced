@@ -25,6 +25,13 @@ jobs:
       - name: Install ast-grep CLI
         run: npm install -g @ast-grep/cli
 
+      - name: Install difftastic
+        run: |
+          DIFFT_VERSION=0.69.0
+          curl -fsSL "https://github.com/Wilfred/difftastic/releases/download/${DIFFT_VERSION}/difft-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz -C /usr/local/bin difft
+          difft --version
+
       - name: Clone and install pi-hashline-readmap as sibling repo
         run: |
           git clone --depth 1 --branch v0.8.6 https://github.com/coctostan/pi-hashline-readmap.git ../pi-hashline-readmap \
