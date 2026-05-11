@@ -4,17 +4,18 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Milestone 17 will audit `pi-ptc-advanced` against local and latest Pi compatibility surfaces, then optimize extension integration and system-prompt/tool guidance.
+**Current focus:** Phase 47 will optimize `code_execution` system-prompt/tool guidance now that Phase 46 aligned the Mario-scope runtime compatibility baseline.
 ## Current Position
 Milestone: Milestone 17 — Pi Compatibility and Prompt Integration Audit (0.16.0)
-Phase: 46 of 48 (Pi Extension Runtime Alignment)
-Plan: `.paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md`
-Status: APPLY complete — ready for UNIFY
-Last activity: 2026-05-11 — Phase 46 plan 46-01 APPLY complete
+Phase: 47 of 48 (System Prompt and Tool Guidance Optimization)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-05-11 — Phase 46 complete, transitioned to Phase 47
 Progress:
-- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [█████░░░░░] 50% (Phase 45 ✓, Phase 46 APPLY ✓)
+- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [█████░░░░░] 50% (Phase 45 ✓, Phase 46 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
-- Phase 46 — Extension Runtime Compatibility Alignment: [███████░░░] APPLY ✓
+- Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
+- Phase 47 — System Prompt and Tool Guidance Optimization: [░░░░░░░░░░] 0% ready to plan
 - Milestone 15 — Bug Fixes and Helper Hardening: [██████████] 100% ✓
 - Milestone 16 — Publishable Fork Packaging: [██████████] 100% ✓
 - Phase 42 — Rename and Package Identity: [██████████] 100% ✓
@@ -54,7 +55,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Phase 46 apply complete]
+  ○        ○        ○     [Phase 47 ready to plan]
 ```
 
 ## Accumulated Context
@@ -116,6 +117,7 @@ PLAN ──▶ APPLY ──▶ UNIFY
 
 - Phase 46 PLAN created `.paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md`: after user clarification, selected latest Mario-scope package alignment (`@mariozechner/*@0.73.1`) instead of a hard `@earendil-works/*` switch; plan still covers context-event compatibility, explicit `sourceInfo` compatibility strategy, and one-time hashline bridge no-executor observability signal; README/CHANGELOG/prompt-guidance remain deferred to Phase 47/48.
 - Phase 46 APPLY completed in commit `c859c9b`: package metadata/lockfile now target `@mariozechner/*@0.73.1`, `sourceInfo` is preserved separately from PTC's internal `source` taxonomy, and the hashline bridge emits a no-executor observability warning while preserving builtin fallback. Deviation: Mario 0.73.1 does not type the `context` event overload, so APPLY retained an explicit compatibility shim instead of the originally planned direct typed call.
+- Phase 46 UNIFY created `46-01-SUMMARY.md`, recorded quality/CODI module evidence, merged PR #2 via squash at `c3f7d06`, and transitioned the milestone to Phase 47 planning readiness.
 ### Deferred Issues
 - Bridge teardown when pi adds getToolExecutor()
 - `src/python-runtime/runtime.py` is now a significant debt hotspot at 743 lines after Phase 41 behavior additions; future changes should avoid casual growth without extraction justification
@@ -128,20 +130,19 @@ PLAN ──▶ APPLY ──▶ UNIFY
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
-- Last implementation checkpoint: `c859c9b` (`chore(46-01): align Mario runtime compatibility`) on `feat/phase-46-runtime-alignment`
-- Branch: `feat/phase-46-runtime-alignment` (pushed to origin)
-- Open PR: [#2](https://github.com/coctostan/pi-ptc-next/pull/2) `feat/phase-46-runtime-alignment -> main`; mergeable, CI `Verify release baseline` in progress at APPLY completion
+- Last committed checkpoint: `c3f7d06` (`Phase 46: Mario runtime compatibility alignment`) on `main`
+- Branch: `main` (synced with `origin/main` after PR #2 squash merge)
+- PR #2: merged via squash at `c3f7d06`; feature branch deleted on origin
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
 ## Session Continuity
 Last session: 2026-05-11
-Stopped at: Phase 46 APPLY complete; awaiting UNIFY
-Next action: /paul:unify .paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md
-Resume file: .paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md
+Stopped at: Phase 46 complete (PLAN/APPLY/UNIFY ✓); transitioned to Phase 47 planning readiness
+Next action: /paul:plan for Phase 47
+Resume file: .paul/ROADMAP.md
 Resume context:
-- APPLY changed `package.json`, `package-lock.json`, `src/index.ts`, `src/contracts/tool-types.ts`, `src/tool-registry.ts`, and `test/tool-registry.test.ts` in commit `c859c9b`.
-- Verification passed: `npm run build`, `node --test test/tool-registry.test.ts`, `node --test test/hashline-default-exposure.test.ts test/hashline-interop-smoke.test.ts`, and `npm test` (210 passing / 0 failing).
-- `npm audit --json` improved against DEAN baseline from 1 critical / 4 high / 5 moderate / 10 total to 0 critical / 0 high / 3 moderate / 3 total; no new critical/high findings introduced.
-- Deviation to reconcile in UNIFY: direct typed `pi.on("context", ...)` was not possible on Mario 0.73.1; APPLY retained an explicit compatibility shim/comment instead.
+- Phase 46 summary: `.paul/phases/46-extension-runtime-compatibility-alignment/46-01-SUMMARY.md`.
+- Phase 46 shipped latest-Mario package alignment (`@mariozechner/*@0.73.1`), explicit `sourceInfo` compatibility handling, and a hashline no-executor startup warning.
+- Phase 47 should implement the prompt/tool-guidance handoff from Phase 45: `promptSnippet`, `promptGuidelines`, auto-route idempotence with `systemPromptOptions`, and custom-tool prompt metadata threading; preserve the Phase 46 decision not to claim an `@earendil-works/*` runtime migration.
 
 ---
-*STATE.md — Updated after Phase 46 APPLY completion (last updated: 2026-05-11)*
+*STATE.md — Updated after Phase 46 UNIFY + transition to Phase 47 (last updated: 2026-05-11)*

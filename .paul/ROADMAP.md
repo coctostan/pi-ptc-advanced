@@ -6,13 +6,13 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 ## Current Milestone
 **Milestone 17 — Pi Compatibility and Prompt Integration Audit** (`0.16.0`)
 Status: 🚧 In Progress
-Phases: 1 of 4 complete (25%)
+Phases: 2 of 4 complete (50%)
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 45 | Pi API and Documentation Delta Audit | 1/1 | ✅ Complete | 2026-05-11 |
-| 46 | Extension Runtime Compatibility Alignment | 1/1 applied | 🔧 Applied | - |
-| 47 | System Prompt and Tool Guidance Optimization | TBD | Not started | - |
+| 46 | Extension Runtime Compatibility Alignment | 1/1 | ✅ Complete | 2026-05-11 |
+| 47 | System Prompt and Tool Guidance Optimization | TBD | Ready to plan | - |
 | 48 | Compatibility Proof and Release Readiness | TBD | Not started | - |
 
 ### Phase 45: Pi API and Documentation Delta Audit
@@ -21,7 +21,7 @@ Plans: 45-01 complete — produced `45-01-PI-COMPAT-AUDIT.md` (271 lines): evide
 
 ### Phase 46: Extension Runtime Compatibility Alignment
 Focus: Apply compatibility improvements in extension registration, lifecycle, tool metadata, runtime execution, callable-tool exposure, and fallback behavior based on the Phase 45 audit.
-Plans: 46-01 applied — `.paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md` aligned package metadata/lockfile to latest Mario-scope Pi (`@mariozechner/*@0.73.1`) while preserving Mario imports; retained an explicit Mario 0.73.1 `context` compatibility shim because the typed overload is not available; made Pi `sourceInfo` compatibility handling explicit; added a one-time hashline bridge no-executor visibility signal; deferred docs/prompt/release work to Phases 47/48.
+Plans: 46-01 complete — produced `46-01-SUMMARY.md`: aligned package metadata/lockfile to latest Mario-scope Pi (`@mariozechner/*@0.73.1`) while preserving Mario imports; retained an explicit Mario 0.73.1 `context` compatibility shim because the typed overload is not available; made Pi `sourceInfo` compatibility handling explicit; added a one-time hashline bridge no-executor visibility signal; recorded WALT/CODI/RUBY/SKIP post-unify evidence; merged PR #2 at `c3f7d06`. Docs/prompt/release work remains deferred to Phases 47/48.
 
 ### Phase 47: System Prompt and Tool Guidance Optimization
 Focus: Improve how `code_execution` informs the model through system-prompt/tool-description guidance, helper-selection instructions, optional tool branching, prompt budget discipline, and latest Pi prompt conventions.
