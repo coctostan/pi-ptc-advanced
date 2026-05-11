@@ -9,11 +9,27 @@ export interface EvalCaseAcceptance {
   rules: string[];
 }
 
+export interface EvalCaseRecipeOutputContract {
+  format: string;
+  style: string;
+  focus: string;
+  max_items: number;
+  max_chars?: number;
+}
+
+export interface EvalCaseRecipeTarget {
+  repos: string[];
+  workflow: string;
+  summary: string;
+  output_contract: EvalCaseRecipeOutputContract;
+}
+
 export interface EvalCase {
   id: string;
   prompt: string;
   expected_first_path: EvalCaseExpectedFirstPath;
   acceptance: EvalCaseAcceptance;
+  recipe_target?: EvalCaseRecipeTarget;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -30,6 +46,10 @@ function isExpectedFirstPath(value: unknown): value is EvalCaseExpectedFirstPath
 
 function isAcceptanceType(value: unknown): value is EvalCaseAcceptanceType {
   return typeof value === "string" && EVAL_CASE_ACCEPTANCE_TYPES.includes(value as EvalCaseAcceptanceType);
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return Number.isInteger(value) && Number(value) > 0;
 }
 
 export function validateEvalCase(value: unknown): string[] {
@@ -75,6 +95,61 @@ export function validateEvalCase(value: unknown): string[] {
       errors.push(`acceptance.rules[${index}] must be a non-empty string`);
     }
   });
+
+  if (value.recipe_target === undefined) {
+    return errors;
+  }
+
+  if (!isRecord(value.recipe_target)) {
+    errors.push("recipe_target must be an object");
+    return errors;
+  }
+
+  if (!Array.isArray(value.recipe_target.repos) || value.recipe_target.repos.length === 0) {
+    errors.push("recipe_target.repos must be a non-empty array of strings");
+  } else {
+    value.recipe_target.repos.forEach((repo, index) => {
+      if (!isNonEmptyString(repo)) {
+        errors.push(`recipe_target.repos[${index}] must be a non-empty string`);
+      }
+    });
+  }
+
+  if (!isNonEmptyString(value.recipe_target.workflow)) {
+    errors.push("recipe_target.workflow must be a non-empty string");
+  }
+
+  if (!isNonEmptyString(value.recipe_target.summary)) {
+    errors.push("recipe_target.summary must be a non-empty string");
+  }
+
+  if (!isRecord(value.recipe_target.output_contract)) {
+    errors.push("recipe_target.output_contract must be an object");
+    return errors;
+  }
+
+  if (!isNonEmptyString(value.recipe_target.output_contract.format)) {
+    errors.push("recipe_target.output_contract.format must be a non-empty string");
+  }
+
+  if (!isNonEmptyString(value.recipe_target.output_contract.style)) {
+    errors.push("recipe_target.output_contract.style must be a non-empty string");
+  }
+
+  if (!isNonEmptyString(value.recipe_target.output_contract.focus)) {
+    errors.push("recipe_target.output_contract.focus must be a non-empty string");
+  }
+
+  if (!isPositiveInteger(value.recipe_target.output_contract.max_items)) {
+    errors.push("recipe_target.output_contract.max_items must be a positive integer");
+  }
+
+  if (
+    value.recipe_target.output_contract.max_chars !== undefined
+    && !isPositiveInteger(value.recipe_target.output_contract.max_chars)
+  ) {
+    errors.push("recipe_target.output_contract.max_chars must be a positive integer when provided");
+  }
 
   return errors;
 }

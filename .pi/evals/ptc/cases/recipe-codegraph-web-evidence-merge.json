@@ -1,0 +1,25 @@
+{
+  "id": "recipe-codegraph-web-evidence-merge",
+  "prompt": "Use Python to merge codegraph and web-tool evidence into one compact JSON result with only the strongest supporting points.",
+  "expected_first_path": "code_execution",
+  "acceptance": {
+    "type": "behavioral",
+    "rules": [
+      "observed_first_path=code_execution",
+      "success=true",
+      "output_json=true"
+    ]
+  },
+  "recipe_target": {
+    "repos": ["pi-codegraph", "pi-web-tools"],
+    "workflow": "codegraph-web-evidence-merge",
+    "summary": "Merge codegraph and web evidence into one bounded synthesis.",
+    "output_contract": {
+      "format": "json",
+      "style": "evidence-merge",
+      "focus": "Return one merged conclusion with compact codegraph and web evidence arrays.",
+      "max_items": 6,
+      "max_chars": 1500
+    }
+  }
+}

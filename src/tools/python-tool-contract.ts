@@ -10,8 +10,13 @@ interface BuiltinToolContract {
 const BUILTIN_TOOL_CONTRACTS: Record<string, BuiltinToolContract> = {
   read: {
     isReadOnly: true,
-    pythonReturnType: "str",
-    helperSignature: "read(path: str, *, offset: Optional[int] = None, limit: Optional[int] = None) -> str",
+    pythonReturnType: "Union[str, ReadResult]",
+    helperSignature: "read(path: str, *, offset: Optional[int] = None, limit: Optional[int] = None, symbol: Optional[str] = None, map: Optional[bool] = None) -> Union[str, ReadResult]"
+  },
+  sg: {
+    isReadOnly: true,
+    pythonReturnType: "SgResult",
+    helperSignature: "sg(pattern: str, *, lang: Optional[str] = None, path: Optional[str] = None) -> SgResult"
   },
   find: {
     isReadOnly: true,
@@ -23,7 +28,7 @@ const BUILTIN_TOOL_CONTRACTS: Record<string, BuiltinToolContract> = {
   },
   grep: {
     isReadOnly: true,
-    pythonReturnType: "List[GrepMatch]",
+    pythonReturnType: "Union[List[GrepMatch], GrepResult]",
   },
   ls: {
     isReadOnly: true,
@@ -35,7 +40,7 @@ const BUILTIN_TOOL_CONTRACTS: Record<string, BuiltinToolContract> = {
   },
   edit: {
     isReadOnly: false,
-    pythonReturnType: "EditResult",
+    pythonReturnType: "AnchoredEditResult",
   },
   write: {
     isReadOnly: false,
@@ -51,16 +56,29 @@ const RESERVED_PYTHON_HELPER_NAMES = new Set([
   "find",
   "glob",
   "grep",
+  "sg",
   "ls",
   "bash",
   "edit",
   "write",
 ]);
 
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+
 export interface PythonParamMetadata {
   name: string;
   signature: string;
   keywordOnly: boolean;
+}
+
+export interface PythonCallableToolMetadata {
+  name: string;
+  pythonName: string;
+  description: string;
+  source: ToolInfo["source"];
+  isReadOnly: boolean;
+  parameters: JsonValue;
 }
 
 export function getBuiltinToolContract(toolName: string): BuiltinToolContract | undefined {
@@ -133,8 +151,43 @@ export function schemaToPythonType(schema: TSchema): string {
   }
 }
 
+function sortJsonValue(value: JsonValue): JsonValue {
+  if (Array.isArray(value)) {
+    return value.map((entry) => sortJsonValue(entry));
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, sortJsonValue((value as Record<string, JsonValue>)[key])])
+    );
+  }
+  return value;
+}
+
+function toJsonValue(value: unknown): JsonValue {
+  const serialized = JSON.stringify(value ?? null);
+  const parsed = JSON.parse(serialized === undefined ? "null" : serialized) as JsonValue;
+  return sortJsonValue(parsed);
+}
+
 export function getPythonHelperName(tool: ToolInfo): string {
   return tool.ptc?.pythonName || tool.name;
+}
+
+export function buildPythonCallableToolMetadata(tool: ToolInfo): PythonCallableToolMetadata {
+  return {
+    name: tool.name,
+    pythonName: getPythonHelperName(tool),
+    description: tool.description || "",
+    source: tool.source,
+    isReadOnly: tool.isReadOnly,
+    parameters: toJsonValue(tool.parameters ?? {}),
+  };
+}
+
+export function buildPythonCallableToolMetadataList(tools: ToolInfo[]): PythonCallableToolMetadata[] {
+  return tools.map((tool) => buildPythonCallableToolMetadata(tool));
 }
 
 export function validatePythonHelperNames(tools: ToolInfo[]): void {
@@ -227,7 +280,7 @@ export function describePythonHelper(tool: ToolInfo): string {
   const pythonName = getPythonHelperName(tool);
   const builtinSignature = getBuiltinToolContract(tool.name)?.helperSignature;
   if (builtinSignature) {
-    return builtinSignature.replace(/^read\(/, `${pythonName}(`);
+    return builtinSignature.replace(/^[A-Za-z_][A-Za-z0-9_]*(?=\()/, pythonName);
   }
 
   const returnType = getPythonReturnType(tool);

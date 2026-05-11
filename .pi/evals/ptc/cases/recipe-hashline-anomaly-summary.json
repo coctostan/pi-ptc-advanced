@@ -1,0 +1,25 @@
+{
+  "id": "recipe-hashline-anomaly-summary",
+  "prompt": "Use Python to inspect many anchored file results, summarize only anomalies, and return compact JSON only.",
+  "expected_first_path": "code_execution",
+  "acceptance": {
+    "type": "behavioral",
+    "rules": [
+      "observed_first_path=code_execution",
+      "success=true",
+      "output_json=true"
+    ]
+  },
+  "recipe_target": {
+    "repos": ["pi-hashline-readmap"],
+    "workflow": "hashline-anomaly-summary",
+    "summary": "Inspect many files and emit only anomaly-focused output.",
+    "output_contract": {
+      "format": "json",
+      "style": "anomaly-summary",
+      "focus": "Return only anomalous files, counts, and small anchored samples.",
+      "max_items": 8,
+      "max_chars": 1500
+    }
+  }
+}

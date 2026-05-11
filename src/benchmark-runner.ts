@@ -29,6 +29,7 @@ export interface BenchmarkRuleOutcome {
 export interface BenchmarkResultRecord {
   result: BenchmarkResult;
   rule_outcomes: BenchmarkRuleOutcome[];
+  recipe_target?: EvalCase["recipe_target"];
 }
 
 export interface BenchmarkRunSummary {
@@ -285,7 +286,12 @@ export function buildBenchmarkResultRecord(
     passed: evaluateRule(rule, result, observation.output),
   }));
 
-  return { result, rule_outcomes };
+  const record: BenchmarkResultRecord = { result, rule_outcomes };
+  if (evalCase.recipe_target) {
+    record.recipe_target = evalCase.recipe_target;
+  }
+
+  return record;
 }
 
 function buildBenchmarkSummary(records: BenchmarkResultRecord[]): BenchmarkRunSummary {

@@ -1,7 +1,9 @@
 const test = require("node:test");
+import type {} from "node:test";
 const assert = require("node:assert/strict");
 const { EventEmitter } = require("node:events");
 const { PassThrough } = require("node:stream");
+const childProcess = require("node:child_process");
 const { PtcPythonError } = require("../dist/execution/execution-errors.js");
 const { CodeExecutor } = require("../dist/code-executor.js");
 
@@ -56,7 +58,7 @@ test("CodeExecutor passes the current execution context to nested tools", async 
     async cleanup() {},
   };
 
-  let capturedExecution = null;
+  let capturedExecution: { ctx?: unknown; parentToolCallId?: string } | null = null;
   const toolRegistry = {
     createCallableToolRuntime(_cwd, _settings, execution) {
       capturedExecution = execution;
@@ -88,9 +90,11 @@ test("CodeExecutor passes the current execution context to nested tools", async 
     }),
     /stop after capturing execution context/
   );
+  assert.ok(capturedExecution);
+  const executionContext = capturedExecution!;
 
-  assert.equal(capturedExecution.ctx, currentCtx);
-  assert.equal(capturedExecution.parentToolCallId, "parent-1");
+  assert.equal(executionContext.ctx, currentCtx);
+  assert.equal(executionContext.parentToolCallId, "parent-1");
 });
 
 test("CodeExecutor preserves typed Python errors", async () => {
@@ -179,7 +183,7 @@ test("CodeExecutor runs the core tool-call pipeline through RpcProtocol", async 
     }
   }
 
-  let runToolArgs = null;
+  let runToolArgs: unknown[] | null = null;
   const sandboxManager = {
     spawn() {
       const proc = new FakeProcess();
@@ -245,4 +249,156 @@ test("CodeExecutor runs the core tool-call pipeline through RpcProtocol", async 
   assert.deepEqual(runToolArgs, ["glob", { pattern: "**/*.ts" }, "nested-1"]);
   assert.equal(result.details.nestedToolCalls, 1);
   assert.equal(result.details.nestedResultCount, 1);
+});
+
+
+test("CodeExecutor exposes ptc handle helpers for bounded response/file follow-up flows", async () => {
+  const nestedCalls: Array<[string, Record<string, unknown>]> = [];
+  const sandboxManager = {
+    spawn(code, cwd) {
+      return childProcess.spawn("python3", ["-u", "-c", code], {
+        cwd,
+        env: { ...process.env },
+      });
+    },
+    getRuntimeWorkspaceRoot(cwd) {
+      return cwd;
+    },
+    async cleanup() {},
+  };
+
+  const toolRegistry = {
+    createCallableToolRuntime() {
+      return {
+        tools: [
+          {
+            name: "fetch_content",
+            description: "Fetch URL content",
+            parameters: { type: "object", properties: { url: { type: "string" } }, required: ["url"] },
+            source: "custom",
+            isReadOnly: true,
+          },
+          {
+            name: "get_search_content",
+            description: "Read cached fetched content",
+            parameters: {
+              type: "object",
+              properties: {
+                responseId: { type: "string" },
+                urlIndex: { type: "integer" },
+              },
+              required: ["responseId"],
+            },
+            source: "custom",
+            isReadOnly: true,
+          },
+          {
+            name: "read",
+            description: "Read file content",
+            parameters: {
+              type: "object",
+              properties: {
+                path: { type: "string" },
+                offset: { type: "integer" },
+                limit: { type: "integer" },
+              },
+              required: ["path"],
+            },
+            source: "builtin",
+            isReadOnly: true,
+          },
+        ],
+        runTool: async (toolName: string, params: Record<string, unknown>) => {
+          nestedCalls.push([toolName, params]);
+          if (toolName === "fetch_content") {
+            return {
+              content: [{ type: "text", text: "Fetched 1 URL" }],
+              details: {
+                ptcValue: {
+                  responseId: "resp_fetch_123",
+                  urls: [
+                    {
+                      url: "https://example.com/page",
+                      title: "Example page",
+                      filePath: "/tmp/example-page.md",
+                    },
+                  ],
+                  successCount: 1,
+                  totalCount: 1,
+                },
+              },
+            };
+          }
+
+          if (toolName === "get_search_content") {
+            assert.deepEqual(params, { responseId: "resp_fetch_123", urlIndex: 0 });
+            return {
+              content: [{ type: "text", text: "Example body" }],
+              details: undefined,
+            };
+          }
+
+          if (toolName === "read") {
+            assert.equal(params.path, "/tmp/example-page.md");
+            assert.equal(params.limit, 20);
+            return {
+              content: [{ type: "text", text: "cached preview" }],
+              details: undefined,
+            };
+          }
+
+          throw new Error(`Unexpected tool: ${toolName}`);
+        },
+      };
+    },
+  };
+
+  const executor = new CodeExecutor(
+    sandboxManager,
+    toolRegistry,
+    {
+      executionTimeoutMs: 10_000,
+      maxOutputChars: 10_000,
+      allowMutations: false,
+      allowBash: false,
+      maxParallelToolCalls: 4,
+      useDocker: false,
+      allowUnsandboxedSubprocess: true,
+      debugLogging: false,
+      trustedReadOnlyTools: undefined,
+      callableTools: undefined,
+      blockedTools: undefined,
+    },
+    process.cwd()
+  );
+
+  const result = await executor.execute(
+    [
+      'result = await fetch_content(url="https://example.com/page")',
+      'response_handle = ptc.first_handle(result, kind="response")',
+      'file_handle = ptc.first_handle(result, kind="file")',
+      'return {',
+      '  "all_handles": ptc.extract_handles(result),',
+      '  "response_preview": await get_search_content(responseId=response_handle["responseId"], urlIndex=0),',
+      '  "file_preview": await ptc.read_text(file_handle["filePath"], limit=20),',
+      '}',
+    ].join("\n"),
+    {
+      cwd: process.cwd(),
+      ctx: { cwd: process.cwd() },
+    }
+  );
+
+  assert.deepEqual(JSON.parse(result.output), {
+    all_handles: [
+      { kind: "response", responseId: "resp_fetch_123" },
+      { kind: "file", filePath: "/tmp/example-page.md" },
+    ],
+    response_preview: "Example body",
+    file_preview: "cached preview",
+  });
+  assert.deepEqual(
+    nestedCalls.map(([toolName]) => toolName),
+    ["fetch_content", "get_search_content", "read"]
+  );
 });

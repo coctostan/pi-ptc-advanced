@@ -1,35 +1,69 @@
 # pi-ptc-next
-
-`pi-ptc-next` adds a provider-agnostic `code_execution` tool to pi. The model writes Python code, Python calls local pi tools through an internal RPC bridge, and only the final Python output is returned to the model context.
+`pi-ptc-next` is the repository and fork lineage for the Pi Programmatic Tool Calling extension that now publishes its package surface as **`pi-ptc-advanced`**. The extension adds a provider-agnostic `code_execution` tool to pi: the model writes Python code, Python calls local pi tools through an internal RPC bridge, and only the final Python output is returned to the model context.
 
 This is **not** Anthropic's provider-native PTC wire protocol. Instead, it implements the same core local behavior in a way that can work across multiple labs and models such as GPT-5.4, GLM-5, and Claude-class models.
 
 ## Fork history and credits
 
-This repository started from the original [`cegersdoerfer/pi-ptc`](https://github.com/cegersdoerfer/pi-ptc) by [@cegersdoerfer](https://github.com/cegersdoerfer) (Chris Egersdoerfer).
+This codebase started from the original [`cegersdoerfer/pi-ptc`](https://github.com/cegersdoerfer/pi-ptc) by [@cegersdoerfer](https://github.com/cegersdoerfer) (Chris Egersdoerfer).
 
-This fork exists because I wanted to keep pushing the extension toward a more provider-agnostic and production-ready local PTC implementation for pi instead of a Claude-leaning prototype.
+The current repository then continued as the public fork/repo identity **`pi-ptc-next`** before the package/release surface was renamed to **`pi-ptc-advanced`** for the publishable-fork baseline. The repo name and package name therefore differ intentionally:
+
+- upstream origin: `cegersdoerfer/pi-ptc`
+- prior fork/repo lineage: `coctostan/pi-ptc-next`
+- current package publish target: `pi-ptc-advanced`
 
 The main work done here includes:
-
 - refactoring the codebase into clearer execution, contract, and tool submodules
 - replacing the split loader/watcher flow with an authoritative custom tool manager
 - tightening the runtime protocol and execution error boundaries
 - making subprocess execution explicit opt-in and improving Docker behavior
 - adding direct behavioral tests for the core execution/runtime/tooling paths
 - improving package loading, vendoring local reference material for PTC/advanced tool use, and benchmarking real pi usage
-
-If you are looking for the original version or the starting point for this fork, please see the upstream repository above.
+If you are looking for the original starting point for this fork, see the upstream repository above. If you are looking for the immediately prior public fork identity, use this repository history.
 
 ## Installation
 
-Install directly from GitHub:
+Install the current publish target directly from GitHub:
 
 ```bash
-pi install git:github.com/edxeth/pi-ptc-next
+pi install git:github.com/coctostan/pi-ptc-next
 ```
 
-This fork is published publicly as **pi-ptc-next** to distinguish it from the original `pi-ptc` repository while preserving clear attribution to Chris Egersdoerfer's upstream work.
+The repository remains `pi-ptc-next`, but the package metadata and release baseline now target **`pi-ptc-advanced@0.15.0`**. Until a separate registry publishing flow exists, the GitHub install path above remains the canonical install/update route documented by this repo.
+
+## Personal fork maintenance
+
+If this fork is primarily for your own workstation, use the repo-local maintenance workflow instead of relying on `.paul/**` history.
+
+The current documented release baseline for that workflow is **`pi-ptc-advanced@0.15.0`**. Routine maintenance, CI-parity verification, and release-surface checks now live in the repo:
+```bash
+./scripts/start-pi-ptc-full-tools.sh
+npm run verify:personal
+npm run verify:personal:full
+npm run verify:ci
+npm run verify:release-package
+```
+- `./scripts/start-pi-ptc-full-tools.sh` starts Pi with the preferred analysis-oriented personal profile
+- `npm run verify:personal` runs the focused maintenance verification bundle
+- `npm run verify:personal:full` runs the higher-confidence full verification path
+- `npm run verify:ci` runs the repo-owned CI parity bundle used by `.github/workflows/ci.yml`
+- `npm run verify:release-package` validates the package metadata and `npm pack --dry-run` tarball surface for the `pi-ptc-advanced@0.15.0` baseline
+For the full maintainer runbook, including the explicit manual git sync/upgrade boundary and how the verification-only workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) fits beside still-manual release/publish concerns, see [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
+Release docs for the active baseline:
+- [`CHANGELOG.md`](CHANGELOG.md)
+- [`docs/releases/0.15.0.md`](docs/releases/0.15.0.md)
+- Historical baseline: [`docs/releases/0.8.0.md`](docs/releases/0.8.0.md)
+## Combined stack notes
+
+If you pair this extension with `pi-hashline-readmap`, the first-pass maintainer story is:
+
+- active overridden `read` / `grep` / `edit` executors should be the same implementations users see in chat
+- structured `details.ptcValue` payloads should cross the RPC boundary unchanged when active tools provide them
+- explicit `ptc.callable` / `ptc.policy` metadata should describe extension-tool exposure and safety traits
+- the focused verification point is `npm run build && node --test test/hashline-interop-smoke.test.ts`
+
+Today that interop path is intentionally narrow: `src/tool-registry.ts` overlays active hashline executors through a `globalThis` fallback plus the EventBus channel `hashline:tool-executors`. This is a temporary bridge so `code_execution` can use the same active tool implementations users see in chat, and it should be removed once Pi exposes `getToolExecutor()` on `ExtensionAPI`.
 
 ## What using it feels like now
 
@@ -86,19 +120,185 @@ This implementation now focuses on provider-agnostic reliability:
 
 By default, Python code inside `code_execution` can call a safe built-in subset:
 
-- `read(path, offset=None, limit=None) -> str`
+- `read(path, *, offset=None, limit=None, symbol=None, map=None) -> Union[str, ReadResult]`
 - `glob(pattern, path='.', limit=1000) -> list[str]`
 - `find(pattern, path='.', limit=1000) -> list[str]`
-- `grep(...) -> list[dict]`
+- `grep(...) -> Union[List[GrepMatch], GrepResult]`
 - `ls(path='.', limit=500) -> list[str]`
 
 Optional tools can be enabled via environment/config policy:
 
+- `sg(pattern, *, lang=None, path=None) -> SgResult` (requires explicit opt-in via `PTC_CALLABLE_TOOLS=...,sg` and Pi still has to expose it to PTC with callable runtime + metadata)
 - `bash(...) -> dict`
-- `edit(...) -> dict`
+- `edit(...) -> AnchoredEditResult`
 - `write(...) -> dict`
 
-Custom and extension tools are **not callable from Python by default**. They must explicitly opt in with `ptc.enabled: true`.
+Custom and extension tools are **not callable from Python by default**. They must opt in with `ptc.callable: true`, and `ptc.policy: "read-only" | "mutating"` declares the safety class the registry enforces. That keeps the default surface conservative, leaves mutating tools unavailable unless both metadata and runtime policy allow them, and preserves legacy compatibility with `ptc.enabled` / `ptc.readOnly`.
+For personal use, this repo now also carries `scripts/start-pi-ptc-full-tools.sh`, an analysis-oriented launcher profile that keeps the surface read-only while requesting `sg` plus selected graph tools.
+
+If you opt into that profile, note the important limitation: `PTC_CALLABLE_TOOLS` is a filter, not a loader. It can only expose tools that Pi already makes visible to PTC in the current session. If a requested tool is missing from the active Pi tool set or lacks the expected `ptc.callable` metadata, PTC will warn and keep it out of `code_execution` rather than silently pretending the allowlist succeeded.
+If Python needs to branch on optional tools, inspect `ptc.list_callable_tools()` first. The live session surface is authoritative; config and allowlists do not guarantee that a helper is callable in the current run.
+
+## Structured override payloads (`details.ptcValue`)
+
+The helper signatures above are the **fallback normalization defaults**.
+If a callable tool returns `details.ptcValue`, that JSON-compatible value is returned to Python unchanged.
+
+This is especially important for active hashline-native overrides of `read`, `grep`, and `edit`, which can expose richer anchored payloads than the fallback signatures imply.
+
+Representative structured payloads:
+
+```json
+{
+  "tool": "read",
+  "path": "tests/fixtures/small.ts",
+  "range": {
+    "startLine": 45,
+    "endLine": 49,
+    "totalLines": 49
+  },
+  "warnings": [],
+  "truncation": null,
+  "symbol": {
+    "query": "createDemoDirectory",
+    "name": "createDemoDirectory",
+    "kind": "function",
+    "startLine": 45,
+    "endLine": 49
+  },
+  "map": {
+    "requested": false,
+    "appended": false
+  },
+  "lines": [
+    {
+      "line": 45,
+      "hash": "4bf",
+      "anchor": "45:4bf",
+      "raw": "export function createDemoDirectory(): UserDirectory {",
+      "display": "export function createDemoDirectory(): UserDirectory {"
+    },
+    {
+      "line": 46,
+      "hash": "59a",
+      "anchor": "46:59a",
+      "raw": "  const directory = new UserDirectory(500);",
+      "display": "  const directory = new UserDirectory(500);"
+    },
+    {
+      "line": 47,
+      "hash": "9c3",
+      "anchor": "47:9c3",
+      "raw": "  directory.addUser(\"Ada Lovelace\", \"ada@example.com\");",
+      "display": "  directory.addUser(\"Ada Lovelace\", \"ada@example.com\");"
+    },
+    {
+      "line": 48,
+      "hash": "6e1",
+      "anchor": "48:6e1",
+      "raw": "  return directory;",
+      "display": "  return directory;"
+    },
+    {
+      "line": 49,
+      "hash": "b18",
+      "anchor": "49:b18",
+      "raw": "}",
+      "display": "}"
+    }
+  ]
+}
+```
+
+```json
+{
+  "tool": "grep",
+  "summary": false,
+  "totalMatches": 1,
+  "records": [
+    {
+      "path": "tests/fixtures/small.ts",
+      "line": 44,
+      "anchor": "44:97e",
+      "kind": "context"
+    },
+    {
+      "path": "tests/fixtures/small.ts",
+      "line": 45,
+      "anchor": "45:4bf",
+      "kind": "match"
+    },
+    {
+      "path": "tests/fixtures/small.ts",
+      "line": 46,
+      "anchor": "46:59a",
+      "kind": "context"
+    }
+  ]
+}
+```
+
+```json
+{
+  "tool": "ast_search",
+  "files": [
+    {
+      "path": "demo.ts",
+      "ranges": [
+        {
+          "startLine": 2,
+          "endLine": 2
+        }
+      ],
+      "lines": [
+        {
+          "line": 2,
+          "hash": "310",
+          "anchor": "2:310",
+          "raw": "  const value = \"before\";",
+          "display": "  const value = \"before\";"
+        }
+      ]
+    }
+  ]
+}
+```
+
+```json
+{
+  "tool": "edit",
+  "ok": true,
+  "path": "sample.ts",
+  "summary": "Updated sample.ts",
+  "diff": "2:5bd|const two = 2; → 2:086|const two = 22;",
+  "firstChangedLine": 2,
+  "warnings": [],
+  "noopEdits": [],
+  "semanticSummary": {
+    "classification": "semantic",
+    "difftasticAvailable": true
+  }
+}
+```
+
+If `details.ptcValue` is absent, fallback normalization still applies (`read -> str`, `grep -> list[dict]`, `edit -> dict`).
+
+## Real compatibility harness
+
+A package-real combined proof now lives at `test/hashline-real-interop.test.ts`.
+
+Run it directly:
+```bash
+npm run build
+node --test test/hashline-real-interop.test.ts
+```
+What it validates:
+- the actual `pi-hashline-readmap` package is loaded into the runtime
+- `sg` is exposed only through the inline opt-in PTC metadata path
+- nested `code_execution` uses real `read`, `grep`, `sg`, and `edit` implementations
+- Python receives structured `details.ptcValue` payloads at each step without mocked historical shapes
+- the file really changes on disk after the `edit` step
+- `grep` confirms the mutation by matching the new content
 
 This fork also supports caller routing metadata via `ptc.callers`:
 
@@ -138,9 +338,43 @@ The runtime also exposes a `ptc` helper object:
 - `await ptc.find_files(pattern, path='.', max_files=1000)`
 - `await ptc.find_files_abs(pattern, path='.', max_files=1000)`
 - `await ptc.read_text(path, offset=None, limit=None)`
+- `await ptc.batch_tool(calls, max_concurrency=None, on_error=None) -> list[Any] | dict[str, Any]`
+  - Use `on_error='collect'` for bounded partial mode (`kind="batch_partial"`) with per-call success/error entries instead of raising on first failure
+- `await ptc.first_success(calls, max_concurrency=None) -> Any`
+- `await ptc.reduce_tool(calls, reducer, initial, max_concurrency=None) -> Any`
+- `ptc.fit_output(value, max_chars=None, max_items=None, max_depth=None) -> dict[str, Any]`
+- `ptc.expect_kind(value, kind) -> Any`
+- `ptc.list_callable_tools() -> list[dict[str, Any]]`
+- `ptc.get_tool_schema(name) -> dict[str, Any]`
+- `ptc.extract_handles(value, kind=None) -> list[SupportedHandle]`
+- `ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]`
 - `ptc.json_dump(value)`
+`SupportedHandle = Union[ResponseHandle, FileHandle]`
+`kind` is bounded to `"response"` or `"file"`.
+`ptc.expect_kind(...)` is a bounded top-level kind assertion for structured payloads that already expose `kind`.
+Use orchestration helpers when you have repeated multi-tool calls, ordered fallback logic, or large intermediate results that should stay local to Python.
+For one simple tool call, call the tool directly.
+Optional tools should be detected from `ptc.list_callable_tools()`, not assumed from env/config alone.
+Use these helpers for structured tool results that already carry `responseId` and/or `filePath`; they avoid custom recursive JSON walking while keeping the contract intentionally narrow.
+Response/file handles are supported now; graph handles are still out of scope.
+Handle workflow example:
 
-Example:
+```python
+result = await fetch_content(url="https://example.com/page")
+response_handle = ptc.first_handle(result, kind="response")
+file_handle = ptc.first_handle(result, kind="file")
+return {
+    "all_handles": ptc.extract_handles(result),
+    "response_preview": await get_search_content(responseId=response_handle["responseId"], urlIndex=0)
+    if response_handle
+    else None,
+    "file_preview": await ptc.read_text(file_handle["filePath"], limit=20)
+    if file_handle
+    else None,
+}
+```
+
+General helper example:
 
 ```python
 entries = await ptc.read_tree(pattern="**/*.ts", path="src", concurrency=6)
@@ -150,17 +384,94 @@ return {
 }
 ```
 
+Hashline-style reduction example:
+
+```python
+search_calls = [
+    {"tool": "grep", "params": {"pattern": "TODO", "path": "src", "glob": "**/*.ts"}},
+    {"tool": "grep", "params": {"pattern": "FIXME", "path": "src", "glob": "**/*.ts"}},
+]
+searches = await ptc.batch_tool(search_calls, max_concurrency=2)
+summary = await ptc.reduce_tool(
+    search_calls,
+    lambda acc, entry: acc
+    + [{
+        "matches": len(entry),
+        "sample": entry[0]["line"] if entry else None,
+    }],
+    initial=[],
+    max_concurrency=2,
+)
+return ptc.fit_output({"searches": searches, "summary": summary}, max_chars=1500, max_items=3, max_depth=3)
+```
+
+Codegraph-style ordered fallback example:
+
+```python
+tools_by_name = {tool["name"]: tool for tool in ptc.list_callable_tools()}
+
+if "symbol_card" in tools_by_name and "symbol_search" in tools_by_name:
+    graph_result = await ptc.first_success([
+        {"tool": "symbol_card", "params": {"name": "CodeExecutor"}},
+        {"tool": "symbol_search", "params": {"query": "CodeExecutor", "limit": 1}},
+    ])
+    return ptc.fit_output(graph_result, max_chars=1500, max_items=3, max_depth=3)
+
+return {"used_tool": None, "available_tools": sorted(tools_by_name)}
+```
+
+Web-handle follow-up with bounded output example:
+
+```python
+result = await fetch_content(url="https://example.com/page")
+response_handle = ptc.first_handle(result, kind="response")
+file_handle = ptc.first_handle(result, kind="file")
+payload = {
+    "all_handles": ptc.extract_handles(result),
+    "response_preview": await get_search_content(responseId=response_handle["responseId"], urlIndex=0)
+    if response_handle
+    else None,
+    "file_preview": await ptc.read_text(file_handle["filePath"], limit=20)
+    if file_handle
+    else None,
+}
+return ptc.fit_output(payload, max_chars=1500, max_items=3, max_depth=3)
+```
+
+Safe branching/introspection example:
+
+```python
+tools_by_name = {tool["name"]: tool for tool in ptc.list_callable_tools()}
+
+if "sg" in tools_by_name:
+    sg_schema = ptc.get_tool_schema("sg")
+    matches = await sg(pattern="console.log($$$ARGS)", lang="typescript", path="src")
+    return {
+        "used_tool": tools_by_name["sg"]["pythonName"],
+        "schema_type": sg_schema["type"],
+        "files_with_matches": len(matches["files"]),
+    }
+
+return {
+    "used_tool": None,
+    "available_tools": sorted(tools_by_name),
+}
+```
+
 ## Result normalization
 
-pi tools are normalized before being returned to Python:
+pi tools are normalized before being returned to Python using this precedence:
 
+1. `details.ptcValue` (when present) is returned unchanged.
+2. Otherwise, fallback normalization rules are applied.
+
+Fallback defaults:
 - `read` returns a string
 - `find`, `glob`, and `ls` return `list[str]`
 - `grep` returns `list[dict]`
 - `bash`, `edit`, and `write` return dictionaries
 - empty `find`/`ls`/`grep` results become empty lists rather than English sentinel strings
-
-This makes the runtime easier for non-Anthropic models to use reliably.
+This keeps the runtime predictable for non-Anthropic models while allowing richer structured hashline payloads when active tools provide them.
 
 ## Local tool policy
 
@@ -176,23 +487,22 @@ Safe read-only built-ins are callable by default.
 
 ### Custom and extension tools
 
-These must opt in with:
+These must opt in with explicit PTC metadata:
 
 ```js
 ptc: {
-  enabled: true,
-  readOnly: true,
+  callable: true,
+  policy: "read-only",
   callers: ["code_execution"], // optional: direct | code_execution | both
 }
 ```
 
-Recommended routing patterns:
+Legacy `ptc.enabled: true` / `ptc.readOnly: true` still work, but new docs and examples prefer `ptc.callable` / `ptc.policy`.
 
+Recommended routing patterns:
 - `callers: ["direct"]` — user-facing tool that the model should call directly
 - `callers: ["code_execution"]` — helper tool intended only for Python/PTC workflows
 - `callers: ["direct", "code_execution"]` — shared tool usable from either path
-
-If a custom tool is marked code-execution-only, `pi-ptc-next` will register it but will not auto-activate it as a direct tool in the session.
 
 ## Environment variables
 
@@ -215,6 +525,26 @@ If a custom tool is marked code-execution-only, `pi-ptc-next` will register it b
 - `PTC_CALLABLE_TOOLS=read,glob,find,grep,ls` — explicit allowlist override
 - `PTC_BLOCKED_TOOLS=bash,write` — explicit denylist override
 - `PTC_EVALS_PATH=.pi/evals/ptc` — override the JSON eval/benchmark root used by the benchmark runner
+
+### Personal analysis profile
+If this fork is primarily for your own workstation, you can launch Pi with the bundled analysis-oriented profile:
+
+```bash
+./scripts/start-pi-ptc-full-tools.sh
+```
+
+That profile keeps mutations and shell access disabled, requests `sg` plus selected graph tools, and leaves `edit`, `write`, `bash`, `resolve_edge`, and `delete_edge` out of the Python surface on purpose.
+
+For the routine local maintenance flow, pair it with:
+```bash
+npm run verify:personal
+npm run verify:personal:full
+npm run verify:release-package
+```
+
+The package check validates the current **`pi-ptc-advanced@0.15.0`** release baseline without introducing changelog, CI, tagging, or publish automation.
+The profile is still constrained by Pi runtime visibility: if Pi does not expose one of those requested tools to PTC with callable metadata in the current session, the tool will stay unavailable inside `code_execution` and PTC will emit a warning describing the gap.
+See [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md) for the full maintainer workflow and the explicit manual git sync/upgrade boundary.
 
 ## How it works
 
@@ -310,8 +640,8 @@ export default {
     required: ["sql"],
   },
   ptc: {
-    enabled: true,
-    readOnly: true,
+    callable: true,
+    policy: "read-only",
   },
   async execute(toolCallId, params, signal, onUpdate, ctx) {
     return {
@@ -328,6 +658,7 @@ export default {
 ```
 
 If `details.ptcValue` is present, that JSON-compatible value is returned directly to Python.
+Prefer `ptc.callable` / `ptc.policy` in new tools; `ptc.enabled` / `ptc.readOnly` remain supported for backward compatibility.
 
 ## Hot reload
 
@@ -423,6 +754,37 @@ Successful `code_execution` runs also expose additive request metadata in tool r
 }
 ```
 
+### Recipe workflows
+
+Recipe workflows are bounded Python scripts that compose PTC helpers (`batch_tool`, `first_success`, `reduce_tool`, `fit_output`, etc.) to solve adjacent-repo analysis tasks. They prove that `pi-ptc-next` orchestration helpers compose into real multi-tool workflows without adding domain-specific logic to the extension itself.
+
+Current recipes live under `.pi/evals/ptc/recipes/`:
+
+| Workflow | Recipe File | Key PTC Helpers | Purpose |
+|----------|-------------|-----------------|----------|
+| graph | `graph-compact-ranking.py` | `reduce_tool`, `fit_output` | Ranked symbol-graph analysis with bounded reduction |
+| web | `web-answer-comparison.py` | `batch_tool`, `extract_handles`, `fit_output` | Web-search answer comparison with handle-aware output |
+| hashline | `hashline-anomaly-summary.py` | `batch_tool`, `fit_output` | Anchored file anomaly detection via batched read/grep |
+| mixed | `codegraph-web-evidence-merge.py` | `first_success`, `extract_handles`, `fit_output` | Cross-source evidence merge (codegraph + web) |
+
+Each recipe uses `ptc.fit_output(...)` as the final bounded return step so large intermediate tool results stay local to Python.
+
+Run the recipe benchmark subset using the same CLI documented above:
+
+```bash
+node dist/run-benchmarks.js \
+  --provider local \
+  --model seeded \
+  --evals-path .pi/evals/ptc \
+  --baseline .pi/evals/ptc/baselines/local__seeded__recipes.json
+```
+
+The deterministic recipe-only baseline at `.pi/evals/ptc/baselines/local__seeded__recipes.json` covers all four workflow types.
+
+To add a new recipe:
+1. Create a seeded eval case with `recipe_target` metadata under `.pi/evals/ptc/cases/`
+2. Add the `.py` recipe artifact under `.pi/evals/ptc/recipes/` using only PTC helpers (no domain-specific imports)
+3. Run `node --test test/eval-cases.test.ts test/recipe-ecosystem-proof.test.ts` to verify alignment
 ## Further reading
 
 - Technical findings and implementation notes: [`docs/PTC-RESEARCH.md`](docs/PTC-RESEARCH.md)
@@ -457,6 +819,7 @@ The exact totals vary by model behavior and tool strategy, but both model famili
 
 ```bash
 npm run build
+node --test test/hashline-interop-smoke.test.ts
 npm test
 ```
 
@@ -472,7 +835,7 @@ Check one of these:
 
 - the tool is blocked by policy
 - it is mutating and `PTC_ALLOW_MUTATIONS` is disabled
-- it is a custom/extension tool without `ptc.enabled: true`
+- it is a custom/extension tool without `ptc.callable: true` (legacy `ptc.enabled: true` still works)
 
 ### Why did Python get a list instead of text?
 

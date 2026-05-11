@@ -1,24 +1,46 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const os = require("node:os");
-const path = require("node:path");
-const {
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import {
   buildBenchmarkResultRecord,
   compareBenchmarkRuns,
   createDeterministicBenchmarkExecutor,
   getDefaultBenchmarkResultPath,
   getProviderModelSlug,
   resolveBenchmarkEvalsPath,
+  readBenchmarkRun,
   runBenchmarkCli,
   runBenchmarkSuite,
   writeBenchmarkRun,
-} = require("../dist/benchmark-runner.js");
+} from "../dist/benchmark-runner.js";
 
-const seededEvalsPath = path.join(__dirname, "..", ".pi", "evals", "ptc");
+type EvalCaseLike = {
+  id: string;
+  expected_first_path: "code_execution" | "direct";
+};
+
+type RecipeTargetShape = {
+  workflow: string;
+  repos: string[];
+  output_contract: {
+    max_items: number;
+  };
+};
+type BenchmarkRunShape = Parameters<typeof writeBenchmarkRun>[1];
+
+const seededEvalsPath = path.resolve(process.cwd(), ".pi", "evals", "ptc");
+const seededRecipeCaseIds = [
+  "recipe-codegraph-web-evidence-merge",
+  "recipe-graph-compact-ranking",
+  "recipe-hashline-anomaly-summary",
+  "recipe-web-answer-comparison",
+] as const;
+const seededRecipeBaselinePath = path.join(seededEvalsPath, "baselines", "local__seeded__recipes.json");
 
 function makeTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "ptc-benchmark-"));
+  return mkdtempSync(path.join(tmpdir(), "ptc-benchmark-"));
 }
 
 test("buildBenchmarkResultRecord preserves required benchmark result fields", () => {
@@ -35,6 +57,18 @@ test("buildBenchmarkResultRecord preserves required benchmark result fields", ()
           "failure_class=missing-await",
           "success=true",
         ],
+      },
+      recipe_target: {
+        repos: ["pi-codegraph"],
+        workflow: "graph-compact-ranking",
+        summary: "Analyze many graph results and return a compact ranking.",
+        output_contract: {
+          format: "json",
+          style: "compact-ranking",
+          focus: "Return only the top ranked symbols with compact impact evidence.",
+          max_items: 5,
+          max_chars: 1200,
+        },
       },
     },
     "local",
@@ -61,6 +95,18 @@ test("buildBenchmarkResultRecord preserves required benchmark result fields", ()
     total_tokens: 12,
     duration_ms: 34,
   });
+  assert.deepEqual(record.recipe_target, {
+    repos: ["pi-codegraph"],
+    workflow: "graph-compact-ranking",
+    summary: "Analyze many graph results and return a compact ranking.",
+    output_contract: {
+      format: "json",
+      style: "compact-ranking",
+      focus: "Return only the top ranked symbols with compact impact evidence.",
+      max_items: 5,
+      max_chars: 1200,
+    },
+  });
 });
 
 test("runBenchmarkSuite executes a seeded eval subset and returns deterministic JSON-ready results", async () => {
@@ -70,7 +116,7 @@ test("runBenchmarkSuite executes a seeded eval subset and returns deterministic 
     evalsPath: seededEvalsPath,
     caseIds: ["ptc-positive-multi-file-aggregation", "recovery-missing-await"],
     timestamp: "2026-03-16T00:00:00.000Z",
-    executor: async (evalCase) => ({
+    executor: async (evalCase: EvalCaseLike) => ({
       observed_first_path: evalCase.expected_first_path,
       recovery_attempted: evalCase.id === "recovery-missing-await",
       failure_class: evalCase.id === "recovery-missing-await" ? "missing-await" : null,
@@ -90,8 +136,73 @@ test("runBenchmarkSuite executes a seeded eval subset and returns deterministic 
   assert.equal(run.results[1].result.failure_class, "missing-await");
 });
 
+test("runBenchmarkSuite preserves recipe-target metadata for seeded M4 recipe cases", async () => {
+  const run = await runBenchmarkSuite({
+    provider: "local",
+    model: "seeded",
+    evalsPath: seededEvalsPath,
+    caseIds: ["recipe-codegraph-web-evidence-merge", "recipe-graph-compact-ranking"],
+    timestamp: "2026-03-26T00:00:00.000Z",
+    executor: async (evalCase: EvalCaseLike) => ({
+      observed_first_path: evalCase.expected_first_path,
+      total_tokens: 34,
+      duration_ms: 9,
+      output: JSON.stringify({ id: evalCase.id }),
+    }),
+  });
+
+  assert.equal(run.summary.total_cases, 2);
+  assert.deepEqual(
+    run.results.map((record: { recipe_target?: RecipeTargetShape }) => record.recipe_target?.workflow),
+    ["codegraph-web-evidence-merge", "graph-compact-ranking"]
+  );
+  assert.deepEqual(run.results[0].recipe_target?.repos, ["pi-codegraph", "pi-web-tools"]);
+  assert.equal(run.results[1].recipe_target?.output_contract.max_items, 5);
+});
+
+test("seeded recipe baseline fixture matches deterministic recipe-only benchmark output", async () => {
+  const baseline = readBenchmarkRun(seededRecipeBaselinePath);
+  const generated = await runBenchmarkSuite({
+    provider: "local",
+    model: "seeded",
+    evalsPath: seededEvalsPath,
+    caseIds: [...seededRecipeCaseIds],
+    timestamp: baseline.generated_at,
+  });
+
+  assert.deepEqual(baseline, generated);
+  assert.equal(baseline.summary.total_cases, seededRecipeCaseIds.length);
+  assert.deepEqual(
+    baseline.results.map((record: { result: { case_id: string } }) => record.result.case_id),
+    [...seededRecipeCaseIds]
+  );
+});
+
+test("seeded recipe baseline fixture stays comparable through benchmark runner helpers", async () => {
+  const baseline = readBenchmarkRun(seededRecipeBaselinePath);
+  const rerun = await runBenchmarkSuite({
+    provider: "local",
+    model: "seeded",
+    evalsPath: seededEvalsPath,
+    caseIds: [...seededRecipeCaseIds],
+    timestamp: baseline.generated_at,
+    baselinePath: seededRecipeBaselinePath,
+  });
+
+  assert.deepEqual(rerun.comparison, {
+    baseline_path: seededRecipeBaselinePath,
+    regressions: [],
+  });
+
+  const tempDir = makeTempDir();
+  const writtenPath = path.join(tempDir, "recipe-results.json");
+  writeBenchmarkRun(writtenPath, rerun);
+
+  assert.deepEqual(readBenchmarkRun(writtenPath), rerun);
+});
+
 test("compareBenchmarkRuns reports routing and recovery regressions deterministically", () => {
-  const baseline = {
+  const baseline: BenchmarkRunShape = {
     provider: "local",
     model: "seeded",
     generated_at: "2026-03-16T00:00:00.000Z",
@@ -119,7 +230,7 @@ test("compareBenchmarkRuns reports routing and recovery regressions deterministi
       recovery_attempts: 1,
     },
   };
-  const current = {
+  const current: BenchmarkRunShape = {
     provider: "local",
     model: "seeded",
     generated_at: "2026-03-16T00:00:01.000Z",
@@ -183,8 +294,8 @@ test("runBenchmarkCli writes a result file and emits comparison output for a see
   const resultsPath = path.join(tempDir, "results.json");
   const baselinePath = path.join(tempDir, "baseline.json");
 
-  fs.mkdirSync(path.join(evalsPath, "cases"), { recursive: true });
-  fs.writeFileSync(
+  mkdirSync(path.join(evalsPath, "cases"), { recursive: true });
+  writeFileSync(
     path.join(evalsPath, "cases", "case.json"),
     JSON.stringify(
       {
@@ -201,7 +312,7 @@ test("runBenchmarkCli writes a result file and emits comparison output for a see
     )
   );
 
-  writeBenchmarkRun(baselinePath, {
+  const baselineRun: BenchmarkRunShape = {
     provider: "local",
     model: "seeded",
     generated_at: "2026-03-16T00:00:00.000Z",
@@ -228,7 +339,8 @@ test("runBenchmarkCli writes a result file and emits comparison output for a see
       routed_cases: 0,
       recovery_attempts: 0,
     },
-  });
+  };
+  writeBenchmarkRun(baselinePath, baselineRun);
 
   const originalWrite = process.stdout.write;
   let stdout = "";
@@ -260,7 +372,7 @@ test("runBenchmarkCli writes a result file and emits comparison output for a see
     process.stdout.write = originalWrite;
   }
 
-  const writtenRun = JSON.parse(fs.readFileSync(resultsPath, "utf8"));
+  const writtenRun = JSON.parse(readFileSync(resultsPath, "utf8"));
   const emitted = JSON.parse(stdout.trim());
 
   assert.equal(writtenRun.results.length, 1);
@@ -307,7 +419,11 @@ test("deterministic benchmark executor derives recovery hints from eval rules", 
   assert.equal(observation.observed_first_path, "code_execution");
   assert.equal(observation.recovery_attempted, true);
   assert.equal(observation.failure_class, "async-wrapper-iterated");
-  assert.deepEqual(JSON.parse(observation.output), {
+  const output = observation.output;
+  if (typeof output !== "string") {
+    assert.fail("expected deterministic benchmark executor to return JSON output");
+  }
+  assert.deepEqual(JSON.parse(output), {
     case_id: "recovery-async-wrapper-iterated",
     provider: "local",
     model: "seeded",

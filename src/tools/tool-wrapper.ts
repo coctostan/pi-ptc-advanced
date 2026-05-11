@@ -1,6 +1,7 @@
 import type { ToolInfo } from "../contracts/tool-types";
 import {
   buildMultilinePythonSignature,
+  buildPythonCallableToolMetadataList,
   buildPythonParamMetadata,
   getPythonHelperName,
   getPythonReturnType,
@@ -34,38 +35,133 @@ function buildReadWrapper(): string {
     *,
     offset: Optional[int] = None,
     limit: Optional[int] = None,
-) -> str:
+    symbol: Optional[str] = None,
+    map: Optional[bool] = None,
+) -> Union[str, ReadResult]:
     params = _ptc_drop_none({
         "path": path,
         "offset": offset,
         "limit": limit,
+        "symbol": symbol,
+        "map": map,
     })
     return await _rpc_call("read", params)`;
 }
 
 export function generateToolWrappers(tools: ToolInfo[]): string {
-  const imports = `from typing import Optional, List, Dict, Any, TypedDict, Union`;
+  const metadataJson = JSON.stringify(buildPythonCallableToolMetadataList(tools));
+  const imports = `import json as _ptc_json
+from typing import Optional, List, Dict, Any, TypedDict, Union, Literal`;
   const helpers = `
-
-class GrepMatch(TypedDict):
+class HashlineLine(TypedDict):
+    line: int
+    hash: str
+    anchor: str
+    raw: str
+    display: str
+class ReadLine(TypedDict):
+    anchor: str
+    text: str
+class ReadRange(TypedDict):
+    startLine: int
+    endLine: int
+    totalLines: int
+class ReadWarning(TypedDict):
+    code: str
+    message: str
+class ReadTruncation(TypedDict):
+    outputLines: int
+    totalLines: int
+    outputBytes: int
+    totalBytes: int
+class ReadSymbol(TypedDict, total=False):
+    query: str
+    name: str
+    kind: str
+    parentName: str
+    startLine: int
+    endLine: int
+class ReadMap(TypedDict):
+    requested: bool
+    appended: bool
+class ReadResult(TypedDict):
+    tool: str
+    path: str
+    range: ReadRange
+    warnings: List[ReadWarning]
+    truncation: Optional[ReadTruncation]
+    symbol: Optional[ReadSymbol]
+    map: ReadMap
+    lines: List[HashlineLine]
+class SgRange(TypedDict):
+    startLine: int
+    endLine: int
+class SgFile(TypedDict):
+    path: str
+    ranges: List[SgRange]
+    lines: List[HashlineLine]
+class SgResult(TypedDict):
+    tool: str
+    files: List[SgFile]
+class GrepMatch(TypedDict, total=False):
     path: str
     line: int
-    text: str
+    hash: str
+    anchor: str
     kind: str
-
+    text: str
+    raw: str
+    display: str
+class GrepResult(TypedDict):
+    tool: str
+    summary: bool
+    totalMatches: int
+    records: List[GrepMatch]
+class ResponseHandle(TypedDict):
+    kind: Literal["response"]
+    responseId: str
+class FileHandle(TypedDict):
+    kind: Literal["file"]
+    filePath: str
+SupportedHandle = Union[ResponseHandle, FileHandle]
+class CallableToolMetadata(TypedDict):
+    name: str
+    pythonName: str
+    description: str
+    source: str
+    isReadOnly: bool
+    parameters: Dict[str, Any]
 class BashResult(TypedDict):
     stdout: str
     stderr: str
     exitCode: int
-
-class EditResult(TypedDict):
+class EditSpan(TypedDict, total=False):
+    startAnchor: str
+    endAnchor: str
+    status: str
+class EditNoop(TypedDict, total=False):
+    editIndex: int
+    loc: str
+    currentContent: str
+class SemanticSummary(TypedDict, total=False):
+    classification: str
+    difftasticAvailable: bool
+    movedBlocks: int
+class AnchoredEditResult(TypedDict, total=False):
+    tool: str
     ok: bool
+    path: str
     summary: str
-    diff: Optional[str]
-
+    diff: str
+    firstChangedLine: Optional[int]
+    warnings: List[str]
+    noopEdits: List[EditNoop]
+    semanticSummary: Optional[SemanticSummary]
 class WriteResult(TypedDict):
     ok: bool
     summary: str
+
+_PTC_CALLABLE_TOOL_METADATA: List[CallableToolMetadata] = _ptc_json.loads(${JSON.stringify(metadataJson)})
 
 
 def _ptc_drop_none(params: Dict[str, Any]) -> Dict[str, Any]:

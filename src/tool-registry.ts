@@ -12,11 +12,53 @@ import type { TSchema } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { classifyBuiltinTool, validatePythonHelperNames } from "./tools/python-tool-contract";
 import type { PtcSettings } from "./contracts/settings";
-import type { CallerMetadata, ExecuteToolContext, PtcToolDefinition, PtcToolOptions, ToolInfo } from "./contracts/tool-types";
+import {
+  normalizePtcToolOptions,
+  type ActivePiToolInfo,
+  type CallerMetadata,
+  type ExecuteToolContext,
+  type InternalToolExecute,
+  type PtcToolDefinition,
+  type PtcToolOptions,
+  type ToolInfo,
+} from "./contracts/tool-types";
 import { logWarning } from "./utils";
 
-function classifyTool(name: string, ptc?: PtcToolOptions): { isReadOnly: boolean } {
-  return classifyBuiltinTool(name, ptc);
+function normalizeStoredPtc(ptc?: PtcToolOptions): PtcToolOptions | undefined {
+  const normalized = normalizePtcToolOptions(ptc);
+  if (!normalized) {
+    return ptc;
+  }
+
+  const defaultExposure = ptc?.defaultExposure ?? normalized.defaultExposure;
+  return {
+    ...ptc,
+    enabled: ptc?.enabled ?? normalized.callable,
+    callable: normalized.callable,
+    readOnly: ptc?.readOnly ?? normalized.isReadOnly,
+    policy: normalized.executionPolicy,
+    pythonName: normalized.pythonName,
+    ...(defaultExposure !== undefined ? { defaultExposure } : {}),
+  };
+}
+
+function classifyTool(name: string, ptc?: PtcToolOptions): { isReadOnly: boolean; ptc?: PtcToolOptions } {
+  const normalized = normalizeStoredPtc(ptc);
+  if (normalized) {
+    return { isReadOnly: normalized.readOnly === true, ptc: normalized };
+  }
+
+  return { isReadOnly: classifyBuiltinTool(name, ptc).isReadOnly, ptc };
+}
+
+function hasInternalExecute(tool: ActivePiToolInfo): tool is ActivePiToolInfo & { execute: InternalToolExecute } {
+  return typeof tool.execute === "function";
+}
+
+function createUnavailableExecute(toolName: string): InternalToolExecute {
+  return async () => {
+    throw new Error(`Tool ${toolName} execute function not available`);
+  };
 }
 
 function getConfiguredCallers(tool: ToolInfo): Set<"direct" | "code_execution"> {
@@ -80,8 +122,120 @@ function validateToolParams(tool: ToolInfo, params: unknown): void {
 export class ToolRegistry {
   private customTools = new Map<string, ToolInfo>();
   private extensionOwnedToolNames = new Set<string>();
+  private extensionExecutors = new Map<string, ToolInfo>();
+  private callablePolicyWarnings = new Set<string>();
 
-  constructor(private pi: ExtensionAPI) {}
+  constructor(private pi: ExtensionAPI) {
+    // Bridge: consume hashline tool executors.
+    // Remove when pi exposes getToolExecutor() on ExtensionAPI.
+    // Grep marker: "hashline:tool-executors"
+    const preEmitted = (globalThis as any).__hashlineToolExecutors;
+    if (preEmitted) {
+      this.ingestExtensionExecutors(preEmitted);
+    }
+    pi.events.on("hashline:tool-executors", (data: unknown) => {
+      this.ingestExtensionExecutors(data);
+    });
+  }
+
+  private ingestExtensionExecutors(data: unknown): void {
+    if (!data || typeof data !== "object") return;
+    for (const [, toolDef] of Object.entries(data as Record<string, unknown>)) {
+      if (!toolDef || typeof toolDef !== "object") continue;
+      const t = toolDef as { name?: string; execute?: unknown; ptc?: PtcToolOptions; parameters?: unknown };
+      if (typeof t.name !== "string" || typeof t.execute !== "function") continue;
+      const classification = classifyTool(t.name, t.ptc);
+      this.extensionExecutors.set(t.name, {
+        name: t.name,
+        description: "",
+        parameters: (t.parameters ?? { type: "object", properties: {} }) as import("@sinclair/typebox").TSchema,
+        execute: t.execute as InternalToolExecute,
+        ptc: classification.ptc,
+        source: "extension",
+        isReadOnly: classification.isReadOnly,
+      });
+    }
+  }
+
+  private warnCallablePolicyOnce(message: string): void {
+    if (this.callablePolicyWarnings.has(message)) {
+      return;
+    }
+
+    this.callablePolicyWarnings.add(message);
+    logWarning(message);
+  }
+
+  private reportAllowlistGaps(
+    allTools: ToolInfo[],
+    callableTools: ToolInfo[],
+    settings: PtcSettings,
+    allowSet: Set<string> | null,
+    blockedSet: Set<string>,
+    trustedReadOnlyTools: Set<string>
+  ): void {
+    if (!allowSet || allowSet.size === 0) {
+      return;
+    }
+
+    const callableNames = new Set(callableTools.map((tool) => tool.name));
+    const availableTools = new Map(allTools.map((tool) => [tool.name, tool]));
+    const gaps: string[] = [];
+
+    for (const toolName of allowSet) {
+      if (callableNames.has(toolName)) {
+        continue;
+      }
+      if (blockedSet.has(toolName)) {
+        gaps.push(`${toolName} (blocked by PTC_BLOCKED_TOOLS)`);
+        continue;
+      }
+
+      const tool = availableTools.get(toolName);
+      if (!tool) {
+        gaps.push(`${toolName} (not present in the current Pi tool set)`);
+        continue;
+      }
+
+      const isBuiltin = tool.source === "builtin" || tool.source === "alias";
+      const normalizedPtc = normalizePtcToolOptions(tool.ptc);
+      const isTrustedReadOnlyCustom =
+        !isBuiltin &&
+        normalizedPtc?.callable === true &&
+        normalizedPtc.isReadOnly &&
+        trustedReadOnlyTools.has(tool.name);
+
+      if (tool.name === "bash" && !settings.allowBash) {
+        gaps.push(`${toolName} (bash is disabled because PTC_ALLOW_BASH=false)`);
+        continue;
+      }
+      if (!isBuiltin && normalizedPtc?.callable !== true) {
+        gaps.push(`${toolName} (missing ptc.callable metadata)`);
+        continue;
+      }
+      if (!toolAllowsCodeExecutionCaller(tool)) {
+        gaps.push(`${toolName} (callers metadata excludes code_execution)`);
+        continue;
+      }
+      if (!settings.allowMutations && !tool.isReadOnly) {
+        gaps.push(`${toolName} (mutating tools stay blocked when PTC_ALLOW_MUTATIONS=false)`);
+        continue;
+      }
+      if (!settings.allowMutations && !isBuiltin && !isTrustedReadOnlyCustom) {
+        gaps.push(`${toolName} (read-only extension tools also need PTC_TRUSTED_READ_ONLY_TOOLS when mutations are disabled)`);
+        continue;
+      }
+
+      gaps.push(`${toolName} (not callable under the current PTC policy)`);
+    }
+
+    if (gaps.length > 0) {
+      this.warnCallablePolicyOnce(
+        `PTC allowlisted tools requested for code_execution but unavailable in this session: ${gaps.join(", ")}. ` +
+          `PTC_CALLABLE_TOOLS only filters tools that Pi already exposes to PTC with a callable runtime + metadata shape.`
+      );
+    }
+  }
 
   upsertTool<TParams extends TSchema, TDetails>(tool: ToolDefinition<TParams, TDetails>): void {
     const ptc = (tool as PtcToolDefinition<TParams, TDetails>).ptc;
@@ -91,8 +245,8 @@ export class ToolRegistry {
       name: tool.name,
       description: tool.description,
       parameters: tool.parameters,
-      execute: tool.execute,
-      ptc,
+      execute: tool.execute as unknown as InternalToolExecute,
+      ptc: classification.ptc,
       source: "extension",
       isReadOnly: classification.isReadOnly,
     });
@@ -118,7 +272,7 @@ export class ToolRegistry {
     for (const { name, create } of factories) {
       try {
         const tool = create(cwd);
-        const executeBuiltin = tool.execute as ToolInfo["execute"];
+        const executeBuiltin = tool.execute as unknown as InternalToolExecute;
         const classification = classifyTool(tool.name);
         builtins.set(name, {
           name: tool.name,
@@ -126,6 +280,7 @@ export class ToolRegistry {
           parameters: tool.parameters,
           source: "builtin",
           isReadOnly: classification.isReadOnly,
+          ptc: classification.ptc,
           execute: async (toolCallId, params, signal, onUpdate, ctx) =>
             await executeBuiltin(toolCallId, params, signal, onUpdate, ctx),
         });
@@ -152,38 +307,66 @@ export class ToolRegistry {
   private buildToolMap(cwd?: string): Map<string, ToolInfo> {
     const allTools = new Map<string, ToolInfo>();
     const builtinTools = this.createBuiltinTools(cwd || process.cwd());
+    const activeToolNames = new Set(this.pi.getActiveTools());
 
     for (const builtin of builtinTools.values()) {
       allTools.set(builtin.name, builtin);
+    }
+
+    // Bridge: overlay extension executors from EventBus.
+    // Remove when pi exposes getToolExecutor() on ExtensionAPI.
+    for (const [name, extTool] of this.extensionExecutors) {
+      const existing = allTools.get(name);
+      if (existing) {
+        allTools.set(name, {
+          ...existing,
+          execute: extTool.execute,
+          ptc: extTool.ptc ?? existing.ptc,
+          isReadOnly: extTool.isReadOnly,
+        });
+      } else {
+        allTools.set(name, extTool);
+      }
     }
 
     for (const customTool of this.customTools.values()) {
       allTools.set(customTool.name, customTool);
     }
 
-    for (const piTool of this.pi.getAllTools()) {
+    for (const piTool of this.pi.getAllTools() as ActivePiToolInfo[]) {
       if (this.extensionOwnedToolNames.has(piTool.name) && !this.customTools.has(piTool.name)) {
         continue;
       }
 
       const existing = allTools.get(piTool.name);
+      const existingIsBuiltin = existing?.source === "builtin" || existing?.source === "alias";
+      const shouldUsePiOverride = activeToolNames.has(piTool.name);
+
       if (existing) {
+        if (existingIsBuiltin && !shouldUsePiOverride) {
+          continue;
+        }
+
+        const mergedPtc = normalizeStoredPtc(piTool.ptc ?? existing.ptc);
+        const classification = classifyTool(piTool.name, mergedPtc);
         allTools.set(piTool.name, {
           ...existing,
           description: piTool.description,
           parameters: piTool.parameters,
+          ptc: classification.ptc,
+          isReadOnly: classification.isReadOnly,
+          execute: shouldUsePiOverride && hasInternalExecute(piTool) ? piTool.execute : existing.execute,
         });
         continue;
       }
 
-      const classification = classifyTool(piTool.name);
+      const classification = classifyTool(piTool.name, piTool.ptc);
       allTools.set(piTool.name, {
         name: piTool.name,
         description: piTool.description,
         parameters: piTool.parameters,
-        execute: async () => {
-          throw new Error(`Tool ${piTool.name} execute function not available`);
-        },
+        execute: shouldUsePiOverride && hasInternalExecute(piTool) ? piTool.execute : createUnavailableExecute(piTool.name),
+        ptc: classification.ptc,
         source: "extension",
         isReadOnly: classification.isReadOnly,
       });
@@ -201,7 +384,6 @@ export class ToolRegistry {
     const allowSet = settings.callableTools ? new Set(settings.callableTools) : null;
     const blockedSet = new Set(settings.blockedTools || []);
     const trustedReadOnlyTools = new Set(settings.trustedReadOnlyTools || []);
-
     const callableTools = allTools.filter((tool) => {
       if (tool.name === "code_execution") {
         return false;
@@ -215,14 +397,16 @@ export class ToolRegistry {
       if (tool.name === "bash" && !settings.allowBash) {
         return false;
       }
-
       const isBuiltin = tool.source === "builtin" || tool.source === "alias";
+      const normalizedPtc = normalizePtcToolOptions(tool.ptc);
+      if (normalizedPtc?.defaultExposure === "opt-in" && (!allowSet || !allowSet.has(tool.name))) {
+        return false;
+      }
       const isTrustedReadOnlyCustom =
         !isBuiltin &&
-        tool.ptc?.enabled === true &&
-        tool.ptc?.readOnly === true &&
+        normalizedPtc?.callable === true &&
+        normalizedPtc.isReadOnly &&
         trustedReadOnlyTools.has(tool.name);
-
       if (!settings.allowMutations) {
         if (!isBuiltin && !isTrustedReadOnlyCustom) {
           return false;
@@ -231,10 +415,10 @@ export class ToolRegistry {
           return false;
         }
       }
-
-      return toolAllowsCodeExecutionCaller(tool) && (isBuiltin || tool.ptc?.enabled === true);
+      return toolAllowsCodeExecutionCaller(tool) && (isBuiltin || normalizedPtc?.callable === true);
     });
 
+    this.reportAllowlistGaps(allTools, callableTools, settings, allowSet, blockedSet, trustedReadOnlyTools);
     validatePythonHelperNames(callableTools);
     return callableTools;
   }

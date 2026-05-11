@@ -1,6 +1,6 @@
 {
-  "name": "@cegersdo/pi-ptc",
-  "version": "0.1.1",
+  "name": "pi-ptc-advanced",
+  "version": "0.15.0",
   "description": "Programmatic Tool Calling (PTC) extension for pi-coding-agent - enables Python code execution with async tool calls",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,8 @@
   },
   "files": [
     "dist",
-    "src/python-runtime",
+    "src/python-runtime/runtime.py",
+    "src/python-runtime/rpc.py",
     "tools"
   ],
   "pi": {
@@ -36,6 +37,10 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
+    "verify:personal": "./scripts/verify-personal-fork.sh",
+    "verify:personal:full": "./scripts/verify-personal-fork.sh --full",
+    "verify:release-package": "./scripts/verify-release-package.sh",
+    "verify:ci": "./scripts/verify-ci.sh",
     "test": "npm run build && node --test test/*.test.ts"
   },
   "keywords": [
@@ -46,6 +51,14 @@
     "ptc"
   ],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coctostan/pi-ptc-next.git"
+  },
+  "homepage": "https://github.com/coctostan/pi-ptc-next#readme",
+  "bugs": {
+    "url": "https://github.com/coctostan/pi-ptc-next/issues"
+  },
   "license": "MIT",
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"

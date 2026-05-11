@@ -72,9 +72,376 @@ def _host_abspath(path: str) -> str:
     return _ptc_os.path.normpath(_ptc_os.path.join(_PTC_HOST_WORKSPACE_ROOT, path))
 
 
+def _extract_text(result: Any) -> str:
+    """Extract raw text from a ReadResult dict, or return as-is if already a string."""
+    if isinstance(result, str):
+        return result
+    if isinstance(result, dict) and "lines" in result:
+        return "\n".join(line.get("raw", "") for line in result["lines"])
+    return str(result)
+
+def _relativize_path(abs_path: str) -> str:
+    """Convert an absolute path to a workspace-relative path if under the host workspace root."""
+    if not _ptc_os.path.isabs(abs_path):
+        return abs_path
+    root = _ptc_os.path.normpath(_PTC_HOST_WORKSPACE_ROOT)
+    normed = _ptc_os.path.normpath(abs_path)
+    if normed == root or normed.startswith(f"{root}{_ptc_os.sep}"):
+        return _ptc_os.path.relpath(normed, root)
+    return abs_path
+
+
+def _normalize_grep_result(result: Any) -> Any:
+    """Normalize grep result paths to be relative to the workspace root."""
+    if not isinstance(result, dict) or "records" not in result:
+        return result
+    for record in result.get("records", []):
+        if isinstance(record, dict) and "path" in record:
+            record["path"] = _relativize_path(record["path"])
+    return result
+
+_SUPPORTED_HANDLE_KINDS = {"response", "file"}
+_DEFAULT_FIT_OUTPUT_MAX_ITEMS = 10
+_DEFAULT_FIT_OUTPUT_MAX_DEPTH = 3
+_FIT_OUTPUT_KIND = "fit_output"
+
+
+def _push_response_handle(handles: list[SupportedHandle], seen: set[str], response_id: str) -> None:
+    normalized = response_id.strip()
+    if not normalized:
+        return
+
+    key = f"response:{normalized}"
+    if key in seen:
+        return
+
+    seen.add(key)
+    handles.append({"kind": "response", "responseId": normalized})
+
+
+def _push_file_handle(handles: list[SupportedHandle], seen: set[str], file_path: str) -> None:
+    normalized = file_path.strip()
+    if not normalized:
+        return
+
+    key = f"file:{normalized}"
+    if key in seen:
+        return
+
+    seen.add(key)
+    handles.append({"kind": "file", "filePath": normalized})
+
+
+def _collect_supported_handles(value: Any, handles: list[SupportedHandle], seen: set[str]) -> None:
+    if isinstance(value, list):
+        for entry in value:
+            _collect_supported_handles(entry, handles, seen)
+        return
+
+    if not isinstance(value, dict):
+        return
+
+    response_id = value.get("responseId")
+    if isinstance(response_id, str):
+        _push_response_handle(handles, seen, response_id)
+
+    file_path = value.get("filePath")
+    if isinstance(file_path, str):
+        _push_file_handle(handles, seen, file_path)
+
+    for nested in value.values():
+        _collect_supported_handles(nested, handles, seen)
+
+
+def _normalize_handle_kind(kind: str | None) -> str | None:
+    if kind is None:
+        return None
+    if kind not in _SUPPORTED_HANDLE_KINDS:
+        supported = ", ".join(sorted(_SUPPORTED_HANDLE_KINDS))
+        raise ValueError(f"Unsupported handle kind '{kind}'. Expected one of: {supported}")
+    return kind
+
+
+def _expect_kind(value: Any, kind: str) -> Any:
+    expected_kind = kind.strip()
+    if not expected_kind:
+        raise ValueError("Expected kind must be a non-empty string")
+    if not isinstance(value, dict):
+        raise ValueError(f"Expected kind '{expected_kind}', but value has no top-level kind field (got {type(value).__name__})")
+    actual_kind = value.get("kind")
+    if not isinstance(actual_kind, str):
+        state = "missing" if actual_kind is None else f"non-string {type(actual_kind).__name__}"
+        raise ValueError(f"Expected kind '{expected_kind}', but value has {state} top-level kind")
+    actual_kind = actual_kind.strip() or "<empty>"
+    if actual_kind != expected_kind:
+        raise ValueError(f"Expected kind '{expected_kind}', got '{actual_kind}'")
+    return value
+
+
+def _clone_json_value(value: Any) -> Any:
+    return _ptc_json.loads(_ptc_json.dumps(value))
+
+
+def _normalize_callable_tool_name(name: str) -> str:
+    if not isinstance(name, str):
+        raise ValueError(f"Tool name must be a non-empty string (got {type(name).__name__})")
+    normalized = name.strip()
+    if not normalized:
+        raise ValueError("Tool name must be a non-empty string")
+    return normalized
+
+
+def _normalize_orchestration_calls(
+    calls: Any,
+    *,
+    allow_empty: bool = False,
+) -> list[dict[str, Any]]:
+    if not isinstance(calls, Sequence) or isinstance(calls, (str, bytes, bytearray)):
+        if allow_empty:
+            raise ValueError("Tool calls must be a sequence of call specs")
+        raise ValueError("Tool calls must be a non-empty sequence of call specs")
+    if len(calls) == 0:
+        if allow_empty:
+            return []
+        raise ValueError("Tool calls must be a non-empty sequence of call specs")
+    normalized_calls: list[dict[str, Any]] = []
+    for index, entry in enumerate(calls):
+        if not isinstance(entry, dict):
+            raise ValueError(f"Call spec at index {index} must be an object")
+        tool_name = entry.get("tool")
+        if not isinstance(tool_name, str) or not tool_name.strip():
+            raise ValueError(f"Call spec at index {index} must include a non-empty 'tool' string")
+        params = entry.get("params", {})
+        if params is None:
+            params = {}
+        if not isinstance(params, dict):
+            raise ValueError(f"Call spec at index {index} for tool '{tool_name.strip()}' must use an object for 'params'")
+        normalized_calls.append({
+            "tool": tool_name.strip(),
+            "params": dict(params),
+        })
+    return normalized_calls
+
+
+def _normalize_orchestration_limit(limit: Any, default_limit: int) -> int:
+    if limit is None:
+        return max(1, default_limit)
+    if isinstance(limit, bool) or not isinstance(limit, int):
+        raise ValueError(f"max_concurrency must be a positive integer (got {type(limit).__name__})")
+    if limit < 1:
+        raise ValueError("max_concurrency must be a positive integer")
+    return limit
+
+_BATCH_ON_ERROR_RAISE = "raise"
+_BATCH_ON_ERROR_COLLECT = "collect"
+
+
+def _normalize_batch_on_error(on_error: Any) -> str:
+    if on_error is None:
+        return _BATCH_ON_ERROR_RAISE
+    if not isinstance(on_error, str):
+        raise ValueError("on_error must be one of: 'raise', 'collect'")
+    normalized = on_error.strip().lower()
+    if normalized not in {_BATCH_ON_ERROR_RAISE, _BATCH_ON_ERROR_COLLECT}:
+        raise ValueError("on_error must be one of: 'raise', 'collect'")
+    return normalized
+
+
+def _summarize_orchestration_error(error: Exception) -> str:
+    summary = " ".join(str(error).splitlines()).strip()
+    if not summary:
+        summary = error.__class__.__name__
+    if len(summary) > 160:
+        return summary[:157] + "..."
+    return summary
+
+
+def _normalize_positive_int(name: str, value: Any, default: int) -> int:
+    if value is None:
+        return default
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} must be a positive integer (got {type(value).__name__})")
+    if value < 1:
+        raise ValueError(f"{name} must be a positive integer")
+    return value
+
+
+def _measure_json_chars(value: Any) -> int:
+    return len(_ptc_json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True))
+
+
+def _normalize_fit_output_limits(
+    max_chars: Any,
+    max_items: Any,
+    max_depth: Any,
+    session_max_output_chars: int,
+) -> dict[str, int]:
+    default_chars = max(1, session_max_output_chars)
+    normalized_chars = _normalize_positive_int("max_chars", max_chars, default_chars)
+    normalized_items = _normalize_positive_int("max_items", max_items, _DEFAULT_FIT_OUTPUT_MAX_ITEMS)
+    normalized_depth = _normalize_positive_int("max_depth", max_depth, _DEFAULT_FIT_OUTPUT_MAX_DEPTH)
+    return {
+        "max_chars": min(normalized_chars, default_chars),
+        "max_items": normalized_items,
+        "max_depth": normalized_depth,
+    }
+
+
+def _json_safe_clone_for_fit_output(value: Any) -> Any:
+    try:
+        return _clone_json_value(value)
+    except Exception as error:
+        raise ValueError(
+            "fit_output only supports JSON-safe values: "
+            + _summarize_orchestration_error(error)
+        ) from error
+
+
+def _compact_fit_output_preview(
+    value: Any,
+    max_chars: int,
+    max_items: int,
+    max_depth: int,
+) -> tuple[Any, dict[str, Any]]:
+    stats = {
+        "truncated": False,
+        "omittedItems": 0,
+        "omittedKeys": 0,
+        "depthLimited": False,
+    }
+
+    if value is None or isinstance(value, (bool, int, float)):
+        return value, stats
+
+    if isinstance(value, str):
+        if len(value) <= max_chars:
+            return value, stats
+        preview = value[: max(1, max_chars - 3)] + "..."
+        stats["truncated"] = True
+        return preview, stats
+
+    if isinstance(value, list):
+        if max_depth <= 0:
+            stats["truncated"] = True
+            stats["depthLimited"] = True
+            stats["omittedItems"] = len(value)
+            return f"<list len={len(value)}>", stats
+
+        preview: list[Any] = []
+        for item in value[:max_items]:
+            compacted_item, child_stats = _compact_fit_output_preview(item, max_chars, max_items, max_depth - 1)
+            preview.append(compacted_item)
+            stats["truncated"] = stats["truncated"] or child_stats["truncated"]
+            stats["omittedItems"] += child_stats["omittedItems"]
+            stats["omittedKeys"] += child_stats["omittedKeys"]
+            stats["depthLimited"] = stats["depthLimited"] or child_stats["depthLimited"]
+
+        omitted_items = max(0, len(value) - len(preview))
+        if omitted_items > 0:
+            stats["truncated"] = True
+            stats["omittedItems"] += omitted_items
+        return preview, stats
+
+    if isinstance(value, dict):
+        if max_depth <= 0:
+            stats["truncated"] = True
+            stats["depthLimited"] = True
+            stats["omittedKeys"] = len(value)
+            return f"<dict keys={len(value)}>", stats
+
+        preview: dict[str, Any] = {}
+        for key in list(value.keys())[:max_items]:
+            compacted_value, child_stats = _compact_fit_output_preview(value[key], max_chars, max_items, max_depth - 1)
+            preview[str(key)] = compacted_value
+            stats["truncated"] = stats["truncated"] or child_stats["truncated"]
+            stats["omittedItems"] += child_stats["omittedItems"]
+            stats["omittedKeys"] += child_stats["omittedKeys"]
+            stats["depthLimited"] = stats["depthLimited"] or child_stats["depthLimited"]
+
+        omitted_keys = max(0, len(value) - len(preview))
+        if omitted_keys > 0:
+            stats["truncated"] = True
+            stats["omittedKeys"] += omitted_keys
+        return preview, stats
+
+    raise ValueError(
+        "fit_output only supports JSON-safe strings, numbers, booleans, null, lists, and dicts"
+    )
+
+
+def _describe_fit_output_kind(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    if isinstance(value, list):
+        return "list"
+    if isinstance(value, dict):
+        return "dict"
+    return type(value).__name__
+
+
+def _fit_result_to_char_budget(result: dict[str, Any], max_chars: int) -> dict[str, Any]:
+    if _measure_json_chars(result) <= max_chars:
+        return result
+
+    preview_text = _ptc_json.dumps(result.get("preview"), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    result["preview"] = preview_text
+    result["stats"]["previewKind"] = "text"
+    result["stats"]["previewChars"] = len(preview_text)
+    result["truncated"] = True
+
+    while _measure_json_chars(result) > max_chars and len(result["preview"]) > 4:
+        overflow = _measure_json_chars(result) - max_chars
+        shrink_by = max(overflow + 3, 8)
+        next_length = max(1, len(result["preview"]) - shrink_by)
+        result["preview"] = result["preview"][:next_length] + "..."
+        result["stats"]["previewChars"] = len(result["preview"])
+
+    if _measure_json_chars(result) <= max_chars:
+        return result
+
+    minimal = {
+        "kind": _FIT_OUTPUT_KIND,
+        "originalKind": result.get("originalKind", "unknown"),
+        "preview": "...",
+        "truncated": True,
+    }
+    if _measure_json_chars(minimal) <= max_chars:
+        return minimal
+    return {"kind": _FIT_OUTPUT_KIND, "truncated": True}
+
+
 class _PtcHelpers:
-    def __init__(self, max_parallel_tool_calls: int):
+    def __init__(
+        self,
+        max_parallel_tool_calls: int,
+        callable_tool_metadata: Sequence[dict[str, Any]] | None = None,
+        max_output_chars: int | None = None,
+    ):
         self.max_parallel_tool_calls = max(1, max_parallel_tool_calls)
+        self.max_output_chars = max(1, max_output_chars if isinstance(max_output_chars, int) else 25_000)
+        metadata = callable_tool_metadata if callable_tool_metadata is not None else []
+        self._callable_tool_metadata = [
+            entry for entry in _clone_json_value(list(metadata)) if isinstance(entry, dict)
+        ]
+        self._callable_tool_lookup: dict[str, dict[str, Any]] = {}
+        available_names: set[str] = set()
+        for entry in self._callable_tool_metadata:
+            for key in ("name", "pythonName"):
+                value = entry.get(key)
+                if isinstance(value, str):
+                    normalized = value.strip()
+                    if normalized:
+                        self._callable_tool_lookup[normalized] = entry
+                        available_names.add(normalized)
+        self._available_callable_tool_names = sorted(available_names)
 
     async def gather_limit(self, coroutines: Iterable[Coroutine[Any, Any, Any]], limit: int | None = None):
         semaphore = _ptc_asyncio.Semaphore(max(1, limit or self.max_parallel_tool_calls))
@@ -86,7 +453,28 @@ class _PtcHelpers:
         return await _ptc_asyncio.gather(*[_runner(coro) for coro in coroutines])
 
     async def find_files(self, pattern: str, path: str = ".", max_files: int = 1000) -> Sequence[str]:
-        return await glob(pattern=pattern, path=path, limit=max_files)
+        normalized_max_files = _normalize_positive_int("max_files", max_files, 1000)
+        files = await glob(pattern=pattern, path=path)
+        json_candidate: str | None = None
+        if isinstance(files, str):
+            json_candidate = files
+        elif (
+            isinstance(files, Sequence)
+            and not isinstance(files, (str, bytes, bytearray))
+            and len(files) == 1
+            and isinstance(files[0], str)
+        ):
+            json_candidate = files[0]
+
+        if isinstance(json_candidate, str):
+            try:
+                parsed = _ptc_json.loads(json_candidate)
+                if isinstance(parsed, list):
+                    files = parsed
+            except Exception:
+                if isinstance(files, str):
+                    files = [line for line in files.splitlines() if line.strip()]
+        return [str(item) for item in list(files)[:normalized_max_files]]
 
     async def find_files_abs(self, pattern: str, path: str = ".", max_files: int = 1000) -> Sequence[str]:
         files = await self.find_files(pattern=pattern, path=path, max_files=max_files)
@@ -94,7 +482,8 @@ class _PtcHelpers:
         return [item if _ptc_os.path.isabs(item) else _ptc_os.path.join(base_path, item) for item in files]
 
     async def read_text(self, path: str, offset: int | None = None, limit: int | None = None) -> str:
-        return await read(path=path, offset=offset, limit=limit)
+        result = await read(path=path, offset=offset, limit=limit)
+        return _extract_text(result)
 
     async def read_many(
         self,
@@ -104,10 +493,70 @@ class _PtcHelpers:
         offset: int | None = None,
         line_limit: int | None = None,
     ) -> Sequence[str]:
-        return await self.gather_limit(
+        results = await self.gather_limit(
             [read(path=path, offset=offset, limit=line_limit) for path in paths],
             limit=max_concurrency,
         )
+        return [_extract_text(r) for r in results]
+
+
+    async def batch_tool(
+        self,
+        calls: Sequence[dict[str, Any]],
+        max_concurrency: int | None = None,
+        *,
+        on_error: str | None = None,
+    ) -> Any:
+        normalized_calls = _normalize_orchestration_calls(calls, allow_empty=True)
+        mode = _normalize_batch_on_error(on_error)
+        if len(normalized_calls) == 0:
+            if mode == _BATCH_ON_ERROR_COLLECT:
+                return {
+                    "kind": "batch_partial",
+                    "mode": mode,
+                    "results": [],
+                    "stats": {"total": 0, "succeeded": 0, "failed": 0},
+                }
+            return []
+        concurrency = _normalize_orchestration_limit(max_concurrency, self.max_parallel_tool_calls)
+        if mode == _BATCH_ON_ERROR_RAISE:
+            results = await self.gather_limit(
+                [_rpc_call(entry["tool"], dict(entry["params"])) for entry in normalized_calls],
+                limit=concurrency,
+            )
+            return list(results)
+        async def _collect_call(entry: dict[str, Any], index: int) -> dict[str, Any]:
+            try:
+                value = await _rpc_call(entry["tool"], dict(entry["params"]))
+                return {
+                    "index": index,
+                    "tool": entry["tool"],
+                    "ok": True,
+                    "value": value,
+                }
+            except Exception as error:
+                return {
+                    "index": index,
+                    "tool": entry["tool"],
+                    "ok": False,
+                    "error": _summarize_orchestration_error(error),
+                }
+        collected = await self.gather_limit(
+            [_collect_call(entry, index) for index, entry in enumerate(normalized_calls)],
+            limit=concurrency,
+        )
+        succeeded = sum(1 for item in collected if item.get("ok"))
+        failed = len(collected) - succeeded
+        return {
+            "kind": "batch_partial",
+            "mode": mode,
+            "results": list(collected),
+            "stats": {
+                "total": len(collected),
+                "succeeded": succeeded,
+                "failed": failed,
+            },
+        }
 
     async def read_tree(
         self,
@@ -128,11 +577,135 @@ class _PtcHelpers:
             for file_path, content in zip(files, contents)
         ]
 
+    def extract_handles(self, value: Any, kind: str | None = None) -> list[SupportedHandle]:
+        normalized_kind = _normalize_handle_kind(kind)
+        handles: list[SupportedHandle] = []
+        _collect_supported_handles(value, handles, set())
+        if normalized_kind is None:
+            return handles
+        return [handle for handle in handles if handle["kind"] == normalized_kind]
+
+    def first_handle(self, value: Any, kind: str | None = None) -> SupportedHandle | None:
+        handles = self.extract_handles(value, kind=kind)
+        return handles[0] if handles else None
+
+    def expect_kind(self, value: Any, kind: str) -> Any:
+        return _expect_kind(value, kind)
+
+
+    def list_callable_tools(self) -> list[dict[str, Any]]:
+        return _clone_json_value(self._callable_tool_metadata)
+
+    def get_tool_schema(self, name: str) -> dict[str, Any]:
+        normalized_name = _normalize_callable_tool_name(name)
+        tool_metadata = self._callable_tool_lookup.get(normalized_name)
+        if tool_metadata is None:
+            available = ", ".join(self._available_callable_tool_names) or "<none>"
+            raise ValueError(f"Unknown callable tool '{normalized_name}'. Available: {available}")
+        parameters = tool_metadata.get("parameters")
+        if not isinstance(parameters, dict):
+            raise ValueError(f"Callable tool '{normalized_name}' does not expose an object parameter schema")
+        return _clone_json_value(parameters)
+
+
+    async def first_success(self, calls: Sequence[dict[str, Any]], max_concurrency: int | None = None) -> Any:
+        normalized_calls = _normalize_orchestration_calls(calls)
+        _normalize_orchestration_limit(max_concurrency, self.max_parallel_tool_calls)
+        failures: list[str] = []
+
+        for entry in normalized_calls:
+            try:
+                return await _rpc_call(entry["tool"], dict(entry["params"]))
+            except Exception as error:
+                failures.append(f"{entry['tool']}: {_summarize_orchestration_error(error)}")
+
+        raise ValueError("All candidate tool calls failed: " + "; ".join(failures))
+
+    async def reduce_tool(
+        self,
+        calls: Sequence[dict[str, Any]],
+        reducer: Callable[[Any, Any], Any],
+        initial: Any,
+        max_concurrency: int | None = None,
+    ) -> Any:
+        if not callable(reducer):
+            raise ValueError("reducer must be callable")
+        results = await self.batch_tool(calls, max_concurrency=max_concurrency)
+        accumulator = initial
+        for index, result in enumerate(results):
+            try:
+                accumulator = reducer(accumulator, result)
+            except Exception as error:
+                raise ValueError(
+                    f"Reducer failed at index {index}: {_summarize_orchestration_error(error)}"
+                ) from error
+        return accumulator
+
+    def fit_output(
+        self,
+        value: Any,
+        max_chars: int | None = None,
+        max_items: int | None = None,
+        max_depth: int | None = None,
+    ) -> dict[str, Any]:
+        limits = _normalize_fit_output_limits(
+            max_chars,
+            max_items,
+            max_depth,
+            self.max_output_chars,
+        )
+        safe_value = _json_safe_clone_for_fit_output(value)
+        preview, preview_stats = _compact_fit_output_preview(
+            safe_value,
+            limits["max_chars"],
+            limits["max_items"],
+            limits["max_depth"],
+        )
+        result = {
+            "kind": _FIT_OUTPUT_KIND,
+            "originalKind": _describe_fit_output_kind(safe_value),
+            "preview": preview,
+            "truncated": bool(preview_stats["truncated"]),
+            "limits": {
+                "maxChars": limits["max_chars"],
+                "maxItems": limits["max_items"],
+                "maxDepth": limits["max_depth"],
+            },
+            "stats": {
+                "originalChars": _measure_json_chars(safe_value),
+                "previewChars": _measure_json_chars(preview),
+                "omittedItems": preview_stats["omittedItems"],
+                "omittedKeys": preview_stats["omittedKeys"],
+                "depthLimited": preview_stats["depthLimited"],
+            },
+        }
+        result["truncated"] = bool(
+            result["truncated"]
+            or result["stats"]["originalChars"] > limits["max_chars"]
+            or result["stats"]["previewChars"] > limits["max_chars"]
+        )
+        return _fit_result_to_char_budget(result, limits["max_chars"])
+
     def json_dump(self, value: Any) -> str:
         return _ptc_json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True)
 
 
-ptc = _PtcHelpers(globals().get("PTC_MAX_PARALLEL_TOOL_CALLS", 8))
+ptc = _PtcHelpers(
+    globals().get("PTC_MAX_PARALLEL_TOOL_CALLS", 8),
+    globals().get("_PTC_CALLABLE_TOOL_METADATA", []),
+    globals().get("PTC_MAX_OUTPUT_CHARS", 25_000),
+)
+
+
+# Post-process wrapper: normalize grep record paths to workspace-relative.
+# The generated grep() wrapper calls _rpc_call("grep", params) and returns
+# whatever the RPC returns. When the hashline bridge is active, record paths
+# are absolute. This wrapper normalizes them.
+_generated_grep = globals().get("grep")
+if callable(_generated_grep):
+    async def grep(**kwargs):
+        result = await _generated_grep(**kwargs)
+        return _normalize_grep_result(result)
 
 
 def _stringify_output(value: Any) -> str:

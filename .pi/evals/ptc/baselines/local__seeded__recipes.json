@@ -1,0 +1,182 @@
+{
+  "provider": "local",
+  "model": "seeded",
+  "generated_at": "2026-03-26T00:00:00.000Z",
+  "results": [
+    {
+      "result": {
+        "case_id": "recipe-codegraph-web-evidence-merge",
+        "provider": "local",
+        "model": "seeded",
+        "expected_first_path": "code_execution",
+        "observed_first_path": "direct",
+        "success": false,
+        "recovery_attempted": false,
+        "failure_class": null,
+        "total_tokens": 55,
+        "duration_ms": 158
+      },
+      "rule_outcomes": [
+        {
+          "rule": "observed_first_path=code_execution",
+          "passed": false
+        },
+        {
+          "rule": "success=true",
+          "passed": false
+        },
+        {
+          "rule": "output_json=true",
+          "passed": true
+        }
+      ],
+      "recipe_target": {
+        "repos": [
+          "pi-codegraph",
+          "pi-web-tools"
+        ],
+        "workflow": "codegraph-web-evidence-merge",
+        "summary": "Merge codegraph and web evidence into one bounded synthesis.",
+        "output_contract": {
+          "format": "json",
+          "style": "evidence-merge",
+          "focus": "Return one merged conclusion with compact codegraph and web evidence arrays.",
+          "max_items": 6,
+          "max_chars": 1500
+        }
+      }
+    },
+    {
+      "result": {
+        "case_id": "recipe-graph-compact-ranking",
+        "provider": "local",
+        "model": "seeded",
+        "expected_first_path": "code_execution",
+        "observed_first_path": "code_execution",
+        "success": true,
+        "recovery_attempted": false,
+        "failure_class": null,
+        "total_tokens": 49,
+        "duration_ms": 133
+      },
+      "rule_outcomes": [
+        {
+          "rule": "observed_first_path=code_execution",
+          "passed": true
+        },
+        {
+          "rule": "success=true",
+          "passed": true
+        },
+        {
+          "rule": "output_json=true",
+          "passed": true
+        }
+      ],
+      "recipe_target": {
+        "repos": [
+          "pi-codegraph"
+        ],
+        "workflow": "graph-compact-ranking",
+        "summary": "Analyze many graph results and return a compact ranking.",
+        "output_contract": {
+          "format": "json",
+          "style": "compact-ranking",
+          "focus": "Return only the top ranked symbols with compact impact evidence.",
+          "max_items": 5,
+          "max_chars": 1200
+        }
+      }
+    },
+    {
+      "result": {
+        "case_id": "recipe-hashline-anomaly-summary",
+        "provider": "local",
+        "model": "seeded",
+        "expected_first_path": "code_execution",
+        "observed_first_path": "code_execution",
+        "success": true,
+        "recovery_attempted": false,
+        "failure_class": null,
+        "total_tokens": 50,
+        "duration_ms": 136
+      },
+      "rule_outcomes": [
+        {
+          "rule": "observed_first_path=code_execution",
+          "passed": true
+        },
+        {
+          "rule": "success=true",
+          "passed": true
+        },
+        {
+          "rule": "output_json=true",
+          "passed": true
+        }
+      ],
+      "recipe_target": {
+        "repos": [
+          "pi-hashline-readmap"
+        ],
+        "workflow": "hashline-anomaly-summary",
+        "summary": "Inspect many files and emit only anomaly-focused output.",
+        "output_contract": {
+          "format": "json",
+          "style": "anomaly-summary",
+          "focus": "Return only anomalous files, counts, and small anchored samples.",
+          "max_items": 8,
+          "max_chars": 1500
+        }
+      }
+    },
+    {
+      "result": {
+        "case_id": "recipe-web-answer-comparison",
+        "provider": "local",
+        "model": "seeded",
+        "expected_first_path": "code_execution",
+        "observed_first_path": "code_execution",
+        "success": true,
+        "recovery_attempted": false,
+        "failure_class": null,
+        "total_tokens": 47,
+        "duration_ms": 127
+      },
+      "rule_outcomes": [
+        {
+          "rule": "observed_first_path=code_execution",
+          "passed": true
+        },
+        {
+          "rule": "success=true",
+          "passed": true
+        },
+        {
+          "rule": "output_json=true",
+          "passed": true
+        }
+      ],
+      "recipe_target": {
+        "repos": [
+          "pi-web-tools"
+        ],
+        "workflow": "web-answer-comparison",
+        "summary": "Compare multiple fetched answers and keep only disagreement summaries.",
+        "output_contract": {
+          "format": "json",
+          "style": "disagreement-summary",
+          "focus": "Return only disagreements, shared conclusion, and minimal evidence pointers.",
+          "max_items": 3,
+          "max_chars": 1200
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total_cases": 4,
+    "successful_cases": 3,
+    "routed_cases": 3,
+    "recovery_attempts": 0
+  }
+}
