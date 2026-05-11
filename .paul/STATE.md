@@ -4,14 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Milestone 16 is complete. The next milestone is not yet defined.
+**Current focus:** Milestone 17 will audit `pi-ptc-advanced` against local and latest Pi compatibility surfaces, then optimize extension integration and system-prompt/tool guidance.
 ## Current Position
-Milestone: Milestone 16 — Publishable Fork Packaging (0.15.0)
-Phase: 44 of 44 (Release Verification and Publish Readiness) — Complete
-Plan: 44-01 complete
-Status: Milestone complete; ready for next milestone planning
-Last activity: 2026-03-29 — Unified Phase 44 and closed Milestone 16
+Milestone: Milestone 17 — Pi Compatibility and Prompt Integration Audit (0.16.0)
+Phase: 45 of 48 (Pi API and Documentation Delta Audit)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-05-11 — Milestone 17 created
 Progress:
+- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [░░░░░░░░░░] 0%
 - Milestone 15 — Bug Fixes and Helper Hardening: [██████████] 100% ✓
 - Milestone 16 — Publishable Fork Packaging: [██████████] 100% ✓
 - Phase 42 — Rename and Package Identity: [██████████] 100% ✓
@@ -51,7 +52,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete - milestone complete]
+  ○        ○        ○     [Ready for first PLAN]
 ```
 
 ## Accumulated Context
@@ -111,23 +112,23 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - `src/python-runtime/runtime.py` is now a significant debt hotspot at 743 lines after Phase 41 behavior additions; future changes should avoid casual growth without extraction justification
 - Existing docs/test hotspots remain in `README.md` (853 lines), `src/index.ts` (424 lines), and `test/index.test.ts` (1220 lines); future proof/docs work should keep using focused companion files or extract sections before growing those anchors further
 - Full-suite verification now passes at `207` passing / `0` failing after Phase 41 APPLY; maintain this as the new baseline for subsequent milestones
-- `npm pack --dry-run` currently includes `src/python-runtime/__pycache__/runtime.cpython-314.pyc`; evaluate whether that artifact should be excluded during Phase 44 publish-readiness work
+- Phase 44 removed packaged Python bytecode/cache artifacts from the tarball surface and added packed-artifact installability proof; preserve this publish-surface invariant in future release work
 
 ### Git State
-- Last committed checkpoint: Milestone 14 closure `43afdec` on `feat/hashline-native-interop`
-- Branch: `feat/hashline-native-interop`
-- Tag: `0.14.0` (pushed to origin)
-- Pushed to origin: tag `0.14.0` pushed; `main` push rejected (non-fast-forward)
+- Last committed checkpoint: `2d539c6` (`test: align hashline contract fixtures`) on `feat/hashline-native-interop`
+- Branch: `feat/hashline-native-interop` (ahead of origin by 2 local commits)
+- Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
+- Pushed to origin: backup branches preserve the Milestone 15/16 working and validated snapshots; feature branch not pushed after local cleanup
 ## Session Continuity
-Last session: 2026-03-29 11:20 EDT
-Stopped at: Phase 44 complete; Milestone 16 complete
-Next action: Run /paul:milestone to define the next milestone
-Resume file: .paul/phases/44-release-verification-and-publish-readiness/44-01-SUMMARY.md
+Last session: 2026-05-11
+Stopped at: Milestone 17 created, ready to plan
+Next action: /paul:plan for Phase 45
+Resume file: .paul/ROADMAP.md
 Resume context:
-- The `0.15.0` tarball no longer ships packaged Python bytecode/cache artifacts; only `src/python-runtime/runtime.py` and `src/python-runtime/rpc.py` remain in the published runtime surface
-- `scripts/verify-release-package.sh` now proves both tarball cleanliness and clean installability from the packed artifact
-- Maintainer/release docs describe the final bounded verification gate while keeping actual publish/tag/git actions manual
-- Milestone 16 is complete; the next milestone is not yet defined
+- Milestone 17 is exploratory with high collaboration.
+- Audit source scope is both the installed local Pi package and the latest published Pi package/docs/source where available.
+- Phase 45 should produce the compatibility delta audit before runtime or prompt-integration changes.
+- Current feature branch has local checkpoint work ahead of origin; backup branches preserve the validated Milestone 15/16 snapshot.
 
 ---
-*STATE.md — Updated after Phase 44 UNIFY completion and Milestone 16 closure (last updated: 2026-03-29)*
+*STATE.md — Updated after Milestone 17 creation (last updated: 2026-05-11)*

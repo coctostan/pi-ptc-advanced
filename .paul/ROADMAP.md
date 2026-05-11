@@ -4,35 +4,49 @@
 Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime interop and structured Python integration.
 
 ## Current Milestone
-**Milestone 16 — Publishable Fork Packaging** (`0.15.0`)
-Status: ✅ Complete
-Phases: 3 of 3 complete
+**Milestone 17 — Pi Compatibility and Prompt Integration Audit** (`0.16.0`)
+Status: 🚧 In Progress
+Phases: 0 of 4 complete
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 42 | Rename and Package Identity | 1/1 | ✅ Complete | 2026-03-27 |
-| 43 | Publish Metadata and Documentation | 1/1 | ✅ Complete | 2026-03-29 |
-| 44 | Release Verification and Publish Readiness | 1/1 | ✅ Complete | 2026-03-29 |
+| 45 | Pi API and Documentation Delta Audit | TBD | Not started | - |
+| 46 | Extension Runtime Compatibility Alignment | TBD | Not started | - |
+| 47 | System Prompt and Tool Guidance Optimization | TBD | Not started | - |
+| 48 | Compatibility Proof and Release Readiness | TBD | Not started | - |
 
-### Phase 42: Rename and Package Identity
-Focus: Rename the fork/package surface to `pi-ptc-advanced` and align package identity metadata for publication.
-Plans: 1/1 complete — package metadata and release-package verification now target `pi-ptc-advanced@0.15.0`.
-Completed: 2026-03-27
+### Phase 45: Pi API and Documentation Delta Audit
+Focus: Compare `pi-ptc-advanced` against both the installed local Pi package and latest published Pi package/docs/source to identify API drift, deprecated assumptions, new extension capabilities, and prompt/tool-description convention changes.
+Plans: TBD (defined during /paul:plan)
 
-### Phase 43: Publish Metadata and Documentation
-Focus: Update README and related release-facing docs for publishability, including explicit acknowledgment of the upstream origin and prior fork lineage.
-Plans: 1/1 complete — README/install guidance, changelog framing, maintainer docs, and a new `0.15.0` release note now present the active `pi-ptc-advanced@0.15.0` baseline while preserving `0.8.0` as historical context.
-Completed: 2026-03-29
+### Phase 46: Extension Runtime Compatibility Alignment
+Focus: Apply compatibility improvements in extension registration, lifecycle, tool metadata, runtime execution, callable-tool exposure, and fallback behavior based on the Phase 45 audit.
+Plans: TBD (defined during /paul:plan)
 
-### Phase 44: Release Verification and Publish Readiness
-Focus: Verify packaging, versioning, installability, and final publish-readiness before release.
-Plans: 1/1 complete — `44-01` removed packaged bytecode artifacts from the tarball surface, added packed-artifact installability proof, and closed the final bounded release-readiness gate for the current manual publish model.
-Completed: 2026-03-29
+### Phase 47: System Prompt and Tool Guidance Optimization
+Focus: Improve how `code_execution` informs the model through system-prompt/tool-description guidance, helper-selection instructions, optional tool branching, prompt budget discipline, and latest Pi prompt conventions.
+Plans: TBD (defined during /paul:plan)
 
-## Next Milestone
-Not yet defined.
+### Phase 48: Compatibility Proof and Release Readiness
+Focus: Add or refresh tests, docs, compatibility notes, and release verification for the `0.16.0` compatibility milestone.
+Plans: TBD (defined during /paul:plan)
 
 ## Completed Milestones
+<details>
+<summary>Milestone 16 — Publishable Fork Packaging (0.15.0) - 2026-03-29 (3 phases)</summary>
+
+| Phase | Name | Plans | Completed |
+|-------|------|-------|-----------|
+| 42 | Rename and Package Identity | 1/1 | 2026-03-27 |
+| 43 | Publish Metadata and Documentation | 1/1 | 2026-03-29 |
+| 44 | Release Verification and Publish Readiness | 1/1 | 2026-03-29 |
+
+Notes:
+- Renamed the fork/package surface to `pi-ptc-advanced@0.15.0` and aligned package metadata for publication.
+- Updated README, changelog, maintainer docs, and release notes for the active package identity while preserving historical fork context.
+- Removed packaged Python bytecode/cache artifacts from the tarball surface and proved packed-artifact installability under the manual publish model.
+
+</details>
 <details>
 <summary>Milestone 15 — Bug Fixes and Helper Hardening (0.14.0) - 2026-03-27 (3 phases)</summary>
 
@@ -220,4 +234,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-03-29 after Phase 44 completion and Milestone 16 closure*
+*Last updated: 2026-05-11 after Milestone 17 creation*
