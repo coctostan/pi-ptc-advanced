@@ -45,6 +45,30 @@ test("loadCustomToolsFromDir loads ptc metadata from tools directory", async () 
   });
 });
 
+test("loadCustomToolsFromDir preserves prompt metadata from custom tools", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "ptc-tools-prompt-"));
+  const toolsDir = path.join(root, "tools");
+  await fs.mkdir(toolsDir, { recursive: true });
+  await writeTool(
+    toolsDir,
+    "search.js",
+    `module.exports = {
+      name: 'search_notes',
+      description: 'Search notes',
+      promptSnippet: 'search_notes: search local notes from the current project.',
+      promptGuidelines: ['Use search_notes only when the user asks to inspect notes.'],
+      parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
+      ptc: { callable: true, policy: 'read-only', pythonName: 'search_notes' },
+      async execute() { return { content: [{ type: 'text', text: 'ok' }], details: undefined }; }
+    };`
+  );
+
+  const loaded = await loadCustomToolsFromDir(toolsDir);
+  assert.equal(loaded.length, 1);
+  assert.equal(loaded[0].tool.promptSnippet, "search_notes: search local notes from the current project.");
+  assert.deepEqual(loaded[0].tool.promptGuidelines, ["Use search_notes only when the user asks to inspect notes."]);
+});
+
 test("loadCustomToolsFromDir fails loudly for invalid custom tools", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "ptc-invalid-tools-"));
   const toolsDir = path.join(root, "tools");
