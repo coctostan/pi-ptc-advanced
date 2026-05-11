@@ -68,9 +68,14 @@ export type InternalToolExecute = (
 
 export type ToolSource = "builtin" | "alias" | "extension";
 
-export interface ToolInfo extends ExtensionToolInfo {
+export interface ToolInfo extends Omit<ExtensionToolInfo, "sourceInfo"> {
   execute: InternalToolExecute;
+  /**
+   * PTC's internal callable taxonomy. Newer Pi hosts also expose sourceInfo;
+   * keep that host provenance separate so Python helper metadata remains stable.
+   */
   source: ToolSource;
+  sourceInfo?: ExtensionToolInfo["sourceInfo"];
   isReadOnly: boolean;
   ptc?: PtcToolOptions;
 }

@@ -119,6 +119,8 @@ function validateToolParams(tool: ToolInfo, params: unknown): void {
   throw new Error(`Invalid parameters for ${tool.name}.${suffix}`.trim());
 }
 
+const HASHLINE_BRIDGE_WARNING_ENV_FLAG = "PTC_HASHLINE_BRIDGE_NO_EXECUTORS_WARNED";
+
 export class ToolRegistry {
   private customTools = new Map<string, ToolInfo>();
   private extensionOwnedToolNames = new Set<string>();
@@ -126,12 +128,15 @@ export class ToolRegistry {
   private callablePolicyWarnings = new Set<string>();
 
   constructor(private pi: ExtensionAPI) {
-    // Bridge: consume hashline tool executors.
-    // Remove when pi exposes getToolExecutor() on ExtensionAPI.
+    // Bridge: consume hashline tool executors from pre-emitted globals plus later
+    // EventBus emissions. Keep this until Pi exposes getToolExecutor() on ExtensionAPI.
     // Grep marker: "hashline:tool-executors"
     const preEmitted = (globalThis as any).__hashlineToolExecutors;
     if (preEmitted) {
       this.ingestExtensionExecutors(preEmitted);
+    } else if (process.env[HASHLINE_BRIDGE_WARNING_ENV_FLAG] !== "1") {
+      process.env[HASHLINE_BRIDGE_WARNING_ENV_FLAG] = "1";
+      logWarning("Hashline tool executor bridge started with no pre-emitted executors; builtin fallback remains active until hashline:tool-executors is emitted.");
     }
     pi.events.on("hashline:tool-executors", (data: unknown) => {
       this.ingestExtensionExecutors(data);
@@ -153,6 +158,8 @@ export class ToolRegistry {
         ptc: classification.ptc,
         source: "extension",
         isReadOnly: classification.isReadOnly,
+        // Hashline executor payloads predate Pi sourceInfo; keep PTC source taxonomy explicit.
+        sourceInfo: undefined,
       });
     }
   }
@@ -249,6 +256,7 @@ export class ToolRegistry {
       ptc: classification.ptc,
       source: "extension",
       isReadOnly: classification.isReadOnly,
+      sourceInfo: (tool as { sourceInfo?: ToolInfo["sourceInfo"] }).sourceInfo,
     });
   }
 
@@ -281,6 +289,7 @@ export class ToolRegistry {
           source: "builtin",
           isReadOnly: classification.isReadOnly,
           ptc: classification.ptc,
+          sourceInfo: (tool as { sourceInfo?: ToolInfo["sourceInfo"] }).sourceInfo,
           execute: async (toolCallId, params, signal, onUpdate, ctx) =>
             await executeBuiltin(toolCallId, params, signal, onUpdate, ctx),
         });
@@ -355,6 +364,7 @@ export class ToolRegistry {
           parameters: piTool.parameters,
           ptc: classification.ptc,
           isReadOnly: classification.isReadOnly,
+          sourceInfo: piTool.sourceInfo ?? existing.sourceInfo,
           execute: shouldUsePiOverride && hasInternalExecute(piTool) ? piTool.execute : existing.execute,
         });
         continue;
@@ -369,6 +379,7 @@ export class ToolRegistry {
         ptc: classification.ptc,
         source: "extension",
         isReadOnly: classification.isReadOnly,
+        sourceInfo: piTool.sourceInfo,
       });
     }
 

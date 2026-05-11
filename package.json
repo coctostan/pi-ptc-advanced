@@ -61,10 +61,10 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*"
+    "@mariozechner/pi-coding-agent": "^0.73.1"
   },
   "dependencies": {
-    "@mariozechner/pi-tui": "^0.55.1",
+    "@mariozechner/pi-tui": "^0.73.1",
     "@sinclair/typebox": "^0.34.41"
   },
   "devDependencies": {
