@@ -8,12 +8,13 @@ See: `.paul/PROJECT.md`
 ## Current Position
 Milestone: Milestone 17 — Pi Compatibility and Prompt Integration Audit (0.16.0)
 Phase: 46 of 48 (Pi Extension Runtime Alignment)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-11 — Phase 45 complete, transitioned to Phase 46
+Plan: `.paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md`
+Status: APPLY complete — ready for UNIFY
+Last activity: 2026-05-11 — Phase 46 plan 46-01 APPLY complete
 Progress:
-- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [███░░░░░░░] 25% (Phase 45 ✓)
+- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [█████░░░░░] 50% (Phase 45 ✓, Phase 46 APPLY ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
+- Phase 46 — Extension Runtime Compatibility Alignment: [███████░░░] APPLY ✓
 - Milestone 15 — Bug Fixes and Helper Hardening: [██████████] 100% ✓
 - Milestone 16 — Publishable Fork Packaging: [██████████] 100% ✓
 - Phase 42 — Rename and Package Identity: [██████████] 100% ✓
@@ -53,7 +54,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 46 ready to plan]
+  ✓        ✓        ○     [Phase 46 apply complete]
 ```
 
 ## Accumulated Context
@@ -113,6 +114,8 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 45 APPLY top-level findings: R-1 build-time peer scope drift (`@mariozechner/*@0.55.1` vs runtime `@earendil-works/*@0.74.0`) is the gating risk; R-2 `code_execution` lacks `promptSnippet`/`promptGuidelines` so it is invisible in the default system prompt's `Available tools` section; R-3 hashline executor bridge has no observability signal when no executors are emitted.
 - Phase 45 APPLY GitHub Flow postflight pushed commit 6fef3f4 to `feat/hashline-native-interop` and opened PR #1 against `main`; CI "Verify release baseline" reports FAILURE due to a pre-existing GitHub Actions Node 20.20.2 runner `ERR_UNKNOWN_FILE_EXTENSION` on `node --test test/*.test.ts`, which is unrelated to the audit-only artifact and is surfaced for UNIFY/Phase 48 to address.
 
+- Phase 46 PLAN created `.paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md`: after user clarification, selected latest Mario-scope package alignment (`@mariozechner/*@0.73.1`) instead of a hard `@earendil-works/*` switch; plan still covers context-event compatibility, explicit `sourceInfo` compatibility strategy, and one-time hashline bridge no-executor observability signal; README/CHANGELOG/prompt-guidance remain deferred to Phase 47/48.
+- Phase 46 APPLY completed in commit `c859c9b`: package metadata/lockfile now target `@mariozechner/*@0.73.1`, `sourceInfo` is preserved separately from PTC's internal `source` taxonomy, and the hashline bridge emits a no-executor observability warning while preserving builtin fallback. Deviation: Mario 0.73.1 does not type the `context` event overload, so APPLY retained an explicit compatibility shim instead of the originally planned direct typed call.
 ### Deferred Issues
 - Bridge teardown when pi adds getToolExecutor()
 - `src/python-runtime/runtime.py` is now a significant debt hotspot at 743 lines after Phase 41 behavior additions; future changes should avoid casual growth without extraction justification
@@ -125,19 +128,20 @@ PLAN ──▶ APPLY ──▶ UNIFY
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
-- Last committed checkpoint: `6fef3f4` (`docs(phase-45): pi compat audit (45-01)`) on `feat/hashline-native-interop`
-- Branch: `feat/hashline-native-interop` (pushed to origin)
-- Open PR: [#1](https://github.com/coctostan/pi-ptc-next/pull/1) `feat/hashline-native-interop -> main` (mergeable; CI `Verify release baseline` SUCCESS 207/207 after Fix 45-02 + 45-03 — merge gate clear; ready for Phase 45 UNIFY merge or Phase 46 planning)
+- Last implementation checkpoint: `c859c9b` (`chore(46-01): align Mario runtime compatibility`) on `feat/phase-46-runtime-alignment`
+- Branch: `feat/phase-46-runtime-alignment` (pushed to origin)
+- Open PR: [#2](https://github.com/coctostan/pi-ptc-next/pull/2) `feat/phase-46-runtime-alignment -> main`; mergeable, CI `Verify release baseline` in progress at APPLY completion
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
 ## Session Continuity
 Last session: 2026-05-11
-Stopped at: Phase 45 complete (PLAN/APPLY/UNIFY ✓); transitioned to Phase 46 planning readiness
-Next action: /paul:plan for Phase 46
-Resume file: .paul/ROADMAP.md
+Stopped at: Phase 46 APPLY complete; awaiting UNIFY
+Next action: /paul:unify .paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md
+Resume file: .paul/phases/46-extension-runtime-compatibility-alignment/46-01-PLAN.md
 Resume context:
-- Phase 45 audit handoff lives in `.paul/phases/45-pi-api-and-documentation-delta-audit/45-01-PI-COMPAT-AUDIT.md` §4; Phase 46 should sequence runtime work as 46-A (peerDependencies scope decision, gating), 46-B (remove `context` event cast), 46-C (hashline bridge visibility warning), 46-D (`sourceInfo` adoption strategy).
-- Phase 45 PR #1 is open on `feat/hashline-native-interop -> main`; the Actions "Verify release baseline" CI failure is a pre-existing Node 20.20.2 `.ts` runner issue, not a Phase 45 regression, and is deferred to Phase 48 or a `/paul:fix` loop.
-- DEAN dependency-audit baseline at `.paul/dean-baseline.json` remains user-approved; do not remediate dependencies inside Phase 46 unless a finding directly requires it.
+- APPLY changed `package.json`, `package-lock.json`, `src/index.ts`, `src/contracts/tool-types.ts`, `src/tool-registry.ts`, and `test/tool-registry.test.ts` in commit `c859c9b`.
+- Verification passed: `npm run build`, `node --test test/tool-registry.test.ts`, `node --test test/hashline-default-exposure.test.ts test/hashline-interop-smoke.test.ts`, and `npm test` (210 passing / 0 failing).
+- `npm audit --json` improved against DEAN baseline from 1 critical / 4 high / 5 moderate / 10 total to 0 critical / 0 high / 3 moderate / 3 total; no new critical/high findings introduced.
+- Deviation to reconcile in UNIFY: direct typed `pi.on("context", ...)` was not possible on Mario 0.73.1; APPLY retained an explicit compatibility shim/comment instead.
 
 ---
-*STATE.md — Updated after Phase 45 UNIFY + transition to Phase 46 (last updated: 2026-05-11)*
+*STATE.md — Updated after Phase 46 APPLY completion (last updated: 2026-05-11)*
