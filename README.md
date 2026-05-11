@@ -173,36 +173,36 @@ Representative structured payloads:
   "lines": [
     {
       "line": 45,
-      "hash": "bf",
-      "anchor": "45:bf",
+      "hash": "4bf",
+      "anchor": "45:4bf",
       "raw": "export function createDemoDirectory(): UserDirectory {",
       "display": "export function createDemoDirectory(): UserDirectory {"
     },
     {
       "line": 46,
-      "hash": "9a",
-      "anchor": "46:9a",
+      "hash": "59a",
+      "anchor": "46:59a",
       "raw": "  const directory = new UserDirectory(500);",
       "display": "  const directory = new UserDirectory(500);"
     },
     {
       "line": 47,
-      "hash": "c3",
-      "anchor": "47:c3",
+      "hash": "9c3",
+      "anchor": "47:9c3",
       "raw": "  directory.addUser(\"Ada Lovelace\", \"ada@example.com\");",
       "display": "  directory.addUser(\"Ada Lovelace\", \"ada@example.com\");"
     },
     {
       "line": 48,
-      "hash": "e1",
-      "anchor": "48:e1",
+      "hash": "6e1",
+      "anchor": "48:6e1",
       "raw": "  return directory;",
       "display": "  return directory;"
     },
     {
       "line": 49,
-      "hash": "18",
-      "anchor": "49:18",
+      "hash": "b18",
+      "anchor": "49:b18",
       "raw": "}",
       "display": "}"
     }
@@ -219,29 +219,20 @@ Representative structured payloads:
     {
       "path": "tests/fixtures/small.ts",
       "line": 44,
-      "hash": "7e",
-      "anchor": "44:7e",
-      "kind": "context",
-      "raw": "// This keeps fixture size stable for truncation-threshold coverage.",
-      "display": "// This keeps fixture size stable for truncation-threshold coverage."
+      "anchor": "44:97e",
+      "kind": "context"
     },
     {
       "path": "tests/fixtures/small.ts",
       "line": 45,
-      "hash": "bf",
-      "anchor": "45:bf",
-      "kind": "match",
-      "raw": "export function createDemoDirectory(): UserDirectory {",
-      "display": "export function createDemoDirectory(): UserDirectory {"
+      "anchor": "45:4bf",
+      "kind": "match"
     },
     {
       "path": "tests/fixtures/small.ts",
       "line": 46,
-      "hash": "9a",
-      "anchor": "46:9a",
-      "kind": "context",
-      "raw": "  const directory = new UserDirectory(500);",
-      "display": "  const directory = new UserDirectory(500);"
+      "anchor": "46:59a",
+      "kind": "context"
     }
   ]
 }
@@ -249,7 +240,7 @@ Representative structured payloads:
 
 ```json
 {
-  "tool": "sg",
+  "tool": "ast_search",
   "files": [
     {
       "path": "demo.ts",
@@ -262,8 +253,8 @@ Representative structured payloads:
       "lines": [
         {
           "line": 2,
-          "hash": "10",
-          "anchor": "2:10",
+          "hash": "310",
+          "anchor": "2:310",
           "raw": "  const value = \"before\";",
           "display": "  const value = \"before\";"
         }
@@ -279,7 +270,7 @@ Representative structured payloads:
   "ok": true,
   "path": "sample.ts",
   "summary": "Updated sample.ts",
-  "diff": "2:bd|const two = 2; → 2:86|const two = 22;",
+  "diff": "2:5bd|const two = 2; → 2:086|const two = 22;",
   "firstChangedLine": 2,
   "warnings": [],
   "noopEdits": [],

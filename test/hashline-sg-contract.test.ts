@@ -1,3 +1,4 @@
+{
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
@@ -161,7 +162,9 @@ test("README sg example exactly matches the normalized live payload", () => {
   const payload = loadSgPayload();
   const readme = readFileSync(path.resolve(__dirname, "../README.md"), "utf8");
   const expectedSgExample = normalizeSgForDocs(payload);
-  const sgExample = extractJsonExample(readme, "sg");
+  const sgExample = extractJsonExample(readme, expectedSgExample.tool);
   assert.match(readme, /sg\(pattern, \*, lang=None, path=None\) -> SgResult/);
   assert.deepEqual(sgExample, expectedSgExample);
 });
+
+}

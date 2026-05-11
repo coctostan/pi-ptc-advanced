@@ -249,6 +249,8 @@ try {
   };
 
   hashlineExtension(pi);
+  const astSearchToolName = registeredTools.some((tool) => tool.name === "sg") ? "sg" : "ast_search";
+  const astSearchHelperName = astSearchToolName === "sg" ? "sg" : "ast_search";
   const settings = {
     executionTimeoutMs: 30000,
     maxOutputChars: 40000,
@@ -258,7 +260,7 @@ try {
     useDocker: false,
     allowUnsandboxedSubprocess: true,
     debugLogging: false,
-    callableTools: ["read", "grep", "sg", "edit"],
+    callableTools: ["read", "grep", "sg", "ast_search", "edit"],
     blockedTools: undefined,
     trustedReadOnlyTools: undefined,
   };
@@ -280,7 +282,7 @@ try {
     "utf8"
   );
 
-  const code = `search = await sg(pattern="function demoTarget() { $$$BODY }", lang="typescript", path=${JSON.stringify(targetFile)})
+  const code = `search = await ${astSearchHelperName}(pattern="function demoTarget() { $$$BODY }", lang="typescript", path=${JSON.stringify(targetFile)})
 target_line = next(line for line in search["files"][0]["lines"] if 'const value = "before";' in line["raw"])
 inspection = await read(path=${JSON.stringify(targetFile)}, symbol="demoTarget")
 edit_result = await edit(

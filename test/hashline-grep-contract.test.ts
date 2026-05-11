@@ -123,7 +123,14 @@ test("grep live payload shape and TypedDict coverage stay aligned", () => {
   assert.equal(payload.tool, "grep");
   assert.equal(payload.summary, false);
   assert.equal(payload.totalMatches, 1);
-  assert.ok(payload.records.every((record) => ["path", "line", "hash", "anchor", "kind", "raw", "display"].every((key) => key in record)));
+  assert.ok(payload.records.every((record) => ["path", "line", "anchor", "kind"].every((key) => key in record)));
+  for (const record of payload.records) {
+    for (const optionalKey of ["hash", "raw", "display"]) {
+      if (optionalKey in record) {
+        assert.equal(typeof record[optionalKey], "string");
+      }
+    }
+  }
 
   assert.match(wrapperCode, /class GrepMatch\(TypedDict, total=False\):/);
   assert.match(wrapperCode, /path: str/);
