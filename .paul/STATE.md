@@ -122,12 +122,12 @@ PLAN ──▶ APPLY ──▶ UNIFY
 
 ### Fixes
 | Fix 45-02 (standard, PARTIAL): bump CI Actions `node-version` 20→22 to fix `.ts` test loader | Phase 45 side-loop | `.github/workflows/ci.yml`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX.md`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX-SUMMARY.md` (commit `e777394`) |
-| Fix 45-02 newly visible: CI now executes 207 tests (was 0); 26 fail across 3 pre-existing classes — (1) ungitignored `.pi/evals/ptc/baselines` + `recipes/*.py`, (2) missing `pi-hashline-readmap`, (3) missing `ast-grep`/`sg` | Phase 45 / Phase 48 candidate | Routing decision pending: follow-on `/paul:fix` vs defer to Phase 48 vs accept-as-is |
+| Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
 - Last committed checkpoint: `6fef3f4` (`docs(phase-45): pi compat audit (45-01)`) on `feat/hashline-native-interop`
 - Branch: `feat/hashline-native-interop` (pushed to origin)
-- Open PR: [#1](https://github.com/coctostan/pi-ptc-next/pull/1) `feat/hashline-native-interop -> main` (mergeable; CI `Verify release baseline` still FAILURE after Fix 45-02 because the Node-22 bump revealed 26 pre-existing CI fixture/env failures — see Fixes table)
+- Open PR: [#1](https://github.com/coctostan/pi-ptc-next/pull/1) `feat/hashline-native-interop -> main` (mergeable; CI `Verify release baseline` SUCCESS 207/207 after Fix 45-02 + 45-03 — merge gate clear; ready for Phase 45 UNIFY merge or Phase 46 planning)
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
 ## Session Continuity
 Last session: 2026-05-11
