@@ -9,9 +9,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 ## Current State
 | Attribute | Value |
 |-----------|-------|
-| Version | 0.15.0 |
+| Version | 0.16.0 |
 | Status | Prototype |
-| Last Updated | 2026-05-11 |
+| Last Updated | 2026-05-12 |
 
 ## Requirements
 ### Validated (Shipped)
@@ -47,7 +47,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-- [ ] Phase 48 compatibility proof and release readiness: reconcile final Pi compatibility evidence, dependency-audit advisories, CI/release proof, and bounded release notes for the 0.16.0 milestone
+- [ ] Next milestone not yet defined.
 ### Validated (Shipped)
 - [x] Restored the P0 file-discovery helper path by removing `glob(limit=...)` dependency and proving bounded success for `ptc.read_tree()`, `ptc.find_files()`, and `ptc.find_files_abs()` in live audit coverage — Phase 39
 - [x] Improved syntax/compile-time error surfacing so pre-terminal Python failures now expose actionable `SyntaxError`/traceback context instead of generic RPC closure messaging — Phase 40
@@ -58,6 +58,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Produced a Pi 0.74.0 compatibility delta audit (`.paul/phases/45-pi-api-and-documentation-delta-audit/45-01-PI-COMPAT-AUDIT.md`) covering installed-vs-latest evidence baseline, an 18-row extension API compatibility matrix, 6 prompt-integration findings, and a bounded Phase 46/47/48 remediation handoff with 6 explicit deferrals — Phase 45
 - [x] Aligned runtime compatibility to latest Mario-scope Pi packages (`@mariozechner/*@0.73.1`), preserved Pi `sourceInfo` separately from PTC's internal `source` taxonomy, and added hashline bridge no-executor observability while preserving builtin fallback — Phase 46
 - [x] Added Pi prompt metadata for `code_execution`, idempotent `systemPromptOptions`-aware fallback auto-routing, custom-tool prompt metadata preservation, and focused README/CHANGELOG guidance while preserving the Phase 46 Mario-scope compatibility decision — Phase 47
+- [x] Finalized the `0.16.0` compatibility-proof release candidate: package metadata + lockfile + verify-release-package script aligned, new `test/release-readiness.test.ts` (7-test drift suite), new `docs/releases/0.16.0.md`, README/CHANGELOG/runbook repointed, and DEAN audit baseline (`4 critical / 0 high / 3 moderate / 0 low`, valid through 2026-06-11) acknowledged at human-verify checkpoint — Phase 48
 - [x] Full live audit: 51 tests across 3 phases proving 94% of helpers work, with stress testing (concurrency, large files, output budgets) and 7 multi-tool composition workflows all passing. 1 P0 bug found (glob/limit), 2 P1, 2 P2 issues documented — Milestone 14
 - [x] Systematic live-tool audit of all 21 Python helpers and 8 pipeline capabilities — Phase 36
 - [x] Added user-facing recipe workflow documentation and ecosystem composition proof — Phase 35
@@ -144,6 +145,8 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Target latest Mario-scope Pi packages for Phase 46 instead of hard-switching to `@earendil-works/*` | The user is still on the Mario package scope; latest-Mario alignment removes the older 0.55.1 drift without breaking local installs | 2026-05-11 | Active |
 | Keep Pi `sourceInfo` separate from PTC's internal `source` taxonomy | Python helper metadata depends on stable `source: builtin | alias | extension`; preserving host provenance separately avoids a backwards-incompatible metadata change | 2026-05-11 | Active |
 | Surface `code_execution` through Pi prompt metadata while keeping auto-route fallback idempotent | Native `promptSnippet` / `promptGuidelines` make the tool visible in Pi's default prompt, while fallback injection remains conservative and skips duplicate guidance when `systemPromptOptions` already selected equivalent code_execution routing | 2026-05-11 | Active |
+| Ship `0.16.0` as a release candidate with an explicitly acknowledged dependency-audit baseline rather than blocking on advisory remediation | The Milestone 17 scope was compatibility proof and release readiness, not advisory remediation; documenting the DEAN baseline with a tracked expiry inside `.paul/dean-baseline.json`, the changelog, and the release note preserves honesty about audit posture while letting the milestone close on its actual scope | 2026-05-12 | Active |
+| Use a focused 7-test release-readiness drift suite (`test/release-readiness.test.ts`) as the durable guard for version/doc/script alignment | A single file-local test pattern across package.json, lockfile, verify-script, release note, README, CHANGELOG, and runbook is cheap to maintain (only constants change per release) and prevents the recurring 0.x → 0.x doc-drift class of bug | 2026-05-12 | Active |
 
 ## Success Metrics
 | Metric | Target | Current | Status |
@@ -181,4 +184,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-05-11 after Phase 47 completion (system prompt and tool guidance optimization)*
+*Last updated: 2026-05-12 after Phase 48 completion (compatibility proof and release readiness, Milestone 17 closed at 0.16.0)*

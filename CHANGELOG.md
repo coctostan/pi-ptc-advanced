@@ -4,12 +4,28 @@ This changelog tracks notable release-facing changes for the fork repository `pi
 
 ## Unreleased
 
+_No changes yet._
+
+## 0.16.0 — 2026-05-12
+
 ### Added
 - `code_execution` now registers Pi prompt metadata (`promptSnippet` and active-only `promptGuidelines`) so the default system prompt exposes when to use Python-backed batching, aggregation, and compact results.
 - PTC-managed custom tools now preserve user-authored `promptSnippet` and `promptGuidelines` when registering with Pi.
+- A durable Pi compatibility audit at `.paul/phases/45-pi-api-and-documentation-delta-audit/45-01-PI-COMPAT-AUDIT.md` covering the compatibility delta and prompt-integration findings.
+- A no-executor observability warning in the hashline executor bridge while preserving builtin fallback.
+- A focused release-readiness regression test at `test/release-readiness.test.ts` that prevents stale release metadata, doc-link, audit-caveat, and verification-script drift.
+- `docs/releases/0.16.0.md` documenting the Milestone 17 compatibility-proof and release-readiness baseline.
 
 ### Changed
-- Prompt-time auto-routing now skips duplicate routing text when Pi `systemPromptOptions` already include equivalent `code_execution` guidance. The local compatibility target remains the latest Mario-scope Pi packages from Phase 46, not a hard `@earendil-works/*` migration.
+- Package metadata and release-package verification now target `pi-ptc-advanced@0.16.0`.
+- The active documented release baseline now points to `0.16.0`; `0.15.0` and `0.8.0` remain available as historical release context.
+- The local compatibility target remains the latest Mario-scope Pi packages (`@mariozechner/*@0.73.1`); this is explicitly not a hard `@earendil-works/*` migration.
+- Prompt-time auto-routing skips duplicate routing text when Pi `systemPromptOptions` already include equivalent `code_execution` guidance.
+
+### Deferred / not included
+- Automated tagging, npm publish, and release GitHub Actions automation remain intentionally out of scope.
+- Bridge teardown still depends on Pi exposing `getToolExecutor()` on `ExtensionAPI`.
+- The dependency audit is explicitly **not** clean for this release. `npm audit --json` currently reports `4 critical / 0 high / 3 moderate / 0 low`; this baseline is recorded in `.paul/dean-baseline.json` and valid through `2026-06-11`. Remediation is deferred and treated as a separate manual decision before any publish action.
 
 ## 0.15.0 — 2026-03-27
 
