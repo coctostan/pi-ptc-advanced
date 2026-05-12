@@ -150,14 +150,14 @@ PLAN ──▶ APPLY ──▶ UNIFY
 ### Git State
 - Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
 - Branch: `feature/51-path-ergonomics-bridge-helpers` created from synced `main` for Phase 51 APPLY.
-- PR #6: MERGED — https://github.com/coctostan/pi-ptc-next/pull/6; Phase 51 PR not yet created at APPLY completion.
+- PR #7: OPEN — https://github.com/coctostan/pi-ptc-next/pull/7 for Phase 51 APPLY branch `feature/51-path-ergonomics-bridge-helpers`; CI pending at APPLY handoff.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
 Stopped at: Phase 51 APPLY complete; UNIFY pending
 Next action: `/paul:unify .paul/phases/51-path-ergonomics-and-bridge-helpers/51-01-PLAN.md`
 Resume file: `.paul/phases/51-path-ergonomics-and-bridge-helpers/51-01-PLAN.md`
-wip_result: implementation complete; verification passed; SUMMARY/UNIFY not yet written.
+wip_result: implementation committed (`83c1605`), pushed, and PR #7 opened; SUMMARY/UNIFY not yet written.
 Resume context:
 - APPLY implemented all 3 plan tasks: RED helper tests, runtime helper implementation, and docs/prompt/CHANGELOG updates.
 - Verification evidence: focused helper/report/docs tests passed; `npm test` passed with 230 passing / 0 failing; `npm run build` passed; `npm audit --json` remained 0 critical / 0 high / 3 moderate.
