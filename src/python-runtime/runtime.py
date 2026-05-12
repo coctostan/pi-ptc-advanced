@@ -2,6 +2,9 @@ import asyncio as _ptc_asyncio
 import json as _ptc_json
 import os as _ptc_os
 import sys as _ptc_sys
+import re as _ptc_re
+import subprocess as _ptc_subprocess
+import time as _ptc_time
 import traceback as _ptc_traceback
 from typing import Any, Callable, Coroutine, Iterable, Sequence
 
@@ -128,6 +131,15 @@ _DEFAULT_FIT_OUTPUT_MAX_DEPTH = 3
 _FIT_OUTPUT_KIND = "fit_output"
 _REPORT_KIND = "ptc_report"
 _REPORT_VERSION = 1
+
+_NODE_TEST_RUNNER_TIMEOUT_SECONDS = 120
+_NODE_TEST_RUNNER_MAX_FAILURES = 10
+_NODE_TEST_RUNNER_MAX_SAMPLE_CHARS = 1000
+_NODE_TEST_RUNNER_PATTERN_FORBIDDEN = ("|", ";", "&", "`", "$", "\n", "\r", "\x00")
+_NODE_TEST_RUNNER_TAP_SUMMARY = _ptc_re.compile(r"^#\s*(tests|pass|fail|skipped|todo|cancelled|duration_ms)\s+([0-9.]+)\s*$")
+_NODE_TEST_RUNNER_TAP_NOT_OK = _ptc_re.compile(r"^not\s+ok\s+(\d+)\s*-\s*(.+?)\s*$")
+_NODE_TEST_RUNNER_STREAM_SUMMARY = _ptc_re.compile("^[\u2139\\s]*(tests|pass|fail|skipped|todo|cancelled|duration_ms)\\s+([0-9.]+)\\s*$")
+_NODE_TEST_RUNNER_STREAM_FAIL = _ptc_re.compile("^[\u2716\u2717xX\u2718]\\s+(.+?)\\s*(?:\\([0-9.]+ms\\))?\\s*$")
 
 
 def _push_response_handle(handles: list[SupportedHandle], seen: set[str], response_id: str) -> None:
@@ -412,6 +424,95 @@ def _normalize_report_warnings(warnings: Any) -> list[str]:
             raise ValueError(f"warnings[{warning_index}] must be a string")
         normalized.append(warning)
     return normalized
+
+
+def _parse_node_test_output(stdout: str, stderr: str) -> dict[str, Any]:
+    """Best-effort bounded parser for ``node --test`` output.
+
+    Reads the TAP-style ``# tests`` / ``# pass`` summary keys when present and
+    falls back to the human-readable ``ℹ tests N`` stream summary that the
+    default reporter emits. Failure names are gathered from TAP ``not ok``
+    lines and from the human-readable failing-tests block. The function does
+    not raise; callers fall back to bounded stdout/stderr samples when no
+    summary line is recognized.
+    """
+    parsed: dict[str, Any] = {
+        "total": None,
+        "passed": None,
+        "failed": None,
+        "skipped": None,
+        "todo": None,
+        "cancelled": None,
+        "duration_ms": None,
+        "failed_names": [],
+        "summary_seen": False,
+    }
+
+    failed_names: list[str] = []
+    seen_failed_names: set[str] = set()
+    summary_keys = {"tests", "pass", "fail", "skipped", "todo", "cancelled", "duration_ms"}
+    summary_key_to_metric = {
+        "tests": "total",
+        "pass": "passed",
+        "fail": "failed",
+        "skipped": "skipped",
+        "todo": "todo",
+        "cancelled": "cancelled",
+        "duration_ms": "duration_ms",
+    }
+
+    def _record_summary(key: str, raw_value: str) -> None:
+        metric = summary_key_to_metric.get(key)
+        if not metric:
+            return
+        if metric == "duration_ms":
+            try:
+                parsed["duration_ms"] = int(float(raw_value))
+            except (TypeError, ValueError):
+                pass
+            return
+        try:
+            parsed[metric] = int(raw_value)
+        except (TypeError, ValueError):
+            try:
+                parsed[metric] = int(float(raw_value))
+            except (TypeError, ValueError):
+                pass
+
+    def _record_failed(name: str) -> None:
+        cleaned = name.strip()
+        if not cleaned or cleaned in seen_failed_names:
+            return
+        seen_failed_names.add(cleaned)
+        failed_names.append(cleaned)
+
+    combined_stream = "\n".join(part for part in (stdout, stderr) if part)
+    for raw_line in combined_stream.splitlines():
+        line = raw_line.rstrip()
+        if not line:
+            continue
+        tap_match = _NODE_TEST_RUNNER_TAP_SUMMARY.match(line)
+        if tap_match:
+            parsed["summary_seen"] = True
+            _record_summary(tap_match.group(1), tap_match.group(2))
+            continue
+        tap_not_ok = _NODE_TEST_RUNNER_TAP_NOT_OK.match(line)
+        if tap_not_ok:
+            _record_failed(tap_not_ok.group(2))
+            continue
+        stream_match = _NODE_TEST_RUNNER_STREAM_SUMMARY.match(line)
+        if stream_match and stream_match.group(1) in summary_keys:
+            parsed["summary_seen"] = True
+            _record_summary(stream_match.group(1), stream_match.group(2))
+            continue
+        stream_fail = _NODE_TEST_RUNNER_STREAM_FAIL.match(line)
+        if stream_fail:
+            candidate = stream_fail.group(1).strip()
+            if candidate and not candidate.lower().startswith("failing tests"):
+                _record_failed(candidate)
+
+    parsed["failed_names"] = failed_names
+    return parsed
 
 
 def _is_ptc_report(value: Any) -> bool:
@@ -970,6 +1071,161 @@ class _PtcHelpers:
             or result["stats"]["previewChars"] > limits["max_chars"]
         )
         return _fit_result_to_char_budget(result, limits["max_chars"])
+
+    def run_tests(self, pattern: str) -> dict[str, Any]:
+        """Run Node's built-in `node --test <pattern>` from the active runtime
+        workspace and return a Phase 50-compatible ``ptc.report`` describing
+        pass/fail metrics, duration, command metadata, runner availability,
+        warnings, and a bounded failures table.
+
+        Failing tests, missing runner, and timeouts are represented as report
+        data; only invalid helper arguments raise ``ValueError``. The helper
+        uses an explicit argument list and never spawns a shell.
+        """
+        if not isinstance(pattern, str) or not pattern.strip():
+            raise ValueError("pattern must be a non-empty string")
+        if _ptc_os.path.isabs(pattern):
+            raise ValueError(
+                "pattern must be a non-empty string scoped to the runtime workspace; absolute paths are rejected"
+            )
+        normalized_pattern = pattern.replace("\\", "/")
+        if ".." in normalized_pattern.split("/"):
+            raise ValueError(
+                "pattern must be a non-empty string with no parent-directory ('..') traversal"
+            )
+        for forbidden in _NODE_TEST_RUNNER_PATTERN_FORBIDDEN:
+            if forbidden in pattern:
+                raise ValueError(
+                    "pattern must be a non-empty string without shell-control characters (|, ;, &, `, $, newline)"
+                )
+
+        command = ["node", "--test", pattern]
+        # Scrub node:test reentry markers so a Node test that calls
+        # ptc.run_tests(...) doesn't inherit the outer runner context and
+        # trigger "node:test run() is being called recursively" warnings.
+        child_env = {
+            key: value
+            for key, value in _ptc_os.environ.items()
+            if key not in ("NODE_TEST_CONTEXT", "NODE_RUN_SCRIPT_NAME")
+        }
+        warnings_list: list[str] = []
+        runner_available = True
+        exit_code: int | None = None
+        stdout = ""
+        stderr = ""
+        timed_out = False
+        start = _ptc_time.monotonic()
+        try:
+            completed = _ptc_subprocess.run(
+                command,
+                cwd=_PTC_RUNTIME_WORKSPACE_ROOT,
+                text=True,
+                capture_output=True,
+                shell=False,
+                check=False,
+                env=child_env,
+                timeout=_NODE_TEST_RUNNER_TIMEOUT_SECONDS,
+            )
+        except FileNotFoundError:
+            runner_available = False
+            warnings_list.append(
+                "node executable not found in the active runtime; ptc.run_tests reports an empty report and runner_available=false."
+            )
+        except _ptc_subprocess.TimeoutExpired as timeout_error:
+            timed_out = True
+            stdout = timeout_error.stdout if isinstance(timeout_error.stdout, str) else ""
+            stderr = timeout_error.stderr if isinstance(timeout_error.stderr, str) else ""
+            warnings_list.append(
+                f"node --test exceeded the {_NODE_TEST_RUNNER_TIMEOUT_SECONDS}s timeout and was terminated; metrics may be partial."
+            )
+        else:
+            stdout = completed.stdout or ""
+            stderr = completed.stderr or ""
+            exit_code = completed.returncode
+        duration_ms = max(0, int((_ptc_time.monotonic() - start) * 1000))
+
+        metrics: dict[str, Any] = {
+            "runner": "node --test",
+            "runner_available": runner_available,
+            "pattern": pattern,
+            "cwd": ".",
+            "command": " ".join(command),
+            "exit_code": exit_code,
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "todo": 0,
+            "cancelled": 0,
+            "duration_ms": duration_ms,
+            "timed_out": timed_out,
+        }
+
+        tables: list[dict[str, Any]] = []
+        samples: list[dict[str, Any]] = []
+
+        if runner_available:
+            parsed = _parse_node_test_output(stdout, stderr)
+            for key in ("total", "passed", "failed", "skipped", "todo", "cancelled"):
+                if parsed.get(key) is not None:
+                    metrics[key] = int(parsed[key])
+            if parsed.get("duration_ms") is not None:
+                metrics["duration_ms"] = parsed["duration_ms"]
+
+            failed_names = parsed.get("failed_names") or []
+            if failed_names:
+                rows = [
+                    {"index": idx + 1, "name": name}
+                    for idx, name in enumerate(failed_names[:_NODE_TEST_RUNNER_MAX_FAILURES])
+                ]
+                tables.append(
+                    {
+                        "title": "Failing tests",
+                        "columns": ["index", "name"],
+                        "rows": rows,
+                    }
+                )
+                if len(failed_names) > _NODE_TEST_RUNNER_MAX_FAILURES:
+                    warnings_list.append(
+                        f"truncated failures table to first {_NODE_TEST_RUNNER_MAX_FAILURES} of {len(failed_names)} reported failed tests."
+                    )
+
+            parser_incomplete = parsed.get("summary_seen") is False
+            if exit_code not in (0, None) and metrics["failed"] == 0:
+                parser_incomplete = True
+                metrics["failed"] = max(metrics["failed"], 1)
+            if parser_incomplete:
+                stdout_sample = stdout[-_NODE_TEST_RUNNER_MAX_SAMPLE_CHARS:] if stdout else ""
+                stderr_sample = stderr[-_NODE_TEST_RUNNER_MAX_SAMPLE_CHARS:] if stderr else ""
+                samples.append(
+                    {
+                        "label": "node --test output (parse fallback)",
+                        "value": {
+                            "stdout_tail": stdout_sample,
+                            "stderr_tail": stderr_sample,
+                        },
+                    }
+                )
+                warnings_list.append(
+                    "could not parse summary counts from node --test output; falling back to bounded stdout/stderr samples."
+                )
+
+        title_state = (
+            "runner unavailable"
+            if not runner_available
+            else ("timed out" if timed_out else ("failed" if metrics["failed"] > 0 else "passed"))
+        )
+        title = f"node --test {pattern} ({title_state})"
+
+        return {
+            "kind": _REPORT_KIND,
+            "version": _REPORT_VERSION,
+            "title": title,
+            "metrics": _normalize_report_metrics(metrics),
+            "tables": _normalize_report_tables(tables),
+            "samples": _normalize_report_samples(samples),
+            "warnings": _normalize_report_warnings(warnings_list),
+        }
 
     def report(
         self,

@@ -9,3 +9,4 @@ See modules/codi/references/codi-instrumentation.md for schema, outcome taxonomy
 | 50-01 | 2026-05-12 | injected | 1 | 0 | 1 | renderCompletedOutput | y |
 | 51-01 | 2026-05-12 | no-dispatch-found | — | — | — | — | n |
 | 52-01 | 2026-05-12 | no-dispatch-found | — | — | — | — | n |
+| 53-01 | 2026-05-12 | injected | 1 | 0 | 4 | buildToolDescription, generateToolWrappers | y |

@@ -18,7 +18,7 @@ Reference: `.paul/notes/2026-05-12-ptc-leverage-brief.md` (pre-planning thesis, 
 | 50 | Structured Report Type | 50-01 | ✅ Complete | 2026-05-12 |
 | 51 | Path Ergonomics and Bridge Helpers | 51-01 | ✅ Complete | 2026-05-12 |
 | 52 | Callable-Tool Introspection | 52-01 | ✅ Complete | 2026-05-12 |
-| 53 | Test Runner Verb | TBD | Not started | - |
+| 53 | Test Runner Verb | 53-01 | ✅ Complete | 2026-05-12 |
 
 ### Phase 49: Pi TUI Audit and Collapsible Code Body
 Focus: Audit Pi's TUI primitives (`@mariozechner/pi-tui`, any newer Pi 0.74.0 render hooks) for collapsible/disclosure components, native table/record renderers, tool-call tree rendering, header-with-summary affordances, and theming hooks; then replace `renderCompletedOutput`'s discard of `details.userCode` with a collapsible post-completion view that preserves the Python source after a `code_execution` call completes. Carries a small prompt-guidelines clarifier teaching the agent to choose `nu` vs `code_execution`. Outcome of the audit informs Phase 50's render hook so we prefer Pi primitives over local reimplementations.
@@ -38,6 +38,7 @@ Plans: 52-01 complete — propagated optional `promptSnippet` / `promptGuideline
 
 ### Phase 53: Test Runner Verb
 Focus: Add `ptc.run_tests(pattern)` as a first-class verb that runs `node --test` against a pattern and parses pass/fail/duration into a structured Phase 50 report with a failures list and summary metrics. Cross-runner support (vitest/jest/pytest) and sandbox/Docker policy interactions are scoped during planning. Provides the agent a single ergonomic verb in place of bespoke subprocess + string-parsing patterns.
+Plans: 53-01 planned — TDD plan will add RED helper/guidance tests, implement sandbox-respecting `ptc.run_tests(pattern)` in the Python runtime using Node's built-in `node --test`, return Phase 50 `ptc_report` summaries for passing/failing/unavailable runs, document Node-only scope, and keep cross-runner/package-script/Docker-image changes deferred.
 
 ## Completed Milestones
 <details>
@@ -258,4 +259,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-12 after Phase 52 completion (52-01)*
+*Last updated: 2026-05-12 after Phase 53 UNIFY completion (53-01); Milestone 18 at 5 of 5 phases complete*
