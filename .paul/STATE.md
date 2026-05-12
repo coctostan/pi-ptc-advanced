@@ -144,8 +144,8 @@ PLAN ──▶ APPLY ──▶ UNIFY
 Last session: 2026-05-12
 Stopped at: Milestone 17 complete; awaiting next-milestone decision
 Next action: `/paul:plan` to start the next milestone (e.g., 0.17.0 dependency-advisory remediation or automated publish), or pause and treat 0.16.0 as a manual release gate
-Resume file: .paul/ROADMAP.md
-wip_result: n/a
+Resume file: .paul/HANDOFF-2026-05-12-milestone17-complete.md
+wip_result: skipped — base-branch (on `main`, no uncommitted tracked changes)
 Resume context:
 - Milestone 17 closed at `0.16.0` with the compatibility-proof release candidate.
 - DEAN audit baseline acknowledged at the Phase 48 human-verify checkpoint; advisory remediation is deferred and tracked in `CHANGELOG.md` 0.16.0 Deferred section and `.paul/dean-baseline.json` (override valid through 2026-06-11).
