@@ -147,10 +147,11 @@ Last session: 2026-05-12
 Stopped at: Phase 49 APPLY complete; paused before UNIFY for 49-01
 Next action: `/paul:unify` for `.paul/phases/49-pi-tui-audit-and-collapsible-code-body/49-01-PLAN.md`
 Resume file: none — prior Phase 49 PLAN handoff consumed and archived to `.paul/handoffs/archive/HANDOFF-2026-05-12-phase49-plan-complete.md`
-wip_result: not run — APPLY completed on `feature/49-pi-tui-audit-and-collapsible-code-body`; postflight commit/PR left for github-flow follow-up/UNIFY because lifecycle planning artifacts and implementation changes are currently staged as one working set.
+github_flow_postflight: commit `6e90062`, pushed branch `feature/49-pi-tui-audit-and-collapsible-code-body`, opened PR https://github.com/coctostan/pi-ptc-next/pull/5 targeting `main`; CI/review status to be reconciled during UNIFY.
 Resume context:
 - APPLY changed `.paul/phases/49-pi-tui-audit-and-collapsible-code-body/49-01-PI-TUI-AUDIT.md`, `src/index.ts`, `test/code-execution-rendering.test.ts`, `test/prompt-guidance.test.ts`, `README.md`, and `CHANGELOG.md`.
 - Verification passed: `node --test test/code-execution-rendering.test.ts test/prompt-guidance.test.ts`; `npm test && npm run build` (223 tests, 0 failures).
+- GitHub Flow postflight passed: branch pushed and PR #5 opened at https://github.com/coctostan/pi-ptc-next/pull/5.
 - Module notes: DEAN audit still reports 0 critical / 0 high / 3 moderate; no new critical/high dependency regression. Security/performance/resilience spot checks on changed runtime/test files found no blocking matches.
 - UNIFY should reconcile one implementation deviation: runtime used Pi TUI `getKeybindings()` with the active render `theme` to produce the expansion hint instead of directly importing `keyHint` from `@mariozechner/pi-coding-agent`, because this CommonJS package cannot safely runtime-import that ESM-only exported entrypoint while preserving package installability.
 
