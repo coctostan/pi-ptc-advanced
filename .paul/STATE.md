@@ -4,19 +4,19 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Phase 48 will complete compatibility proof and release readiness for the 0.16.0 milestone, building on Phase 47 prompt metadata integration and carrying forward current dependency-audit advisory reconciliation.
+**Current focus:** Milestone 17 is complete (0.16.0 compatibility-proof release candidate shipped behind PR #4 with acknowledged DEAN audit baseline). Awaiting next-milestone selection (likely candidates: 0.17.0 dependency-advisory remediation, automated publish workflow, or another scope).
 ## Current Position
-Milestone: Milestone 17 — Pi Compatibility and Prompt Integration Audit (0.16.0)
-Phase: 48 of 48 (Compatibility Proof and Release Readiness)
-Plan: 48-01 — Compatibility Proof and Release Readiness
-Status: APPLY complete; ready for UNIFY
-Last activity: 2026-05-12 — Phase 48 APPLY complete: package metadata + lockfile + verify-release-package script bumped to `pi-ptc-advanced@0.16.0`; new `test/release-readiness.test.ts` (7 tests) and `docs/releases/0.16.0.md`; README/CHANGELOG/runbook repointed to 0.16.0; full verification PASS (220/0); DEAN audit baseline acknowledged at human-verify checkpoint
+Milestone: Milestone 17 — Pi Compatibility and Prompt Integration Audit (0.16.0) — ✓ COMPLETE
+Phase: 48 of 48 (Compatibility Proof and Release Readiness) — ✓ Complete
+Plan: Not started (Milestone 17 closed)
+Status: Milestone 17 complete; ready to plan next milestone
+Last activity: 2026-05-12 — Phase 48 UNIFY complete; SUMMARY at `.paul/phases/48-compatibility-proof-and-release-readiness/48-01-SUMMARY.md`; Milestone 17 closed at `0.16.0`; PR #4 awaiting merge-gate processing
 Progress:
-- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [█████████░] 90% (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 planned)
+- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
 - Phase 47 — System Prompt and Tool Guidance Optimization: [██████████] 100% ✓
-- Phase 48 — Compatibility Proof and Release Readiness: [███████░░░] 70% APPLY complete
+- Phase 48 — Compatibility Proof and Release Readiness: [██████████] 100% ✓
 - Milestone 15 — Bug Fixes and Helper Hardening: [██████████] 100% ✓
 - Milestone 16 — Publishable Fork Packaging: [██████████] 100% ✓
 - Phase 42 — Rename and Package Identity: [██████████] 100% ✓
@@ -56,7 +56,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Phase 48 APPLY complete; ready for UNIFY]
+  ✓        ✓        ✓     [Phase 48 UNIFY complete; Milestone 17 closed]
 ```
 
 ## Accumulated Context
@@ -129,28 +129,28 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Existing docs/test hotspots remain in `README.md` (853 lines), `src/index.ts` (424 lines), and `test/index.test.ts` (1220 lines); future proof/docs work should keep using focused companion files or extract sections before growing those anchors further
 - Full-suite verification now passes at `207` passing / `0` failing after Phase 41 APPLY; maintain this as the new baseline for subsequent milestones
 - Phase 44 removed packaged Python bytecode/cache artifacts from the tarball surface and added packed-artifact installability proof; preserve this publish-surface invariant in future release work
-- Phase 48 must reconcile current `npm audit --json` advisory counts (4 critical / 0 high / 3 moderate during Phase 47 UNIFY) against the existing DEAN baseline and Mario-scope compatibility target before declaring 0.16.0 release readiness.
+- Phase 48 shipped the 0.16.0 release candidate with explicit DEAN audit baseline acknowledgement (`4 critical / 0 high / 3 moderate / 0 low`, valid through 2026-06-11); advisory remediation is now a deferred follow-up tracked in `CHANGELOG.md` 0.16.0 Deferred section and `.paul/dean-baseline.json`.
 
 ### Fixes
 | Fix 45-02 (standard, PARTIAL): bump CI Actions `node-version` 20→22 to fix `.ts` test loader | Phase 45 side-loop | `.github/workflows/ci.yml`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX.md`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX-SUMMARY.md` (commit `e777394`) |
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
-- Last pushed checkpoint: `07a6d14` (`docs(state): record phase 47 merge gate`) on `main`
-- Branch: `main` synced with `origin/main`; Phase 48 planning changes are local/uncommitted
-- PR #3: merged; Phase 48 PR not created yet
-- Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
+- Last pushed checkpoint: `906379c` (`feat(48): release 0.16.0 compatibility-proof candidate`) on `feature/48-compatibility-proof-release-readiness`
+- Branch: `feature/48-compatibility-proof-release-readiness` pushed to `origin`; `main` last synced at `07a6d14`
+- PR #4: OPEN / MERGEABLE against `main`; CI in progress at APPLY time; merge-gate is the UNIFY responsibility per github-flow
+- Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
-Stopped at: Phase 48 APPLY complete; ready for UNIFY
-Next action: /paul:unify .paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md
-Resume file: .paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md
-wip_result: skipped — base-branch; current branch is `main`, so PAUSE did not create a WIP commit under github-flow rules
+Stopped at: Milestone 17 complete; awaiting next-milestone decision
+Next action: process PR #4 merge gate (CI → review → merge → base sync → branch cleanup) then `/paul:plan` for the next milestone, or pause
+Resume file: .paul/ROADMAP.md
+wip_result: n/a
 Resume context:
-- Phase 48 plan is ready at `.paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md`; plan type is TDD with one human verification checkpoint before UNIFY.
-- User selected DEAN override during planning; `.paul/dean-baseline.json` records 4 critical / 0 high / 3 moderate findings through 2026-06-11.
-- Working tree has local `.paul/**` planning/handoff changes; APPLY must recheck git state and start from a non-base feature branch.
-- Preserve the Phase 48 boundary: no dependency/version changes beyond root package metadata to `0.16.0` unless explicitly redirected.
+- Milestone 17 closed at `0.16.0` with the compatibility-proof release candidate.
+- DEAN audit baseline acknowledged at the Phase 48 human-verify checkpoint; advisory remediation is deferred and tracked in `CHANGELOG.md` 0.16.0 Deferred section and `.paul/dean-baseline.json` (override valid through 2026-06-11).
+- PR #4 still needs to clear the github-flow merge gate (CI, optional review, merge, base sync, branch cleanup) before the next milestone's APPLY can run from a refreshed `main`.
+- Next planning decision is whether to open a 0.17.0 milestone (e.g., advisory remediation or automated publish workflow), or pause and treat 0.16.0 as a manual release gate.
 
 ---
-*STATE.md — Updated after Phase 48 pause handoff (last updated: 2026-05-12)*
+*STATE.md — Updated after Phase 48 UNIFY / Milestone 17 transition (last updated: 2026-05-12)*

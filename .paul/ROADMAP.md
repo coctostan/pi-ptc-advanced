@@ -4,16 +4,16 @@
 Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime interop and structured Python integration.
 
 ## Current Milestone
-**Milestone 17 — Pi Compatibility and Prompt Integration Audit** (`0.16.0`)
-Status: 🚧 In Progress
-Phases: 3 of 4 complete (75%); Phase 48 planned / ready for APPLY
+**Milestone 17 — Pi Compatibility and Prompt Integration Audit** (`0.16.0`) — ✅ Complete (2026-05-12)
+Status: ✅ Complete
+Phases: 4 of 4 complete (100%)
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 45 | Pi API and Documentation Delta Audit | 1/1 | ✅ Complete | 2026-05-11 |
 | 46 | Extension Runtime Compatibility Alignment | 1/1 | ✅ Complete | 2026-05-11 |
 | 47 | System Prompt and Tool Guidance Optimization | 1/1 | ✅ Complete | 2026-05-11 |
-| 48 | Compatibility Proof and Release Readiness | 1/1 | APPLY complete / Ready for UNIFY | - |
+| 48 | Compatibility Proof and Release Readiness | 1/1 | ✅ Complete | 2026-05-12 |
 
 ### Phase 45: Pi API and Documentation Delta Audit
 Focus: Compare `pi-ptc-advanced` against both the installed local Pi package and latest published Pi package/docs/source to identify API drift, deprecated assumptions, new extension capabilities, and prompt/tool-description convention changes.
@@ -29,7 +29,7 @@ Plans: 47-01 complete — produced `47-01-SUMMARY.md`: added RED coverage, regis
 
 ### Phase 48: Compatibility Proof and Release Readiness
 Focus: Add or refresh tests, docs, compatibility notes, and release verification for the `0.16.0` compatibility milestone.
-Plans: 48-01 planned — `.paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md` will add TDD release-readiness drift coverage, align package/release verification metadata to `0.16.0`, update README/CHANGELOG/runbook/release notes, run full release verification, and human-gate release readiness with the acknowledged dependency-audit baseline (4 critical / 0 high / 3 moderate).
+Plans: 48-01 complete — produced `48-01-SUMMARY.md`: bumped package metadata / lockfile root / `scripts/verify-release-package.sh` to `pi-ptc-advanced@0.16.0`; added focused `test/release-readiness.test.ts` (7-test drift suite, RED → GREEN); added `docs/releases/0.16.0.md`; repointed README, CHANGELOG, and personal-fork runbook to 0.16.0 (with 0.15.0 preserved as "Previous baseline"); full local verification passed (npm test 220/0, build, verify:release-package, verify:ci); DEAN audit baseline acknowledged at human-verify checkpoint (`4 critical / 0 high / 3 moderate / 0 low`, valid through 2026-06-11). PR #4 opened; merge gate pending.
 
 ## Completed Milestones
 <details>
@@ -234,4 +234,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-12 after Phase 48 PLAN creation*
+*Last updated: 2026-05-12 after Phase 48 UNIFY / Milestone 17 closure (0.16.0)*
