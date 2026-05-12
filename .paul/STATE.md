@@ -152,13 +152,14 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
 - Phase 51 feature branch `feature/51-path-ergonomics-bridge-helpers` merged to `main` via PR #7 squash merge at `b2dc14b`; remote branch deleted by merge automation.
 - PR #7: MERGED — https://github.com/coctostan/pi-ptc-next/pull/7; GitHub Actions `Verify release baseline` and Socket checks SUCCESS.
+- PR #8: OPEN — https://github.com/coctostan/pi-ptc-next/pull/8 for Phase 52 APPLY branch `feature/52-callable-tool-introspection`; CI pending at APPLY handoff.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
 Stopped at: Phase 52 APPLY complete; UNIFY pending
 Next action: `/paul:unify .paul/phases/52-callable-tool-introspection/52-01-PLAN.md`
 Resume file: `.paul/phases/52-callable-tool-introspection/52-01-PLAN.md`
-wip_result: implementation complete; verification passed; SUMMARY/UNIFY not yet written.
+wip_result: implementation committed (`9601383`), pushed, and PR #8 opened; SUMMARY/UNIFY not yet written.
 Resume context:
 - APPLY implemented all 3 plan tasks: RED metadata/help-helper tests, GREEN metadata propagation plus `ptc.help(...)`, and docs/prompt guidance updates.
 - Verification evidence: focused callable introspection/prompt/index tests passed; `npm test` passed with 230 passing / 0 failing; `npm run build` passed; `npm audit --json` remained 0 critical / 0 high / 3 moderate.
