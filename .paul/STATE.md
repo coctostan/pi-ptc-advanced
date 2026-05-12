@@ -9,10 +9,10 @@ See: `.paul/PROJECT.md`
 Milestone: Milestone 18 — PTC Leverage and Output Shape (`0.17.0`)
 Phase: 53 of 53 (Test Runner Verb)
 Plan: `.paul/phases/53-test-runner-verb/53-01-PLAN.md`
-Status: APPLY complete — ready for UNIFY
-Last activity: 2026-05-12 — Phase 53 APPLY shipped `ptc.run_tests(pattern)` Node test runner helper (runtime, generated guidance, README/CHANGELOG); full suite 236/236 ✓, build clean, audit 0 critical / 0 high; PR #9 opened.
+Status: UNIFY complete — Phase 53 closed; Milestone 18 ready to complete
+Last activity: 2026-05-12 — Phase 53 UNIFY closed `ptc.run_tests(pattern)` with SUMMARY.md; all ACs PASS; full suite 236/236 ✓, build clean, audit 0 critical / 0 high; PR #9 awaiting CI/merge per github-flow.
 Progress:
-- Milestone 18 — PTC Leverage and Output Shape: [█████████░] 90% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ✓; Phase 53 PLAN ✓ / APPLY ✓ / UNIFY pending)
+- Milestone 18 — PTC Leverage and Output Shape: [██████████] 100% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ✓; Phase 53 ✓) — all plans unified; awaiting milestone-completion routing and PR #9 merge.
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
@@ -58,7 +58,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Phase 53 APPLY complete, ready for UNIFY]
+  ✓        ✓        ✓     [Phase 53 loop complete; Milestone 18 ready to complete]
 ```
 
 ## Accumulated Context
@@ -159,15 +159,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
-Stopped at: Phase 53 APPLY complete — awaiting UNIFY
-Next action: `/paul:unify .paul/phases/53-test-runner-verb/53-01-PLAN.md`
-Resume file: `.paul/phases/53-test-runner-verb/53-01-PLAN.md`
-wip_result: committed — Phase 53 APPLY changes committed and pushed; PR #9 opened against `main`.
+Stopped at: Phase 53 UNIFY complete; Milestone 18 ready to complete after PR #9 merges to main.
+Next action: `/paul:milestone` to close Milestone 18 (or merge PR #9 first if reviewing the feature branch is preferred)
+Resume file: `.paul/phases/53-test-runner-verb/53-01-SUMMARY.md`
+wip_result: committed — Phase 53 APPLY + lifecycle changes committed and pushed; PR #9 open against `main`; UNIFY artifacts pending commit on this branch.
 Resume context:
-- Plan path: `.paul/phases/53-test-runner-verb/53-01-PLAN.md`.
-- APPLY shipped: `ptc.run_tests(pattern)` Node test runner helper in `src/python-runtime/runtime.py`, generated guidance in `src/index.ts`, README + CHANGELOG, and live focused tests in `test/run-tests-helper.test.ts` + `test/index.test.ts`.
-- Verification: `npm test` 236/236 ✓; `npm run build` clean; `npm audit --json` 0 critical / 0 high / 3 moderate (baseline unchanged).
-- GitHub Flow: branch `feature/53-test-runner-verb` pushed; PR #9 open against `main`; CI informational for APPLY (UNIFY owns merge readiness).
+- SUMMARY path: `.paul/phases/53-test-runner-verb/53-01-SUMMARY.md`.
+- Final verification: `npm test` 236/236 ✓; `npm run build` clean; `npm audit --json` 0 critical / 0 high / 3 moderate (baseline unchanged through 2026-06-11).
+- GitHub Flow: branch `feature/53-test-runner-verb` pushed; PR #9 open against `main`; merge gate awaiting CI/review per pals.json (`require_pr_before_next_phase: true`, `require_reviews: false`, `ci_checks: true`).
+- Milestone 18 (`0.17.0`) is at 5 of 5 phases with PLAN/APPLY/UNIFY complete; milestone-completion routing is the next lifecycle step.
 
 ---
-*STATE.md — Updated after Phase 53 APPLY completion (last updated: 2026-05-12)*
+*STATE.md — Updated after Phase 53 UNIFY completion (last updated: 2026-05-12)*
