@@ -33,6 +33,7 @@ const CODE_EXECUTION_PROMPT_GUIDELINES = [
   "Use code_execution when custom per-item logic, stateful aggregation, complex return shapes, or multiple callable-tool orchestration is needed.",
   "Keep large intermediate results inside Python and return only the compact final answer the user needs.",
   "Use the callable tool list in the code_execution description; call ptc.list_callable_tools() only when branching on optional tools or when the needed tool may be unavailable.",
+  "Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool.",
 ];
 
 const CODE_EXECUTION_AUTO_ROUTE_PROMPT =
@@ -185,6 +186,7 @@ Python helpers currently available in this session:
 - ptc.expect_kind(value, kind) -> Any
 - ptc.list_callable_tools() -> list[dict[str, Any]]
 - ptc.get_tool_schema(name) -> dict[str, Any]
+- ptc.help(tool_name) -> dict[str, Any]
 - ptc.extract_handles(value, kind=None) -> list[SupportedHandle]
 - ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]
 - ptc.json_dump(value) -> str
@@ -194,6 +196,7 @@ Prefer these for string content:
 - ptc.read_text(path) always returns str (extracts raw text from structured results)
 - ptc.read_many(paths) always returns list[str]
 - ptc.read_tree(pattern) returns list[dict] where each entry["content"] is str
+- Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool; do not run introspection as a routine prelude.
 - ptc.tabulate(...) and ptc.diff(...) are bridge helpers for report payloads and explicit before/after comparisons; prefer nu for grouping, histograms, ranking, or pipeline-style data analysis.
 Use read(path) directly when you need structured anchored data (ReadResult with .lines[].anchor).
 Callable tool set for this session: ${callable || "(none)"}. Use this list directly unless your Python code needs to branch on optional tools.
