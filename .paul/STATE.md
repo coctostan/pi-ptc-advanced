@@ -8,11 +8,11 @@ See: `.paul/PROJECT.md`
 ## Current Position
 Milestone: Milestone 18 — PTC Leverage and Output Shape (`0.17.0`)
 Phase: 52 of 53 (Callable-Tool Introspection)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-12 — Phase 51 complete: path ergonomics and bridge helpers shipped, reconciled in `51-01-SUMMARY.md`, and project transitioned to Phase 52.
+Plan: `.paul/phases/52-callable-tool-introspection/52-01-PLAN.md`
+Status: APPLY complete — ready for UNIFY
+Last activity: 2026-05-12 — Phase 52 APPLY implemented callable-tool prompt metadata propagation and on-demand `ptc.help(tool_name)` runtime introspection; focused tests, full `npm test` (230 passing / 0 failing), and `npm run build` passed.
 Progress:
-- Milestone 18 — PTC Leverage and Output Shape: [██████░░░░] 60% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ready to plan; Phase 53 not started)
+- Milestone 18 — PTC Leverage and Output Shape: [████████░░] 80% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 APPLY ✓ / UNIFY pending; Phase 53 not started)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
@@ -58,7 +58,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 52 ready to plan]
+  ✓        ✓        ○     [Phase 52 apply complete, ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -155,14 +155,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
-Stopped at: Phase 51 complete, ready to plan Phase 52
-Next action: `/paul:plan` for Phase 52
-Resume file: `.paul/ROADMAP.md`
-wip_result: Phase 51 SUMMARY written; Phase 51 PR #7 merge gate still pending completion during UNIFY.
+Stopped at: Phase 52 APPLY complete; UNIFY pending
+Next action: `/paul:unify .paul/phases/52-callable-tool-introspection/52-01-PLAN.md`
+Resume file: `.paul/phases/52-callable-tool-introspection/52-01-PLAN.md`
+wip_result: implementation complete; verification passed; SUMMARY/UNIFY not yet written.
 Resume context:
-- Phase 51 delivered `relative` / `relative_to` path formatting, report-compatible `ptc.tabulate(...)`, and shallow JSON-safe `ptc.diff(...)`.
-- Phase 52 focus from ROADMAP: extend Phase 47 `promptSnippet` / `promptGuidelines` plumbing inward so callable tools can expose runtime metadata; add likely `ptc.help(tool_name)` returning metadata without inflating the tool-description block.
-- Carry-forward concerns: `src/python-runtime/runtime.py` is 1081 lines; existing dependency audit baseline still has 3 moderate advisories; keep broad data helpers in `nu` territory.
+- APPLY implemented all 3 plan tasks: RED metadata/help-helper tests, GREEN metadata propagation plus `ptc.help(...)`, and docs/prompt guidance updates.
+- Verification evidence: focused callable introspection/prompt/index tests passed; `npm test` passed with 230 passing / 0 failing; `npm run build` passed; `npm audit --json` remained 0 critical / 0 high / 3 moderate.
+- Module notes for UNIFY: TODD TDD sequencing followed; WALT quality gate passed; DEAN no critical/high regression; RUBY flags runtime/index/README hotspots but changes stayed compact.
+- Ready to create `.paul/phases/52-callable-tool-introspection/52-01-SUMMARY.md` during UNIFY.
 
 ---
-*STATE.md — Updated after Phase 51 completion and transition to Phase 52 (last updated: 2026-05-12)*
+*STATE.md — Updated after Phase 52 APPLY completion (last updated: 2026-05-12)*

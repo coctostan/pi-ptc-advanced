@@ -356,6 +356,7 @@ The runtime also exposes a `ptc` helper object:
 - `ptc.expect_kind(value, kind) -> Any`
 - `ptc.list_callable_tools() -> list[dict[str, Any]]`
 - `ptc.get_tool_schema(name) -> dict[str, Any]`
+- `ptc.help(tool_name) -> dict[str, Any]`
 - `ptc.extract_handles(value, kind=None) -> list[SupportedHandle]`
 - `ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]`
 - `ptc.json_dump(value)`
@@ -365,6 +366,7 @@ The runtime also exposes a `ptc` helper object:
 Use orchestration helpers when you have repeated multi-tool calls, ordered fallback logic, or large intermediate results that should stay local to Python.
 For one simple tool call, call the tool directly.
 Optional tools should be detected from `ptc.list_callable_tools()`, not assumed from env/config alone.
+Use `ptc.help(tool_name)` when optional-tool prompt metadata would help choose or parameterize a tool. Do not run introspection as a routine prelude; use the callable tool list in the generated description when it is already sufficient.
 Use these helpers for structured tool results that already carry `responseId` and/or `filePath`; they avoid custom recursive JSON walking while keeping the contract intentionally narrow.
 Response/file handles are supported now; graph handles are still out of scope.
 Report returns are a soft contract: recognized reports get richer completed tool-result rendering and `details.report`, while free-form strings/dicts/lists and `ptc.fit_output(...)` continue to work normally.
@@ -457,6 +459,16 @@ if "symbol_card" in tools_by_name and "symbol_search" in tools_by_name:
     return ptc.fit_output(graph_result, max_chars=1500, max_items=3, max_depth=3)
 
 return {"used_tool": None, "available_tools": sorted(tools_by_name)}
+```
+
+Callable-tool help example:
+
+```python
+tools = {tool["name"]: tool for tool in ptc.list_callable_tools()}
+if "sg" in tools:
+    sg_help = ptc.help("sg")
+    sg_schema = ptc.get_tool_schema("sg")
+    return {"description": sg_help["description"], "guidelines": sg_help.get("promptGuidelines", []), "schema": sg_schema}
 ```
 
 Web-handle follow-up with bounded output example:

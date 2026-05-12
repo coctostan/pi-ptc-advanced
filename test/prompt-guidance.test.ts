@@ -147,10 +147,11 @@ test("code_execution registers prompt metadata for Pi default system prompts", a
       "Use code_execution when custom per-item logic, stateful aggregation, complex return shapes, or multiple callable-tool orchestration is needed.",
       "Keep large intermediate results inside Python and return only the compact final answer the user needs.",
       "Use the callable tool list in the code_execution description; call ptc.list_callable_tools() only when branching on optional tools or when the needed tool may be unavailable.",
+      "Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool."
     ]);
     assert.ok(
-      latestCodeExecutionTool.promptGuidelines.some((guideline) => /call ptc\.list_callable_tools\(\) only/i.test(guideline)),
-      "promptGuidelines should avoid encouraging unconditional callable-tool introspection"
+      latestCodeExecutionTool.promptGuidelines.some((guideline) => /ptc\.help\(tool_name\) only when optional callable-tool prompt metadata/i.test(guideline)),
+      "promptGuidelines should describe ptc.help as on-demand metadata, not unconditional introspection"
     );
   } finally {
     harness.cleanup();

@@ -79,6 +79,8 @@ export interface PythonCallableToolMetadata {
   source: ToolInfo["source"];
   isReadOnly: boolean;
   parameters: JsonValue;
+  promptSnippet?: string;
+  promptGuidelines?: string[];
 }
 
 export function getBuiltinToolContract(toolName: string): BuiltinToolContract | undefined {
@@ -175,8 +177,24 @@ export function getPythonHelperName(tool: ToolInfo): string {
   return tool.ptc?.pythonName || tool.name;
 }
 
+function normalizePromptSnippet(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizePromptGuidelines(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const guidelines = value.filter((entry): entry is string => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean);
+  return guidelines.length > 0 ? guidelines : undefined;
+}
+
 export function buildPythonCallableToolMetadata(tool: ToolInfo): PythonCallableToolMetadata {
-  return {
+  const metadata: PythonCallableToolMetadata = {
     name: tool.name,
     pythonName: getPythonHelperName(tool),
     description: tool.description || "",
@@ -184,6 +202,15 @@ export function buildPythonCallableToolMetadata(tool: ToolInfo): PythonCallableT
     isReadOnly: tool.isReadOnly,
     parameters: toJsonValue(tool.parameters ?? {}),
   };
+  const promptSnippet = normalizePromptSnippet(tool.promptSnippet);
+  const promptGuidelines = normalizePromptGuidelines(tool.promptGuidelines);
+  if (promptSnippet) {
+    metadata.promptSnippet = promptSnippet;
+  }
+  if (promptGuidelines) {
+    metadata.promptGuidelines = promptGuidelines;
+  }
+  return metadata;
 }
 
 export function buildPythonCallableToolMetadataList(tools: ToolInfo[]): PythonCallableToolMetadata[] {

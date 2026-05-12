@@ -56,9 +56,11 @@ test("generateToolWrappers emits concise wrappers with typed result models", () 
   assert.match(code, /class FileHandle\(TypedDict\):/);
   assert.match(code, /kind: Literal\["file"\]/);
   assert.match(code, /SupportedHandle = Union\[ResponseHandle, FileHandle\]/);
-  assert.match(code, /class CallableToolMetadata\(TypedDict\):/);
+  assert.match(code, /class CallableToolMetadata\(TypedDict, total=False\):/);
   assert.match(code, /pythonName: str/);
   assert.match(code, /parameters: Dict\[str, Any\]/);
+  assert.match(code, /promptSnippet: str/);
+  assert.match(code, /promptGuidelines: List\[str\]/);
   assert.match(code, /_PTC_CALLABLE_TOOL_METADATA: List\[CallableToolMetadata\] = _ptc_json\.loads\(/);
   assert.match(code, /\\"name\\":\\"read\\"/);
   assert.match(code, /\\"pythonName\\":\\"read_text\\"/);

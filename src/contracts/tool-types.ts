@@ -78,6 +78,8 @@ export interface ToolInfo extends Omit<ExtensionToolInfo, "sourceInfo"> {
   sourceInfo?: ExtensionToolInfo["sourceInfo"];
   isReadOnly: boolean;
   ptc?: PtcToolOptions;
+  promptSnippet?: string;
+  promptGuidelines?: string[];
 }
 
 export interface ActivePiToolInfo extends ExtensionToolInfo {
