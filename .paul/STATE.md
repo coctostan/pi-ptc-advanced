@@ -145,9 +145,9 @@ PLAN ──▶ APPLY ──▶ UNIFY
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
-- Transition evidence pending final UNIFY metadata commit and PR #6 merge for Phase 50
-- Branch: `feature/50-structured-report-type` pushed to `origin/feature/50-structured-report-type`; base `origin/main` was current at APPLY start
-- PR #6: OPEN — https://github.com/coctostan/pi-ptc-next/pull/6; GitHub Actions `Verify release baseline` and Socket checks SUCCESS; UNIFY owns merge readiness
+- Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
+- Branch: `main` synced to `origin/main`; feature branch `feature/50-structured-report-type` deleted by PR merge.
+- PR #6: MERGED — https://github.com/coctostan/pi-ptc-next/pull/6; GitHub Actions `Verify release baseline` and Socket checks SUCCESS.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
@@ -158,7 +158,7 @@ Resume context:
 - Phase 50 summary: `.paul/phases/50-structured-report-type/50-01-SUMMARY.md`.
 - Next phase: Phase 51 — Path Ergonomics and Bridge Helpers (`relative=True`, `relative_to=<root>`, slim `tabulate(...)` / `diff(...)` bridge helpers).
 - Carried concerns: `runtime.py` hotspot at 908 lines; dependency audit baseline still has 3 moderate advisories; Phase 51 should avoid reintroducing broad semantic data helpers that `nu` already covers.
-- Phase 50 verification: commits `154f2ab`, `498d9b9`, `66003ac`; focused report/render/docs tests PASS; `npm test && npm run build` PASS (228 passing / 0 failing); focused ESLint PASS; PR #6 CI SUCCESS before merge gate.
+- Phase 50 verification: commits `154f2ab`, `498d9b9`, `66003ac`, and metadata commit `7adfbc8` merged via PR #6 squash `5eee7cb`; focused report/render/docs tests PASS; `npm test && npm run build` PASS (228 passing / 0 failing); focused ESLint PASS; PR #6 CI SUCCESS.
 
 ---
 *STATE.md — Updated after Phase 50 completion and transition to Phase 51 (last updated: 2026-05-12)*
