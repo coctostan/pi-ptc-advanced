@@ -154,17 +154,17 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
 - Phase 51 feature branch `feature/51-path-ergonomics-bridge-helpers` merged to `main` via PR #7 squash merge at `b2dc14b`; remote branch deleted by merge automation.
 - PR #7: MERGED — https://github.com/coctostan/pi-ptc-next/pull/7; GitHub Actions `Verify release baseline` and Socket checks SUCCESS.
-- PR #8: OPEN — https://github.com/coctostan/pi-ptc-next/pull/8 for Phase 52 branch `feature/52-callable-tool-introspection`; GitHub Actions and Socket checks passing before UNIFY merge gate.
+- PR #8: MERGED — https://github.com/coctostan/pi-ptc-next/pull/8; squash merge `b91d71d` to `main`; GitHub Actions `Verify release baseline` and Socket checks SUCCESS; remote feature branch deleted by merge automation.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
 Stopped at: Phase 52 complete, ready to plan Phase 53
 Next action: `/paul:plan` for Phase 53
 Resume file: `.paul/ROADMAP.md`
-wip_result: Phase 52 summary and lifecycle artifacts prepared for merge gate; verification passed with `npm test` (230 passing / 0 failing), `npm run build`, focused ESLint complexity check, and unchanged audit baseline (0 critical / 0 high / 3 moderate).
+wip_result: Phase 52 summary and lifecycle artifacts merged to `main` through PR #8; verification passed with `npm test` (230 passing / 0 failing), `npm run build`, focused ESLint complexity check, and unchanged audit baseline (0 critical / 0 high / 3 moderate).
 Resume context:
 - Phase 52 summary: `.paul/phases/52-callable-tool-introspection/52-01-SUMMARY.md`.
-- GitHub Flow: branch `feature/52-callable-tool-introspection`, PR #8 OPEN/CLEAN with GitHub Actions and Socket checks passing before merge gate.
+- GitHub Flow: PR #8 MERGED via squash commit `b91d71d`; local `main` fast-forwarded to `origin/main`.
 - Phase 53 focus: add `ptc.run_tests(pattern)` as a structured test-runner verb.
 
 ---
