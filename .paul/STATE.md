@@ -8,15 +8,15 @@ See: `.paul/PROJECT.md`
 ## Current Position
 Milestone: Milestone 17 — Pi Compatibility and Prompt Integration Audit (0.16.0)
 Phase: 48 of 48 (Compatibility Proof and Release Readiness)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-11 — Phase 47 UNIFY complete; transitioned to Phase 48 planning readiness
+Plan: 48-01 — Compatibility Proof and Release Readiness
+Status: APPLY complete; ready for UNIFY
+Last activity: 2026-05-12 — Phase 48 APPLY complete: package metadata + lockfile + verify-release-package script bumped to `pi-ptc-advanced@0.16.0`; new `test/release-readiness.test.ts` (7 tests) and `docs/releases/0.16.0.md`; README/CHANGELOG/runbook repointed to 0.16.0; full verification PASS (220/0); DEAN audit baseline acknowledged at human-verify checkpoint
 Progress:
-- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [████████░░] 80% (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ready)
+- Milestone 17 — Pi Compatibility and Prompt Integration Audit: [█████████░] 90% (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 planned)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
 - Phase 47 — System Prompt and Tool Guidance Optimization: [██████████] 100% ✓
-- Phase 48 — Compatibility Proof and Release Readiness: [░░░░░░░░░░] 0% ready to plan
+- Phase 48 — Compatibility Proof and Release Readiness: [███████░░░] 70% APPLY complete
 - Milestone 15 — Bug Fixes and Helper Hardening: [██████████] 100% ✓
 - Milestone 16 — Publishable Fork Packaging: [██████████] 100% ✓
 - Phase 42 — Rename and Package Identity: [██████████] 100% ✓
@@ -56,7 +56,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 48 ready to plan]
+  ✓        ✓        ○     [Phase 48 APPLY complete; ready for UNIFY]
 ```
 
 ## Accumulated Context
@@ -121,6 +121,8 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 46 UNIFY created `46-01-SUMMARY.md`, recorded quality/CODI module evidence, merged PR #2 via squash at `c3f7d06`, and transitioned the milestone to Phase 47 planning readiness.
 - Phase 47 UNIFY created `47-01-SUMMARY.md`, recorded WALT/CODI/SKIP/RUBY post-unify evidence, confirmed `npm test && npm run build` at 213 passing / 0 failing, marked Phase 47 complete, and transitioned the milestone to Phase 48 planning readiness.
 - Phase 47 prompt metadata decision: keep high-level `code_execution` routing guidance in Pi `promptSnippet` / `promptGuidelines`, preserve deep helper details in the tool description, and make fallback auto-route injection idempotent with `systemPromptOptions`.
+- 2026-05-12: DEAN pre-plan enforcement for Phase 48 found current npm audit findings (4 critical / 0 high / 3 moderate); user approved override and `.paul/dean-baseline.json` now records the acknowledged dependency-risk baseline through 2026-06-11.
+- Phase 48 PLAN created `.paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md`: TDD release-readiness plan to add focused release metadata drift coverage, bump package/release verification to `0.16.0`, update README/CHANGELOG/runbook/release notes, run full verification, and require human approval of the audit caveat before UNIFY.
 ### Deferred Issues
 - Bridge teardown when pi adds getToolExecutor()
 - `src/python-runtime/runtime.py` is now a significant debt hotspot at 743 lines after Phase 41 behavior additions; future changes should avoid casual growth without extraction justification
@@ -134,21 +136,21 @@ PLAN ──▶ APPLY ──▶ UNIFY
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
 
 ### Git State
-- Last merge checkpoint: `e62d472` (`feat(47): system prompt guidance optimization`) on `main`
-- Branch: `main` synced with `origin/main` after PR #3 squash merge
-- PR #3: merged; CI passed before merge; feature branch deleted remotely by merge gate
+- Last pushed checkpoint: `07a6d14` (`docs(state): record phase 47 merge gate`) on `main`
+- Branch: `main` synced with `origin/main`; Phase 48 planning changes are local/uncommitted
+- PR #3: merged; Phase 48 PR not created yet
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; validate tag/version alignment before any publish action
 ## Session Continuity
-Last session: 2026-05-11
-Stopped at: Phase 47 UNIFY complete; ready to plan Phase 48
-Next action: /paul:plan for Phase 48
-Resume file: .paul/ROADMAP.md
-wip_result: Phase 47 complete; summary created at `.paul/phases/47-system-prompt-and-tool-guidance-optimization/47-01-SUMMARY.md`
+Last session: 2026-05-12
+Stopped at: Phase 48 APPLY complete; ready for UNIFY
+Next action: /paul:unify .paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md
+Resume file: .paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md
+wip_result: skipped — base-branch; current branch is `main`, so PAUSE did not create a WIP commit under github-flow rules
 Resume context:
-- Phase 47 shipped Pi prompt metadata for `code_execution`, idempotent `systemPromptOptions`-aware fallback auto-routing, custom-tool prompt metadata preservation, and bounded README/CHANGELOG notes.
-- Verification: `npm test && npm run build` passed with 213 tests / 0 failures and clean TypeScript build.
-- Post-unify reports: WALT quality history row appended; CODI history row appended; SKIP knowledge entry and RUBY debt warnings recorded in `47-01-SUMMARY.md`.
-- Carry forward to Phase 48: current `npm audit --json` advisory counts are 4 critical / 0 high / 3 moderate and require release-readiness reconciliation.
+- Phase 48 plan is ready at `.paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md`; plan type is TDD with one human verification checkpoint before UNIFY.
+- User selected DEAN override during planning; `.paul/dean-baseline.json` records 4 critical / 0 high / 3 moderate findings through 2026-06-11.
+- Working tree has local `.paul/**` planning/handoff changes; APPLY must recheck git state and start from a non-base feature branch.
+- Preserve the Phase 48 boundary: no dependency/version changes beyond root package metadata to `0.16.0` unless explicitly redirected.
 
 ---
-*STATE.md — Updated after Phase 47 UNIFY completion (last updated: 2026-05-11)*
+*STATE.md — Updated after Phase 48 pause handoff (last updated: 2026-05-12)*

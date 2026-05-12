@@ -6,14 +6,14 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 ## Current Milestone
 **Milestone 17 — Pi Compatibility and Prompt Integration Audit** (`0.16.0`)
 Status: 🚧 In Progress
-Phases: 3 of 4 complete (75%); Phase 48 ready to plan
+Phases: 3 of 4 complete (75%); Phase 48 planned / ready for APPLY
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 45 | Pi API and Documentation Delta Audit | 1/1 | ✅ Complete | 2026-05-11 |
 | 46 | Extension Runtime Compatibility Alignment | 1/1 | ✅ Complete | 2026-05-11 |
 | 47 | System Prompt and Tool Guidance Optimization | 1/1 | ✅ Complete | 2026-05-11 |
-| 48 | Compatibility Proof and Release Readiness | TBD | Ready to plan | - |
+| 48 | Compatibility Proof and Release Readiness | 1/1 | APPLY complete / Ready for UNIFY | - |
 
 ### Phase 45: Pi API and Documentation Delta Audit
 Focus: Compare `pi-ptc-advanced` against both the installed local Pi package and latest published Pi package/docs/source to identify API drift, deprecated assumptions, new extension capabilities, and prompt/tool-description convention changes.
@@ -29,7 +29,7 @@ Plans: 47-01 complete — produced `47-01-SUMMARY.md`: added RED coverage, regis
 
 ### Phase 48: Compatibility Proof and Release Readiness
 Focus: Add or refresh tests, docs, compatibility notes, and release verification for the `0.16.0` compatibility milestone.
-Plans: TBD (defined during /paul:plan); carry forward Phase 47 dependency-audit reconciliation plus final compatibility/release-readiness proof.
+Plans: 48-01 planned — `.paul/phases/48-compatibility-proof-and-release-readiness/48-01-PLAN.md` will add TDD release-readiness drift coverage, align package/release verification metadata to `0.16.0`, update README/CHANGELOG/runbook/release notes, run full release verification, and human-gate release readiness with the acknowledged dependency-audit baseline (4 critical / 0 high / 3 moderate).
 
 ## Completed Milestones
 <details>
@@ -234,4 +234,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-11 after Phase 47 UNIFY completion*
+*Last updated: 2026-05-12 after Phase 48 PLAN creation*
