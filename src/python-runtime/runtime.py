@@ -884,6 +884,14 @@ class _PtcHelpers:
             raise ValueError(f"Callable tool '{normalized_name}' does not expose an object parameter schema")
         return _clone_json_value(parameters)
 
+    def help(self, name: str) -> dict[str, Any]:
+        normalized_name = _normalize_callable_tool_name(name)
+        tool_metadata = self._callable_tool_lookup.get(normalized_name)
+        if tool_metadata is None:
+            available = ", ".join(self._available_callable_tool_names) or "<none>"
+            raise ValueError(f"Unknown callable tool '{normalized_name}'. Available: {available}")
+        return _clone_json_value(tool_metadata)
+
 
     async def first_success(self, calls: Sequence[dict[str, Any]], max_concurrency: int | None = None) -> Any:
         normalized_calls = _normalize_orchestration_calls(calls)

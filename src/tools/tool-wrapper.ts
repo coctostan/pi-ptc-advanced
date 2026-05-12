@@ -124,13 +124,15 @@ class FileHandle(TypedDict):
     kind: Literal["file"]
     filePath: str
 SupportedHandle = Union[ResponseHandle, FileHandle]
-class CallableToolMetadata(TypedDict):
+class CallableToolMetadata(TypedDict, total=False):
     name: str
     pythonName: str
     description: str
     source: str
     isReadOnly: bool
     parameters: Dict[str, Any]
+    promptSnippet: str
+    promptGuidelines: List[str]
 class BashResult(TypedDict):
     stdout: str
     stderr: str

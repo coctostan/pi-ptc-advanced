@@ -7,12 +7,12 @@ See: `.paul/PROJECT.md`
 **Current focus:** Milestone 18 — PTC Leverage and Output Shape (`0.17.0`). Make `code_execution` convert "I need to know X about this repo/dataset" into a small, well-shaped, debuggable answer with minimum agent friction — structured report shape, callable-tool introspection, ergonomic helpers, path/UI polish, and a first-class test-runner verb. Caching, cross-call session state, and persistence remain explicitly deferred (see `.paul/notes/2026-05-12-ptc-leverage-brief.md`).
 ## Current Position
 Milestone: Milestone 18 — PTC Leverage and Output Shape (`0.17.0`)
-Phase: 52 of 53 (Callable-Tool Introspection)
+Phase: 53 of 53 (Test Runner Verb)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-05-12 — Phase 51 complete: path ergonomics and bridge helpers shipped, reconciled in `51-01-SUMMARY.md`, and project transitioned to Phase 52.
+Last activity: 2026-05-12 — Phase 52 UNIFY reconciled callable-tool prompt metadata propagation and `ptc.help(tool_name)`, recorded module/quality evidence, and transitioned to Phase 53 planning readiness.
 Progress:
-- Milestone 18 — PTC Leverage and Output Shape: [██████░░░░] 60% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ready to plan; Phase 53 not started)
+- Milestone 18 — PTC Leverage and Output Shape: [████████░░] 80% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ✓; Phase 53 not started)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
@@ -58,7 +58,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 52 ready to plan]
+  ○        ○        ○     [Phase 53 ready to plan]
 ```
 
 ## Accumulated Context
@@ -136,11 +136,13 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 51 PLAN created `.paul/phases/51-path-ergonomics-and-bridge-helpers/51-01-PLAN.md`: TDD plan for workspace-root-aware path formatting options on `find_files` / `find_files_abs` / `read_tree`, plus slim JSON-safe `ptc.tabulate(...)` and `ptc.diff(...)` bridge helpers; broad aggregators remain out of scope in favor of `nu`.
 - Phase 51 APPLY added root-aware `relative` / `relative_to` formatting on `ptc.find_files(...)`, `ptc.find_files_abs(...)`, and `ptc.read_tree(...)`; added report-compatible `ptc.tabulate(...)` and shallow JSON-safe `ptc.diff(...)`; updated README, generated tool guidance, CHANGELOG, and contract tests. Verification passed: RED tests failed before implementation, focused tests passed, `npm test` passed with 230 passing / 0 failing, `npm run build` passed, and `npm audit --json` remained 0 critical / 0 high / 3 moderate.
 - Phase 51 UNIFY reconciled path ergonomics and bridge helpers in `51-01-SUMMARY.md`, recorded WALT/CODI/RUBY/SKIP post-unify evidence, marked Phase 51 complete, and transitioned Milestone 18 to Phase 52 planning readiness.
+- Phase 52 UNIFY reconciled callable-tool prompt metadata and `ptc.help(tool_name)` in `52-01-SUMMARY.md`, recorded WALT/CODI/RUBY/SKIP post-unify evidence, marked Phase 52 complete, and transitioned Milestone 18 to Phase 53 planning readiness.
+- Phase 52 decision: `ptc.help(tool_name)` returns full callable metadata including `parameters`, while `ptc.get_tool_schema(...)` remains schema-only; generated guidance must keep `ptc.help(...)` on-demand rather than a routine prelude.
 ### Deferred Issues
 - Bridge teardown when pi adds getToolExecutor()
-- `src/python-runtime/runtime.py` is now a significant debt hotspot at 1081 lines after Phase 51 helper additions; future changes should avoid casual growth without extraction justification
-- Existing docs/test/runtime hotspots remain in `README.md` (854 lines), `src/index.ts` (523 lines after Phase 49), and `test/index.test.ts` (1220 lines); future proof/docs/render work should keep using focused companion files or extract sections before growing those anchors further
-- Full-suite verification now passes at `228` passing / `0` failing after Phase 50 APPLY; maintain this as the current baseline for subsequent milestones
+- `src/python-runtime/runtime.py` remains a significant debt hotspot at 1089 lines after Phase 52 helper additions; future changes should avoid casual growth without extraction justification
+- Existing docs/test/runtime hotspots remain in `README.md` (899 lines), `src/index.ts` (534 lines), and `test/index.test.ts` (1222 lines); future proof/docs/render work should keep using focused companion files or extract sections before growing those anchors further
+- Full-suite verification now passes at `230` passing / `0` failing after Phase 52 UNIFY; maintain this as the current baseline for subsequent milestones
 - Phase 44 removed packaged Python bytecode/cache artifacts from the tarball surface and added packed-artifact installability proof; preserve this publish-surface invariant in future release work
 - Phase 48 shipped the 0.16.0 release candidate with explicit DEAN audit baseline acknowledgement (`4 critical / 0 high / 3 moderate / 0 low`, valid through 2026-06-11); advisory remediation is now a deferred follow-up tracked in `CHANGELOG.md` 0.16.0 Deferred section and `.paul/dean-baseline.json`.
 
@@ -152,17 +154,18 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
 - Phase 51 feature branch `feature/51-path-ergonomics-bridge-helpers` merged to `main` via PR #7 squash merge at `b2dc14b`; remote branch deleted by merge automation.
 - PR #7: MERGED — https://github.com/coctostan/pi-ptc-next/pull/7; GitHub Actions `Verify release baseline` and Socket checks SUCCESS.
+- PR #8: OPEN — https://github.com/coctostan/pi-ptc-next/pull/8 for Phase 52 branch `feature/52-callable-tool-introspection`; GitHub Actions and Socket checks passing before UNIFY merge gate.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
-Stopped at: Phase 51 complete, ready to plan Phase 52
-Next action: `/paul:plan` for Phase 52
+Stopped at: Phase 52 complete, ready to plan Phase 53
+Next action: `/paul:plan` for Phase 53
 Resume file: `.paul/ROADMAP.md`
-wip_result: Phase 51 SUMMARY written; Phase 51 PR #7 merge gate still pending completion during UNIFY.
+wip_result: Phase 52 summary and lifecycle artifacts prepared for merge gate; verification passed with `npm test` (230 passing / 0 failing), `npm run build`, focused ESLint complexity check, and unchanged audit baseline (0 critical / 0 high / 3 moderate).
 Resume context:
-- Phase 51 delivered `relative` / `relative_to` path formatting, report-compatible `ptc.tabulate(...)`, and shallow JSON-safe `ptc.diff(...)`.
-- Phase 52 focus from ROADMAP: extend Phase 47 `promptSnippet` / `promptGuidelines` plumbing inward so callable tools can expose runtime metadata; add likely `ptc.help(tool_name)` returning metadata without inflating the tool-description block.
-- Carry-forward concerns: `src/python-runtime/runtime.py` is 1081 lines; existing dependency audit baseline still has 3 moderate advisories; keep broad data helpers in `nu` territory.
+- Phase 52 summary: `.paul/phases/52-callable-tool-introspection/52-01-SUMMARY.md`.
+- GitHub Flow: branch `feature/52-callable-tool-introspection`, PR #8 OPEN/CLEAN with GitHub Actions and Socket checks passing before merge gate.
+- Phase 53 focus: add `ptc.run_tests(pattern)` as a structured test-runner verb.
 
 ---
-*STATE.md — Updated after Phase 51 completion and transition to Phase 52 (last updated: 2026-05-12)*
+*STATE.md — Updated after Phase 52 UNIFY completion (last updated: 2026-05-12)*

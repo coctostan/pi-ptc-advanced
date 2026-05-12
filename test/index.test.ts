@@ -209,6 +209,8 @@ test("ptc extension bootstraps and cleans up runtime components", async () => {
     assert.match(latestCodeExecutionTool.description, /ptc\.expect_kind\(value, kind\) -> Any/);
     assert.match(latestCodeExecutionTool.description, /ptc\.list_callable_tools\(\) -> list\[dict\[str, Any\]\]/);
     assert.match(latestCodeExecutionTool.description, /ptc\.get_tool_schema\(name\) -> dict\[str, Any\]/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.help\(tool_name\) -> dict\[str, Any\]/);
+    assert.match(latestCodeExecutionTool.description, /Use ptc\.help\(tool_name\) only when optional callable-tool prompt metadata is needed/);
     assert.match(latestCodeExecutionTool.description, /ptc\.extract_handles\(value, kind=None\) -> list\[SupportedHandle\]/);
     assert.match(latestCodeExecutionTool.description, /ptc\.first_handle\(value, kind=None\) -> Optional\[SupportedHandle\]/);
     assert.match(latestCodeExecutionTool.description, /Use orchestration helpers for repeated multi-tool calls, ordered fallback logic, or bounded final-output shaping\./);

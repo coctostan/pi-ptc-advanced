@@ -12,6 +12,7 @@ This changelog tracks notable release-facing changes for the fork repository `pi
 - Free-form returns and `ptc.fit_output(...)` remain unchanged when they are not the recognized `ptc_report` shape.
 - `code_execution` Python helpers now support root-aware path formatting options on `ptc.find_files(...)`, `ptc.find_files_abs(...)`, and `ptc.read_tree(...)`.
 - `ptc.tabulate(...)` and shallow `ptc.diff(...)` add slim bridge helpers for composing Python intermediates into `ptc.report(...)` without adding broad data-analysis helpers.
+- Callable-tool introspection now carries optional prompt metadata into Python and adds `ptc.help(tool_name)` for bounded on-demand runtime guidance.
 
 ## 0.16.0 — 2026-05-12
 
