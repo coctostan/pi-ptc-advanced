@@ -13,6 +13,7 @@ This changelog tracks notable release-facing changes for the fork repository `pi
 - `code_execution` Python helpers now support root-aware path formatting options on `ptc.find_files(...)`, `ptc.find_files_abs(...)`, and `ptc.read_tree(...)`.
 - `ptc.tabulate(...)` and shallow `ptc.diff(...)` add slim bridge helpers for composing Python intermediates into `ptc.report(...)` without adding broad data-analysis helpers.
 - Callable-tool introspection now carries optional prompt metadata into Python and adds `ptc.help(tool_name)` for bounded on-demand runtime guidance.
+- `ptc.run_tests(pattern)` adds a first-class Node `node --test` helper that returns a structured `ptc_report` with pass/fail/duration metrics, a bounded failures table, runner-availability data, and a fixed 120s timeout. Failing tests, missing `node`, and timeouts are reported as data; invalid patterns still raise `ValueError`. Cross-runner support, package-script dispatch, and Docker image changes remain explicitly out of scope for this phase.
 
 ## 0.16.0 — 2026-05-12
 

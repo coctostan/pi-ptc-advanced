@@ -8,11 +8,11 @@ See: `.paul/PROJECT.md`
 ## Current Position
 Milestone: Milestone 18 — PTC Leverage and Output Shape (`0.17.0`)
 Phase: 53 of 53 (Test Runner Verb)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-12 — Phase 52 UNIFY reconciled callable-tool prompt metadata propagation and `ptc.help(tool_name)`, recorded module/quality evidence, and transitioned to Phase 53 planning readiness.
+Plan: `.paul/phases/53-test-runner-verb/53-01-PLAN.md`
+Status: PLAN complete — ready for APPLY
+Last activity: 2026-05-12 — Phase 53 PLAN created a TDD plan for `ptc.run_tests(pattern)` as a Node `node --test` helper returning structured Phase 50 reports; ready for APPLY.
 Progress:
-- Milestone 18 — PTC Leverage and Output Shape: [████████░░] 80% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ✓; Phase 53 not started)
+- Milestone 18 — PTC Leverage and Output Shape: [████████░░] 80% (Phase 49 ✓; Phase 50 ✓; Phase 51 ✓; Phase 52 ✓; Phase 53 PLAN ✓ / APPLY pending)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
@@ -58,7 +58,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 53 ready to plan]
+  ✓        ○        ○     [Phase 53 plan complete, ready for APPLY]
 ```
 
 ## Accumulated Context
@@ -138,6 +138,7 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 51 UNIFY reconciled path ergonomics and bridge helpers in `51-01-SUMMARY.md`, recorded WALT/CODI/RUBY/SKIP post-unify evidence, marked Phase 51 complete, and transitioned Milestone 18 to Phase 52 planning readiness.
 - Phase 52 UNIFY reconciled callable-tool prompt metadata and `ptc.help(tool_name)` in `52-01-SUMMARY.md`, recorded WALT/CODI/RUBY/SKIP post-unify evidence, marked Phase 52 complete, and transitioned Milestone 18 to Phase 53 planning readiness.
 - Phase 52 decision: `ptc.help(tool_name)` returns full callable metadata including `parameters`, while `ptc.get_tool_schema(...)` remains schema-only; generated guidance must keep `ptc.help(...)` on-demand rather than a routine prelude.
+- Phase 53 PLAN created `.paul/phases/53-test-runner-verb/53-01-PLAN.md`: TDD plan for `ptc.run_tests(pattern)` as a sandbox-respecting Node `node --test` helper that returns Phase 50 structured reports for pass/fail/unavailable cases; cross-runner support, package-script dispatch, and Docker image changes remain out of scope.
 ### Deferred Issues
 - Bridge teardown when pi adds getToolExecutor()
 - `src/python-runtime/runtime.py` remains a significant debt hotspot at 1089 lines after Phase 52 helper additions; future changes should avoid casual growth without extraction justification
@@ -158,14 +159,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-12
-Stopped at: Phase 52 complete, ready to plan Phase 53
-Next action: `/paul:plan` for Phase 53
-Resume file: `.paul/ROADMAP.md`
-wip_result: Phase 52 summary and lifecycle artifacts merged to `main` through PR #8; verification passed with `npm test` (230 passing / 0 failing), `npm run build`, focused ESLint complexity check, and unchanged audit baseline (0 critical / 0 high / 3 moderate).
+Stopped at: Paused after Phase 53 PLAN refinement; ready for APPLY
+Next action: `/paul:apply .paul/phases/53-test-runner-verb/53-01-PLAN.md`
+Resume file: `.paul/HANDOFF-2026-05-12-phase-53-apply-ready.md`
+wip_result: skipped — no WIP commit requested during PAUSE; uncommitted PLAN/lifecycle changes remain in the working tree.
 Resume context:
-- Phase 52 summary: `.paul/phases/52-callable-tool-introspection/52-01-SUMMARY.md`.
-- GitHub Flow: PR #8 MERGED via squash commit `b91d71d`; local `main` fast-forwarded to `origin/main`.
-- Phase 53 focus: add `ptc.run_tests(pattern)` as a structured test-runner verb.
+- Handoff: `.paul/HANDOFF-2026-05-12-phase-53-apply-ready.md`.
+- Phase 53 plan path: `.paul/phases/53-test-runner-verb/53-01-PLAN.md`.
+- Approved assumptions captured in plan: Docker/no-node unavailable report, direct `node --test <pattern>` pass-through, fixed timeout, minimal TAP parser, narrow API, cwd redaction, parsed audit handling.
+- Apply focus: RED tests first, then runtime helper, then README/generated guidance/CHANGELOG and full verification.
 
 ---
-*STATE.md — Updated after Phase 52 UNIFY completion (last updated: 2026-05-12)*
+*STATE.md — Updated after Phase 53 PAUSE handoff (last updated: 2026-05-12)*

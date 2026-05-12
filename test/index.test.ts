@@ -217,6 +217,9 @@ test("ptc extension bootstraps and cleans up runtime components", async () => {
     assert.match(latestCodeExecutionTool.description, /Prefer these for string content/);
     assert.match(latestCodeExecutionTool.description, /Use read\(path\) directly when you need structured anchored data/);
     assert.match(latestCodeExecutionTool.description, /Inspect ptc\.list_callable_tools\(\) before branching on optional tools/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.run_tests\(pattern: str\) -> dict\[str, Any\]/);
+    assert.match(latestCodeExecutionTool.description, /ptc\.run_tests/);
+    assert.match(latestCodeExecutionTool.description, /Node['’]?s built-in `node --test`/);
     assert.match(latestCodeExecutionTool.description, /Do not call _rpc_call/);
     assert.doesNotMatch(latestCodeExecutionTool.description, /details\.ptcValue/);
     assert.doesNotMatch(latestCodeExecutionTool.description, /PTC_BLOCKED_TOOLS/);

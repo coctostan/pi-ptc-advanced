@@ -183,6 +183,8 @@ Python helpers currently available in this session:
 -   - Produces a report-compatible table payload; use inside ptc.report(tables=[...]).
 - ptc.diff(before, after) -> dict[str, Any]
 -   - Produces a shallow JSON-safe before/after diff for explicit values.
+- ptc.run_tests(pattern: str) -> dict[str, Any]
+-   - Runs Node's built-in \`node --test\` with the supplied pattern from the active runtime workspace and returns a ptc_report with pass/fail/duration metrics, a bounded failures table, and a runner_available flag. Node-only for this phase; no cross-runner support or package-script dispatch.
 - ptc.expect_kind(value, kind) -> Any
 - ptc.list_callable_tools() -> list[dict[str, Any]]
 - ptc.get_tool_schema(name) -> dict[str, Any]
@@ -198,6 +200,7 @@ Prefer these for string content:
 - ptc.read_tree(pattern) returns list[dict] where each entry["content"] is str
 - Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool; do not run introspection as a routine prelude.
 - ptc.tabulate(...) and ptc.diff(...) are bridge helpers for report payloads and explicit before/after comparisons; prefer nu for grouping, histograms, ranking, or pipeline-style data analysis.
+- Use ptc.run_tests(pattern) only when the user asks to run a focused Node \`node --test\` pattern from inside code_execution; treat it as structured reporting, not a substitute for normal repo verification commands like \`npm test\`, \`npm run build\`, or PALS gates.
 Use read(path) directly when you need structured anchored data (ReadResult with .lines[].anchor).
 Callable tool set for this session: ${callable || "(none)"}. Use this list directly unless your Python code needs to branch on optional tools.
 Example:
