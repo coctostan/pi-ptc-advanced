@@ -835,6 +835,54 @@ def _fit_result_to_char_budget(result: dict[str, Any], max_chars: int) -> dict[s
     return {"kind": _FIT_OUTPUT_KIND, "truncated": True}
 
 
+_PTC_HELPER_INVENTORY: tuple[dict[str, str], ...] = (
+    {"name": "gather_limit", "signature": "ptc.gather_limit(coros, limit=...) -> list",
+     "summary": "Bounded concurrency for arbitrary coroutines."},
+    {"name": "read_many", "signature": "ptc.read_many(paths, max_concurrency=..., offset=None, line_limit=None, on_error=None) -> list[str] | dict[str, Any]",
+     "summary": "Read many files; default returns list[str]; on_error='collect' returns a partial envelope."},
+    {"name": "read_tree", "signature": "ptc.read_tree(pattern=..., path='.', max_files=1000, concurrency=..., offset=None, line_limit=None, relative=False, relative_to=None) -> list[dict[str, Any]]",
+     "summary": "Discover then read a file tree; each entry['content'] is str."},
+    {"name": "find_files", "signature": "ptc.find_files(pattern='**/*', path='.', max_files=1000, relative=True, relative_to=None) -> list[str]",
+     "summary": "Relative file discovery suitable for downstream reads."},
+    {"name": "find_files_abs", "signature": "ptc.find_files_abs(pattern='**/*', path='.', max_files=1000, relative=False, relative_to=None) -> list[str]",
+     "summary": "Absolute file discovery suitable for later read()/write()."},
+    {"name": "read_text", "signature": "ptc.read_text(path, offset=None, limit=None) -> str",
+     "summary": "Always-string convenience read."},
+    {"name": "batch_tool", "signature": "ptc.batch_tool(calls, max_concurrency=None, on_error=None) -> list[Any] | dict[str, Any]",
+     "summary": "Run many callable-tool calls; on_error='collect' classifies tool-level failures."},
+    {"name": "first_success", "signature": "ptc.first_success(calls, max_concurrency=None) -> Any",
+     "summary": "Ordered-fallback dispatch across callable-tool calls."},
+    {"name": "reduce_tool", "signature": "ptc.reduce_tool(calls, reducer, initial, max_concurrency=None) -> Any",
+     "summary": "Reduce results of bounded callable-tool calls."},
+    {"name": "fit_output", "signature": "ptc.fit_output(value, max_chars=None, max_items=None, max_depth=None) -> dict[str, Any]",
+     "summary": "Bound final-output shaping under explicit limits."},
+    {"name": "report", "signature": "ptc.report(title, metrics=None, tables=None, samples=None, warnings=None) -> dict[str, Any]",
+     "summary": "Build a structured ptc_report payload for compact final answers."},
+    {"name": "tabulate", "signature": "ptc.tabulate(rows, headers=None, title=None) -> dict[str, Any]",
+     "summary": "Build a report-compatible table payload."},
+    {"name": "diff", "signature": "ptc.diff(before, after) -> dict[str, Any]",
+     "summary": "Shallow JSON-safe before/after diff for explicit values."},
+    {"name": "run_tests", "signature": "ptc.run_tests(pattern: str) -> dict[str, Any]",
+     "summary": "Run Node `node --test pattern` from the active runtime; returns a ptc_report. Requires Node; Python-only/Docker runtimes may report runner_available=false."},
+    {"name": "expect_kind", "signature": "ptc.expect_kind(value, kind) -> Any",
+     "summary": "Assert a tagged-kind shape and return the value."},
+    {"name": "list_callable_tools", "signature": "ptc.list_callable_tools() -> list[dict[str, Any]]",
+     "summary": "List callable Pi tools available in this session (NOT ptc.* helpers)."},
+    {"name": "list_helpers", "signature": "ptc.list_helpers() -> list[dict[str, Any]]",
+     "summary": "List ptc.* helpers available in this runtime (the counterpart to list_callable_tools())."},
+    {"name": "get_tool_schema", "signature": "ptc.get_tool_schema(name) -> dict[str, Any]",
+     "summary": "Return the callable-tool schema for a single tool name."},
+    {"name": "help", "signature": "ptc.help(tool_name) -> dict[str, Any]",
+     "summary": "Return full metadata (description, parameters, prompt snippets) for a callable tool."},
+    {"name": "extract_handles", "signature": "ptc.extract_handles(value, kind=None) -> list[SupportedHandle]",
+     "summary": "Collect response/file handles from arbitrary tool results."},
+    {"name": "first_handle", "signature": "ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]",
+     "summary": "Return the first matching response/file handle, if any."},
+    {"name": "json_dump", "signature": "ptc.json_dump(value) -> str",
+     "summary": "Serialize a value to compact JSON."},
+)
+
+
 class _PtcHelpers:
     def __init__(
         self,
@@ -1099,6 +1147,16 @@ class _PtcHelpers:
 
     def list_callable_tools(self) -> list[dict[str, Any]]:
         return _clone_json_value(self._callable_tool_metadata)
+
+    def list_helpers(self) -> list[dict[str, Any]]:
+        """Return the curated ptc.* helper inventory (Phase 57, issue-4).
+
+        This is the helper-side counterpart to list_callable_tools().
+        list_callable_tools() lists callable Pi tools that cross the RPC
+        boundary; list_helpers() lists ptc.* helpers that live in this
+        runtime. Entries are stable, deterministic, and JSON-safe.
+        """
+        return [dict(entry) for entry in _PTC_HELPER_INVENTORY]
 
     def get_tool_schema(self, name: str) -> dict[str, Any]:
         normalized_name = _normalize_callable_tool_name(name)
@@ -1463,6 +1521,45 @@ if callable(_generated_read):
             kwargs["path"] = args[0]
         result = await _generated_read(**kwargs)
         return _normalize_read_result(result)
+
+
+# Post-process wrappers: normalize positional-argument behavior for find/glob/ls
+# so every documented callable wrapper accepts at most 1 positional arg and
+# raises a TypeError naming the wrapper when more are passed (Phase 57 issue-5).
+_generated_find = globals().get("find")
+if callable(_generated_find):
+    async def find(*args, **kwargs):
+        if len(args) > 1:
+            raise TypeError(f"find() takes at most 1 positional argument ({len(args)} given)")
+        if args:
+            if "pattern" in kwargs:
+                raise TypeError("find() got multiple values for argument 'pattern'")
+            kwargs["pattern"] = args[0]
+        return await _generated_find(**kwargs)
+
+
+_generated_glob = globals().get("glob")
+if callable(_generated_glob):
+    async def glob(*args, **kwargs):
+        if len(args) > 1:
+            raise TypeError(f"glob() takes at most 1 positional argument ({len(args)} given)")
+        if args:
+            if "pattern" in kwargs:
+                raise TypeError("glob() got multiple values for argument 'pattern'")
+            kwargs["pattern"] = args[0]
+        return await _generated_glob(**kwargs)
+
+
+_generated_ls = globals().get("ls")
+if callable(_generated_ls):
+    async def ls(*args, **kwargs):
+        if len(args) > 1:
+            raise TypeError(f"ls() takes at most 1 positional argument ({len(args)} given)")
+        if args:
+            if "path" in kwargs:
+                raise TypeError("ls() got multiple values for argument 'path'")
+            kwargs["path"] = args[0]
+        return await _generated_ls(**kwargs)
 
 
 def _stringify_output(value: Any) -> str:

@@ -30,13 +30,13 @@ Install the current publish target directly from GitHub:
 pi install git:github.com/coctostan/pi-ptc-next
 ```
 
-The repository remains `pi-ptc-next`, but the package metadata and release baseline now target **`pi-ptc-advanced@0.17.0`**. Until a separate registry publishing flow exists, the GitHub install path above remains the canonical install/update route documented by this repo.
+The repository remains `pi-ptc-next`, but the package metadata and release baseline now target **`pi-ptc-advanced@0.18.0`**. Until a separate registry publishing flow exists, the GitHub install path above remains the canonical install/update route documented by this repo.
 
 ## Personal fork maintenance
 
 If this fork is primarily for your own workstation, use the repo-local maintenance workflow instead of relying on `.paul/**` history.
 
-The current documented release baseline for that workflow is **`pi-ptc-advanced@0.17.0`**. Routine maintenance, CI-parity verification, and release-surface checks now live in the repo:
+The current documented release baseline for that workflow is **`pi-ptc-advanced@0.18.0`**. Routine maintenance, CI-parity verification, and release-surface checks now live in the repo:
 ```bash
 ./scripts/start-pi-ptc-full-tools.sh
 npm run verify:personal
@@ -48,11 +48,11 @@ npm run verify:release-package
 - `npm run verify:personal` runs the focused maintenance verification bundle
 - `npm run verify:personal:full` runs the higher-confidence full verification path
 - `npm run verify:ci` runs the repo-owned CI parity bundle used by `.github/workflows/ci.yml`
-- `npm run verify:release-package` validates the package metadata and `npm pack --dry-run` tarball surface for the `pi-ptc-advanced@0.17.0` baseline
+- `npm run verify:release-package` validates the package metadata and `npm pack --dry-run` tarball surface for the `pi-ptc-advanced@0.18.0` baseline
 For the full maintainer runbook, including the explicit manual git sync/upgrade boundary and how the verification-only workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) fits beside still-manual release/publish concerns, see [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
 Release docs for the active baseline:
 - [`CHANGELOG.md`](CHANGELOG.md)
-- [`docs/releases/0.17.0.md`](docs/releases/0.17.0.md)
+- [`docs/releases/0.18.0.md`](docs/releases/0.18.0.md)
 - Previous baseline: [`docs/releases/0.16.0.md`](docs/releases/0.16.0.md)
 - Historical baseline: [`docs/releases/0.15.0.md`](docs/releases/0.15.0.md)
 - Historical baseline: [`docs/releases/0.8.0.md`](docs/releases/0.8.0.md)
@@ -145,6 +145,8 @@ For personal use, this repo now also carries `scripts/start-pi-ptc-full-tools.sh
 
 If you opt into that profile, note the important limitation: `PTC_CALLABLE_TOOLS` is a filter, not a loader. It can only expose tools that Pi already makes visible to PTC in the current session. If a requested tool is missing from the active Pi tool set or lacks the expected `ptc.callable` metadata, PTC will warn and keep it out of `code_execution` rather than silently pretending the allowlist succeeded.
 If Python needs to branch on optional tools, inspect `ptc.list_callable_tools()` first. The live session surface is authoritative; config and allowlists do not guarantee that a helper is callable in the current run.
+
+`ptc.list_callable_tools()` lists **callable Pi tools** that cross the RPC boundary (e.g. `read`, `grep`, `edit`). It does NOT list `ptc.*` helpers, which live in this runtime. Use `ptc.list_helpers()` for the curated `ptc.*` helper inventory (each entry has `name`, `signature`, and a one-line `summary`).
 
 ## Structured override payloads (`details.ptcValue`)
 
@@ -415,6 +417,8 @@ The runtime also exposes a `ptc` helper object:
 - `ptc.diff(before, after) -> dict[str, Any]`
 - `ptc.expect_kind(value, kind) -> Any`
 - `ptc.list_callable_tools() -> list[dict[str, Any]]`
+- `ptc.list_helpers() -> list[dict[str, Any]]`
+  - Curated `ptc.*` helper inventory; each entry has `name`, `signature`, and a one-line `summary`. Counterpart to `ptc.list_callable_tools()`, which lists callable Pi tools (not helpers).
 - `ptc.get_tool_schema(name) -> dict[str, Any]`
 - `ptc.help(tool_name) -> dict[str, Any]`
 - `ptc.run_tests(pattern) -> dict[str, Any]`
@@ -656,7 +660,7 @@ npm run verify:personal:full
 npm run verify:release-package
 ```
 
-The package check validates the current **`pi-ptc-advanced@0.17.0`** release baseline without introducing changelog, CI, or publish automation.
+The package check validates the current **`pi-ptc-advanced@0.18.0`** release baseline without introducing changelog, CI, or publish automation.
 The profile is still constrained by Pi runtime visibility: if Pi does not expose one of those requested tools to PTC with callable metadata in the current session, the tool will stay unavailable inside `code_execution` and PTC will emit a warning describing the gap.
 See [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md) for the full maintainer workflow and the explicit manual git sync/upgrade boundary.
 
