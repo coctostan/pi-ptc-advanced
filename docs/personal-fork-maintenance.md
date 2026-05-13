@@ -2,7 +2,7 @@
 
 This document is the maintainer runbook for the public `pi-ptc-advanced` package identity and the repo-local release-readiness workflow.
 It covers the workflow that should remain stable across sessions:
-- start Pi with the preferred personal analysis profile
+- start Pi with the preferred analysis-oriented profile
 - run the routine verification bundle for day-to-day checks
 - run the full verification bundle when confidence needs to be higher
 - run the CI-parity verification bundle used by GitHub Actions
@@ -10,7 +10,7 @@ It covers the workflow that should remain stable across sessions:
 - handle sync, publishing, and repo rename work as explicit manual operations instead of hidden automation
 The current documented release target is **`pi-ptc-advanced@1.0.0`**. This runbook covers verification-only CI automation and the package-surface verification needed for that baseline while still leaving `npm publish`, tagging, GitHub releases, and the GitHub repository rename as explicit manual concerns; see [`docs/releases/1.0.0.md`](./releases/1.0.0.md) for details.
 ## Day-to-day workflow
-### 1. Start Pi with the personal analysis profile
+### 1. Start Pi with the analysis-oriented profile
 
 From the repo root:
 
@@ -76,7 +76,7 @@ Release reference docs for the active baseline:
 - Historical baseline: [`docs/releases/0.8.0.md`](./releases/0.8.0.md)
 ## Manual sync and upgrade boundary
 
-Phase 20 intentionally keeps git and remote operations manual.
+Git and remote operations are intentionally kept manual for this package.
 
 That means this repo documents the process, but does **not** automate:
 - remote creation

@@ -135,3 +135,132 @@ test("docs/personal-fork-maintenance.md targets the 1.0.0 baseline", () => {
   const opening = runbook.slice(0, 600);
   assert.doesNotMatch(opening, new RegExp(STALE_REPO_SLUG), "runbook opening must not lead with stale repo identity");
 });
+
+const REQUIRED_README_SECTIONS = [
+  /^## Quick Start/m,
+  /^## Installation/m,
+  /^## Usage/m,
+  /^## Python helpers/m,
+  /^## (Configuration|Environment variables)/m,
+  /^## Verification/m,
+  /^## Limitations/m,
+  /^## Development/m,
+  /^## Troubleshooting/m,
+  /^## License/m,
+  /^## Credits/m,
+];
+
+test("README has the Phase 59 public package section structure", () => {
+  const readme = read("README.md");
+  for (const re of REQUIRED_README_SECTIONS) {
+    assert.match(readme, re, `README missing required section: ${re}`);
+  }
+});
+
+test("README opening path leads with product value, not deep internals or lineage", () => {
+  const readme = read("README.md");
+  const quickStart = readme.search(/^## Quick Start/m);
+  const installation = readme.search(/^## Installation/m);
+  const credits = readme.search(/^## Credits/m);
+  const architecture = readme.search(/^## Architecture/m);
+  const howItWorks = readme.search(/^## How it works/m);
+  assert.ok(quickStart > 0, "README must include a Quick Start section");
+  assert.ok(installation > 0, "README must include an Installation section");
+  assert.ok(credits > 0, "README must include a Credits section");
+  assert.ok(
+    quickStart < credits,
+    "Quick Start must appear before Credits/lineage in the README opening path",
+  );
+  if (architecture > 0) {
+    assert.ok(
+      quickStart < architecture,
+      "Quick Start must appear before deep Architecture details",
+    );
+  }
+  if (howItWorks > 0) {
+    assert.ok(
+      quickStart < howItWorks,
+      "Quick Start must appear before deep How it works section",
+    );
+  }
+  assert.ok(
+    installation < credits,
+    "Installation must appear before Credits/lineage",
+  );
+});
+
+test("README does not advertise npm/pi registry install commands before publish is confirmed", () => {
+  const readme = read("README.md");
+  assert.doesNotMatch(
+    readme,
+    /\bnpm install\s+pi-ptc-advanced\b/,
+    "README must not advertise `npm install pi-ptc-advanced` until publish is confirmed",
+  );
+  assert.doesNotMatch(
+    readme,
+    /\bpi install\s+pi-ptc-advanced(?!-)/,
+    "README must not advertise `pi install pi-ptc-advanced` until publish is confirmed",
+  );
+  assert.doesNotMatch(
+    readme,
+    /available on npm/i,
+    "README must not claim the package is available on npm",
+  );
+});
+
+test("README does not use 'personal fork' as primary public release framing", () => {
+  const readme = read("README.md");
+  assert.doesNotMatch(
+    readme,
+    /^## Personal fork/m,
+    "README must not use 'Personal fork' as an active section heading",
+  );
+  // File path/link references to docs/personal-fork-maintenance.md and
+  // scripts/verify-personal-fork.sh are allowed; lead-paragraph framing is not.
+  const openingPath = readme.slice(0, 1500);
+  assert.doesNotMatch(
+    openingPath,
+    /\bpersonal fork\b/i,
+    "README opening must not lead with 'personal fork' framing",
+  );
+});
+
+test("README/runbook/release note do not claim publish, tags, releases, or repo rename happened", () => {
+  const claims = [
+    /has been published to npm/i,
+    /now available on the npm registry/i,
+    /the repository has been renamed/i,
+    /repo rename (is )?complete/i,
+    /git tag .* (?:has been )?(?:created|pushed)/i,
+    /GitHub release (?:has been )?published/i,
+  ];
+  for (const rel of ["README.md", "docs/personal-fork-maintenance.md", EXPECTED_RELEASE_DOC]) {
+    const body = read(rel);
+    for (const claim of claims) {
+      assert.doesNotMatch(body, claim, `${rel} must not claim ${claim} occurred`);
+    }
+  }
+});
+
+test("runbook leads with public release maintenance, not personal-fork framing", () => {
+  const runbook = read("docs/personal-fork-maintenance.md");
+  const firstLine = runbook.split("\n", 1)[0] ?? "";
+  assert.match(
+    firstLine,
+    /Public Release Maintenance/i,
+    "runbook title must be Public Release Maintenance, not personal-fork-first framing",
+  );
+  const opening = runbook.slice(0, 600);
+  assert.doesNotMatch(
+    opening,
+    /^# Personal fork/m,
+    "runbook must not use 'Personal fork' as its top heading",
+  );
+});
+
+test("docs/releases/1.0.0.md describes the user-facing baseline and verification path", () => {
+  const note = read(EXPECTED_RELEASE_DOC);
+  assert.match(note, /verify:release-package|verify-release-package/i, "release note must reference the release-package verifier");
+  assert.match(note, /verify:ci|verify-ci|workflows\/ci\.yml/i, "release note must reference the CI parity verification path");
+  assert.match(note, /repo rename|repository rename/i, "release note must reference the manual repo-rename boundary");
+});
