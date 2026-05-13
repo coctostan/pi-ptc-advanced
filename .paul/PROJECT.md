@@ -11,7 +11,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 |-----------|-------|
 | Version | 1.0.0 release readiness in progress (Milestone 20) |
 | Status | Active Milestone 20 — Phase 59 ready to plan |
-| Last Updated | 2026-05-13 after Phase 58 public identity baseline |
+| Last Updated | 2026-05-13 after Phase 59 README and docs polish |
 
 ## Requirements
 ### Validated (Shipped)
@@ -175,6 +175,8 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Ship `ptc.list_helpers()` as the curated helper inventory, separate from `ptc.list_callable_tools()` | Models need a deterministic way to distinguish built-in `ptc.*` helper functions from live callable Pi tools; a literal inventory avoids reflection drift and keeps optional-tool branching clear | 2026-05-13 | Active |
 | Keep `details.ptcValue` guidance in README rather than generated `code_execution` prompt text | The generated description intentionally stays concise and preserves existing prompt-description invariants, while README remains the durable contract for this advanced boundary case | 2026-05-13 | Active |
 | Target `pi-ptc-advanced@1.0.0` as a clean public NPM release identity | The project is ready to move beyond fork-first framing; README/docs/package metadata should present a standalone product while preserving credit and lineage lower in the README | 2026-05-13 | Active |
+| Defer `npm install pi-ptc-advanced` / `pi install pi-ptc-advanced` registry commands in public docs until actual npm publish is user-confirmed | Phase 59 ships public-package README/runbook/release-note framing without advertising an install path that does not yet work; Phase 60/61 can re-introduce a registry block once publish is confirmed | 2026-05-13 | Active |
+| Preserve `docs/personal-fork-maintenance.md` filename while moving its content to public release maintenance framing | Existing inbound links and CI references stay valid; only the title/lead-paragraph framing is reframed, with manual git/sync/upgrade boundary intact | 2026-05-13 | Active |
 
 ## Success Metrics
 | Metric | Target | Current | Status |
@@ -217,4 +219,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-05-13 after Milestone 20 creation and Phase 58 planning readiness*
+*Last updated: 2026-05-13 after Phase 59 UNIFY closeout (README and docs polish)*

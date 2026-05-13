@@ -8,11 +8,11 @@ See: `.paul/PROJECT.md`
 ## Current Position
 Milestone: Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release (`1.0.0`)
 Phase: 59 of 61 (README and Docs Polish)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-13 — Phase 58 complete: public identity baseline retargeted to `pi-ptc-advanced@1.0.0`; transitioned to Phase 59.
+Plan: 59-01 (`.paul/phases/59-readme-and-docs-polish/59-01-PLAN.md`)
+Status: UNIFY complete — Phase 59 closed
+Last activity: 2026-05-13 — Phase 59 UNIFY complete; 59-01-SUMMARY.md created; PR #16 awaiting merge gate.
 Progress:
-- Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [███░░░░░░░] 25% (Phase 58 ✓; Phase 59 ○; Phase 60 ○; Phase 61 ○)
+- Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [█████░░░░░] 50% (Phase 58 ✓; Phase 59 ✓; Phase 60 ○; Phase 61 ○)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
@@ -59,7 +59,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 59 ready to plan]
+  ✓        ✓        ✓     [Phase 59 UNIFY complete — awaiting PR #16 merge + transition]
 ```
 
 ## Accumulated Context
@@ -174,15 +174,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-13
-Stopped at: Phase 58 complete; Phase 59 ready to plan.
-Next action: `/paul:plan` for Phase 59 — README and Docs Polish
-Resume file: `.paul/ROADMAP.md`
+Stopped at: Phase 59 UNIFY complete; PR #16 awaiting merge gate before Phase 60 transition.
+Next action: complete PR #16 merge gate, then transition to Phase 60 planning.
+Resume file: `.paul/phases/59-readme-and-docs-polish/59-01-SUMMARY.md`
 wip_result: skipped — current branch is base branch `main`; PAUSE does not create WIP commits on base branch.
 Resume context:
-- Phase 58 plan 58-01 UNIFY closed with `.paul/phases/58-public-identity-rename/58-01-SUMMARY.md`.
-- Phase 58 shipped the public identity baseline: metadata/tests/docs now target `pi-ptc-advanced@1.0.0` and intended `coctostan/pi-ptc-advanced`; manual publish/repo-rename boundaries remain explicit.
-- Verification: `node --test test/release-readiness.test.ts`, `npm run build`, `bash scripts/verify-release-package.sh`; PR #15 GitHub Actions and Socket checks passed, then PR #15 merged to `main`.
-- Expected resume action: `/paul:plan` for Phase 59 — README and Docs Polish.
+- Phase 59 UNIFY: 59-01-SUMMARY.md created reconciling all 3 ACs PASS, WALT/TODD/DEAN module evidence recorded, 1 auto-fixed deviation (surgical README edits after wholesale rewrite removed pinned payloads).
+- GitHub Flow merge gate: PR #16 open against `main`; CI `Verify release baseline` ×2 and Socket Security ×2 in progress at last check.
+- Transition: Phase 59 is 1/1 plan complete; PROJECT/ROADMAP evolution and transition to Phase 60 pending PR merge confirmation.
+- Expected resume action: confirm PR #16 merged, then proceed to Phase 60 planning.
 
 ---
-*STATE.md — Updated for Phase 58 completion and Phase 59 planning readiness (last updated: 2026-05-13)*
+*STATE.md — Updated for Phase 59 UNIFY completion and Phase 60 transition readiness (last updated: 2026-05-13)*

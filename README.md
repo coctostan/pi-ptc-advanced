@@ -1,43 +1,135 @@
 # pi-ptc-advanced
-`pi-ptc-advanced` is a public Programmatic Tool Calling extension for pi-coding-agent. It adds a provider-agnostic `code_execution` tool: the model writes Python code, Python calls local pi tools through an internal RPC bridge, and only the final Python output is returned to the model context.
+
+`pi-ptc-advanced` is a public Programmatic Tool Calling (PTC) extension for
+[`pi-coding-agent`](https://github.com/earendil-works/pi-coding-agent). It
+adds a provider-agnostic `code_execution` tool: the model writes Python
+code, Python calls local Pi tools through an internal RPC bridge, and only
+the final Python output is returned to the model context.
 
 This is **not** Anthropic's provider-native PTC wire protocol. Instead, it implements the same core local behavior in a way that can work across multiple labs and models such as GPT-5.4, GLM-5, and Claude-class models.
 
 The current release baseline is **`pi-ptc-advanced@1.0.0`**. The GitHub repository is intended to be renamed to `coctostan/pi-ptc-advanced`; until that repository rename is performed, historical links may still appear in credits and older release material.
 
-## Installation
+> **Status:** the package is built from this repository only. It is not yet
+> available on the npm registry. Install from Git source using the paths
+> described in [Installation](#installation).
 
-Install the public package identity:
+## Quick Start
 
-```bash
-pi install pi-ptc-advanced
+Once the extension is loaded into your local Pi setup (see
+[Installation](#installation)), Pi exposes a `code_execution` tool. The model
+can use it like this from inside an ordinary chat session:
+
+```python
+# inside code_execution
+entries = await ptc.read_tree(pattern="**/*.ts", path="src", concurrency=6)
+return {
+    "files": len(entries),
+    "sample_lengths": [len(entry["content"]) for entry in entries[:3]],
+}
 ```
 
-For GitHub-based installs after the repository rename, use:
+The Python runs locally, calls Pi tools (`read`, `grep`, `find`, ...) through
+the RPC bridge, and only the final compact dict is returned to the model.
+Large intermediate results stay inside Python instead of being shipped
+through chat.
+
+For a richer composed example using batched tool calls and reports, see
+[Python helpers](#python-helpers).
+
+## Installation
+
+`pi-ptc-advanced@1.0.0` ships from source in this repository. Until publish
+is confirmed, install it directly from the GitHub source rather than from
+the npm registry.
+
+After the intended `coctostan/pi-ptc-advanced` repository rename:
 
 ```bash
 pi install git:github.com/coctostan/pi-ptc-advanced
 ```
 
-The repo-local release verification path validates the package metadata, tarball contents, and clean install proof for **`pi-ptc-advanced@1.0.0`**. Actual `npm publish`, git tags, GitHub releases, and the GitHub repository rename remain manual/user-owned operations.
+For development, clone the repository and point Pi at the local copy:
 
-## Personal fork maintenance
+```bash
+git clone <pi-ptc-advanced source repo> pi-ptc-advanced
+cd pi-ptc-advanced
+npm install
+npm run build
+```
 
-Use the repo-local maintenance workflow for routine verification and release-surface checks:
+Then load it into Pi as a local extension following Pi's extension docs.
+
+Actual `npm publish`, npm dist-tags, git tags, GitHub releases, and the
+GitHub repository rename remain manual, user-owned operations and are not
+automated by this release.
+
+## Usage
+
+Once installed, Pi exposes a `code_execution` tool. The model uses it the
+same way as any other tool, but the body is Python code instead of a
+structured parameter object.
+
+Minimal multi-tool example:
+
+```python
+matches = await grep("TODO", path="src", glob="**/*.ts")
+files = sorted({m["path"] for m in matches})
+return {"todo_files": files[:5], "todo_count": len(matches)}
+```
+
+Key runtime rules inside `code_execution`:
+
+- Top-level `await` is already available — do **not** call
+  `asyncio.run(...)`.
+- Direct callable Pi tool wrappers are async — use `await read(...)`,
+  `await grep(...)`, `await find(...)`, `await ls(...)`, `await glob(...)`.
+- `ptc.*` helpers follow their listed sync/async signatures.
+- Do **not** call `_rpc_call(...)` directly; use the generated wrappers and
+  `ptc.*` helpers.
+
+When to use what:
+
+- Use `code_execution` for 3+ dependent tool calls; loops, filtering,
+  aggregation, batching; large intermediate results that should stay out of
+  chat history.
+- Use direct tools for a single read, one grep, one file lookup.
+- Use `nu` for pipeline-style structured-data or filesystem-metadata
+  analysis (`where`, `sort-by`, `group-by`, `first`, `histogram`).
+
+## Verification
+
+From a clean checkout:
+
+```bash
+npm install
+npm run build
+npm test
+```
+
+For release-readiness work:
+
+```bash
+npm run verify:ci                # CI-parity bundle used by .github/workflows/ci.yml
+npm run verify:release-package   # metadata + tarball + clean-install proof for pi-ptc-advanced@1.0.0
+```
+
+For day-to-day maintainer verification:
+
 ```bash
 ./scripts/start-pi-ptc-full-tools.sh
 npm run verify:personal
 npm run verify:personal:full
-npm run verify:ci
-npm run verify:release-package
 ```
-- `./scripts/start-pi-ptc-full-tools.sh` starts Pi with the preferred analysis-oriented personal profile
-- `npm run verify:personal` runs the focused maintenance verification bundle
-- `npm run verify:personal:full` runs the higher-confidence full verification path
-- `npm run verify:ci` runs the repo-owned CI parity bundle used by `.github/workflows/ci.yml`
-- `npm run verify:release-package` validates the package metadata and `npm pack --dry-run` tarball surface for the `pi-ptc-advanced@1.0.0` baseline
-For the full maintainer runbook, including the explicit manual git sync/upgrade boundary and how the verification-only workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) fits beside still-manual release/publish concerns, see [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
+
+For the full maintainer runbook — including the explicit manual git
+sync/upgrade boundary and how the verification-only workflow at
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) fits beside still-manual
+release/publish concerns — see
+[`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md).
+
 Release docs for the active baseline:
+
 - [`CHANGELOG.md`](CHANGELOG.md)
 - [`docs/releases/1.0.0.md`](docs/releases/1.0.0.md)
 - Previous baseline: [`docs/releases/0.18.0.md`](docs/releases/0.18.0.md)
@@ -45,23 +137,29 @@ Release docs for the active baseline:
 - Historical baseline: [`docs/releases/0.15.0.md`](docs/releases/0.15.0.md)
 - Historical baseline: [`docs/releases/0.8.0.md`](docs/releases/0.8.0.md)
 
-## Credits and lineage
+## Limitations
 
-This codebase started from the original [`cegersdoerfer/pi-ptc`](https://github.com/cegersdoerfer/pi-ptc) by [@cegersdoerfer](https://github.com/cegersdoerfer) (Chris Egersdoerfer).
+`pi-ptc-advanced@1.0.0` ships with explicit manual boundaries. The package
+itself does **not**:
 
-It later continued through the `coctostan/pi-ptc-next` fork/repo lineage before the package and release surface moved to **`pi-ptc-advanced`** for the public 1.0 baseline. Credit and history remain part of the project:
+- run `npm publish` or create npm dist-tags
+- create git tags or GitHub releases
+- perform the GitHub repository rename to `coctostan/pi-ptc-advanced`
+- automate remote creation, fetch, rebase, push, or PR strategy
 
-- upstream origin: `cegersdoerfer/pi-ptc`
-- prior fork/repo lineage: `coctostan/pi-ptc-next`
-- current public package identity: `pi-ptc-advanced`
+Runtime limitations:
 
-The main work done here includes:
-- refactoring the codebase into clearer execution, contract, and tool submodules
-- replacing the split loader/watcher flow with an authoritative custom tool manager
-- tightening the runtime protocol and execution error boundaries
-- making subprocess execution explicit opt-in and improving Docker behavior
-- adding direct behavioral tests for the core execution/runtime/tooling paths
-- improving package loading, vendoring local reference material for PTC/advanced tool use, and benchmarking real pi usage
+- Hard execution timeout: `PTC_EXECUTION_TIMEOUT_MS` (default `270000` ms).
+- Max final output: `PTC_MAX_OUTPUT_CHARS` (default `100000` chars).
+- Per nested tool call timeout: 300 seconds in the Python RPC client.
+- `code_execution` cannot call itself recursively.
+- Recovery is intentionally narrow: only async-only first-attempt failures
+  are eligible, and at most one auto-recovery attempt is allowed per user
+  request when `PTC_AUTO_RECOVER` is enabled.
+
+See `## Execution limits`, `## Environment variables`, and
+[`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md) for
+the full manual-boundary list.
 ## Combined stack notes
 
 If you pair this extension with `pi-hashline-readmap`, the first-pass maintainer story is:
@@ -968,4 +1066,32 @@ That is intentional for tools like `find`, `glob`, `ls`, and `grep`. The runtime
 
 ## License
 
-MIT
+MIT. See [`LICENSE`](LICENSE).
+
+## Credits and lineage
+
+This codebase started from the original
+[`cegersdoerfer/pi-ptc`](https://github.com/cegersdoerfer/pi-ptc) by
+[@cegersdoerfer](https://github.com/cegersdoerfer) (Chris Egersdoerfer).
+
+It later continued through the `coctostan/pi-ptc-next` fork/repo lineage
+before the package and release surface moved to **`pi-ptc-advanced`** for the
+public 1.0 baseline. Credit and history remain part of the project:
+
+- upstream origin: `cegersdoerfer/pi-ptc`
+- prior fork/repo lineage: `coctostan/pi-ptc-next`
+- current public package identity: `pi-ptc-advanced`
+
+The main work done in this lineage includes:
+
+- refactoring the codebase into clearer execution, contract, and tool
+  submodules
+- replacing the split loader/watcher flow with an authoritative custom tool
+  manager
+- tightening the runtime protocol and execution error boundaries
+- making subprocess execution explicit opt-in and improving Docker behavior
+- adding direct behavioral tests for the core execution/runtime/tooling paths
+- improving package loading, vendoring local reference material for PTC and
+  advanced tool use, and benchmarking real Pi usage
+- adding bounded orchestration, report, handle, and run-tests helpers under
+  `ptc.*` so models can compose multi-tool workflows from a single Python run
