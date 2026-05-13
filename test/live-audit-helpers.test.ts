@@ -464,3 +464,123 @@ test("audit: ptc.first_handle() returns first matching handle or None", async ()
   const parsed = JSON.parse(result.output);
   assert.equal(typeof parsed.found, "boolean", `first_handle should return bool for found`);
 });
+
+// ═══════════════════════════════════════════
+// PHASE 57 LIVE-AUDIT CLOSEOUT (issues 1, 4, 5, 8, 9)
+// ═══════════════════════════════════════════
+
+test("audit: issue-1 ptc.run_tests() reports runner availability and shell-quoted command", async () => {
+  const executor = createAuditExecutor();
+  const result = await exec(executor, [
+    'r = ptc.run_tests("test/no-such-pattern.test.js")',
+    'cmd = r["metrics"]["command"]',
+    'return ptc.json_dump({',
+    '  "kind": r["kind"],',
+    '  "runner_available_present": "runner_available" in r["metrics"],',
+    '  "runner_available_is_bool": isinstance(r["metrics"]["runner_available"], bool),',
+    '  "command_starts_with_node": cmd.startswith("node "),',
+    '  "command": cmd,',
+    '})',
+  ].join("\n"));
+  const parsed = JSON.parse(result.output);
+  assert.equal(parsed.kind, "ptc_report", `run_tests should produce a ptc_report, got: ${result.output}`);
+  assert.equal(parsed.runner_available_present, true, `metrics.runner_available must be present`);
+  assert.equal(parsed.runner_available_is_bool, true, `metrics.runner_available must be a bool`);
+  assert.equal(parsed.command_starts_with_node, true, `metrics.command must start with 'node ', got: ${parsed.command}`);
+});
+
+test("audit: issue-4 ptc.list_callable_tools() vs ptc.list_helpers() distinguish surfaces", async () => {
+  const executor = createAuditExecutor();
+  const result = await exec(executor, [
+    'callable_names = sorted([t["name"] for t in ptc.list_callable_tools()])',
+    'helpers = ptc.list_helpers()',
+    'helper_names = sorted([h["name"] for h in helpers])',
+    'return ptc.json_dump({',
+    '  "callable_names": callable_names,',
+    '  "helper_names": helper_names,',
+    '  "helpers_are_dicts": all(isinstance(h, dict) and "name" in h and "signature" in h for h in helpers),',
+    '  "no_helper_in_callable": all(name not in callable_names for name in ["report", "run_tests", "read_many", "batch_tool"]),',
+    '})',
+  ].join("\n"));
+  const parsed = JSON.parse(result.output);
+  assert.ok(parsed.callable_names.includes("read"), `list_callable_tools must list callable Pi tools (read), got: ${parsed.callable_names}`);
+  assert.equal(parsed.no_helper_in_callable, true, `list_callable_tools must NOT include ptc.* helpers, got: ${parsed.callable_names}`);
+  assert.equal(parsed.helpers_are_dicts, true, `list_helpers entries must be dicts with name+signature`);
+  for (const expected of ["report", "run_tests", "read_many", "batch_tool", "list_callable_tools"]) {
+    assert.ok(parsed.helper_names.includes(expected), `list_helpers must include ptc.${expected}, got: ${parsed.helper_names}`);
+  }
+});
+
+test("audit: issue-5 callable wrappers have consistent positional-argument behavior", async () => {
+  const executor = createAuditExecutor();
+  const result = await exec(executor, [
+    'async def safe(coro):',
+    '    try:',
+    '        await coro',
+    '        return "ok"',
+    '    except TypeError as e:',
+    '        return "TypeError:" + str(e)',
+    '    except Exception as e:',
+    '        return type(e).__name__ + ":" + str(e)',
+    '',
+    '# First positional should be accepted for every documented wrapper',
+    'r1 = await safe(read("file-a.txt"))',
+    'r2 = await safe(grep("line", path="."))',
+    'r3 = await safe(glob("*.txt"))',
+    'r4 = await safe(find("*.txt"))',
+    'r5 = await safe(ls())',
+    '',
+    '# Excess positionals must raise TypeError naming the wrapper',
+    'r6 = await safe(read("a", "b"))',
+    'r7 = await safe(grep("a", "b"))',
+    'r8 = await safe(glob("a", "b"))',
+    'r9 = await safe(find("a", "b"))',
+    'r10 = await safe(ls("a", "b"))',
+    '',
+    'return ptc.json_dump({',
+    '  "first_positional_ok": [r1, r2, r3, r4, r5],',
+    '  "excess_positional": [r6, r7, r8, r9, r10],',
+    '})',
+  ].join("\n"));
+  const parsed = JSON.parse(result.output);
+  assert.deepEqual(parsed.first_positional_ok, ["ok", "ok", "ok", "ok", "ok"],
+    `each wrapper must accept its documented first positional, got: ${result.output}`);
+  const namedWrappers = ["read", "grep", "glob", "find", "ls"];
+  parsed.excess_positional.forEach((entry: string, idx: number) => {
+    assert.ok(entry.startsWith("TypeError:"), `${namedWrappers[idx]}() must reject excess positionals with TypeError, got: ${entry}`);
+    assert.ok(entry.includes(namedWrappers[idx] + "()"), `${namedWrappers[idx]}() TypeError must name the wrapper, got: ${entry}`);
+  });
+});
+
+test("audit: issue-8 callable wrapper preserves details.ptcValue override unchanged", async () => {
+  const executor = createAuditExecutor();
+  const result = await exec(executor, [
+    '# web_search stub returns details.ptcValue with a fixed shape; wrapper must surface it unchanged.',
+    'r = await web_search(query="phase-57 ptcValue probe")',
+    'return ptc.json_dump({',
+    '  "type": type(r).__name__,',
+    '  "is_dict": isinstance(r, dict),',
+    '  "has_responseId": isinstance(r, dict) and r.get("responseId") == "resp_ws_001",',
+    '  "results_len": (len(r["results"]) if isinstance(r, dict) and "results" in r else -1),',
+    '})',
+  ].join("\n"));
+  const parsed = JSON.parse(result.output);
+  assert.equal(parsed.is_dict, true, `web_search override must arrive as dict, got: ${result.output}`);
+  assert.equal(parsed.has_responseId, true, `details.ptcValue must be delivered unchanged (responseId), got: ${result.output}`);
+  assert.equal(parsed.results_len, 1, `details.ptcValue.results must be preserved as a 1-element list, got: ${result.output}`);
+});
+
+test("audit: issue-9 ptc.run_tests() shell-quotes patterns containing spaces", async () => {
+  const executor = createAuditExecutor();
+  const result = await exec(executor, [
+    'r = ptc.run_tests("test/name with spaces.test.js")',
+    'cmd = r["metrics"]["command"]',
+    'return ptc.json_dump({"command": cmd})',
+  ].join("\n"));
+  const parsed = JSON.parse(result.output);
+  const cmd: string = parsed.command;
+  const quoted = cmd.includes("'test/name with spaces.test.js'")
+    || cmd.includes('"test/name with spaces.test.js"');
+  assert.ok(quoted,
+    `metrics.command must shell-quote patterns containing spaces (issue-9), got: ${cmd}`);
+});

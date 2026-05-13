@@ -6,6 +6,42 @@ This changelog tracks notable release-facing changes for the fork repository `pi
 
 _No unreleased changes yet._
 
+## 0.18.0 — 2026-05-13
+
+`0.18.0` closes Milestone 19 — Live Runtime Helper Hardening. The release tightens the live `code_execution` surface (runner availability and shell-quoted command reporting, async callable wrapper contract, consistent positional-argument behavior across wrappers, normalized read results, and opt-in partial-error envelopes for `read_many` / `batch_tool`), closes out the live-audit issue note, and adds a curated `ptc.list_helpers()` inventory as the counterpart to `ptc.list_callable_tools()`.
+
+### Added
+
+- `ptc.list_helpers() -> list[dict[str, Any]]` returns a deterministic, JSON-safe inventory of `ptc.*` helpers (each entry carries `name`, `signature`, and a one-line `summary`). It is the helper-side counterpart to `ptc.list_callable_tools()`, which lists callable Pi tools.
+- Live-audit regression coverage for the remaining helper edge cases (issues 1, 4, 5, 8, 9): runner-unavailable shape and shell-quoted `metrics.command`, callable-vs-helper distinction, positional-argument behavior across `read`/`grep`/`glob`/`find`/`ls`, `details.ptcValue` override preservation at the callable boundary, and shell-quoted patterns for `ptc.run_tests`.
+
+### Changed
+
+- `find`, `glob`, and `ls` Python wrappers now accept at most 1 positional argument and raise a wrapper-named `TypeError` on excess positionals, matching the existing behavior of `read` and `grep` (Phase 55 + Phase 57).
+- `ptc.run_tests(pattern)` `metrics.command` is shell-quoted via `shlex.join`, and `metrics.runner_available` (bool) is recorded in the report (Phase 54, regression-pinned in Phase 57).
+- `ptc.read_many(...)` accepts opt-in `on_error='collect'` and returns a typed partial envelope (`kind="read_many_partial"`) instead of raising on the first failure (Phase 56).
+- `ptc.batch_tool(..., on_error='collect')` classifies tool-level normalized error payloads as failed entries (`ok: false, error: summary`) while preserving the raw payload under `value` (Phase 56).
+- Path normalization invariant documented across direct wrappers, `ptc.read_*` helpers, and `ptc.batch_tool` read/grep payloads (Phase 56).
+- README and the generated `code_execution` tool description distinguish `ptc.list_callable_tools()` (callable Pi tools) from `ptc.list_helpers()` (`ptc.*` helpers); README retains the `details.ptcValue` callable-boundary callout.
+- Package metadata and release-package verification now target `pi-ptc-advanced@0.18.0`.
+- `docs/issues/2026-05-13-code-execution-helper-edge-cases.md` records explicit per-issue resolution status for all ten live-audit items.
+
+### Security / Audit
+
+- Dependency audit posture improved during Milestone 19: `npm audit --json` reports `0 critical / 0 high / 3 moderate / 0 low` (down from the Phase 48 baseline of `4 critical / 0 high / 3 moderate / 0 low`).
+- `.paul/dean-baseline.json` (Phase 48 acknowledgement, valid through 2026-06-11) is retained as historical context; it is materially superseded by the improved audit posture and is not relied on by `0.18.0` plan creation.
+
+### Verification
+
+- Phase 57 verification: `node --test test/live-audit-helpers.test.ts` 29/29 passing with the five new `issue-N` cases; full `npm test` baseline carried forward unchanged.
+- `npm run build` clean.
+- `bash scripts/verify-release-package.sh` passes against the `0.18.0` baseline.
+
+### Deferred / not included
+
+- Automated publish remains manual; `scripts/verify-release-package.sh` validates the release surface but does not publish to a registry.
+- Cross-runner support for vitest / jest / pytest / package-script dispatch in `ptc.run_tests(pattern)` remains intentionally out of scope.
+- Extraction of `src/python-runtime/runtime.py` (now grown by the bounded `list_helpers` + positional-normalization inserts) remains an IRIS debt flag carried forward to a future milestone.
 ## 0.17.0 — 2026-05-12
 
 ### Added

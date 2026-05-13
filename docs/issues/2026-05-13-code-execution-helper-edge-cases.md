@@ -68,3 +68,20 @@ Tracking milestone: **Milestone 19 — Live Runtime Helper Hardening** (`0.18.0`
 - Path normalization is consistent across direct wrappers and batched helper results, or the differences are explicitly documented.
 - Tool-level failures in batched calls are either counted as failures or clearly documented as successful transport calls carrying failed tool payloads.
 - Add at least one live/manual-style regression case for helper availability and runner-unavailable behavior.
+
+## Resolution status (Phase 57)
+
+*Last updated: 2026-05-13 during Phase 57 (Live Proof and Release Readiness, `0.18.0`).*
+
+| # | Item | Status | Evidence |
+|---|------|--------|----------|
+| 1 | `ptc.run_tests` runner-unavailable behavior | **Closed** (live regression coverage; documented as environment-dependent) | `test/live-audit-helpers.test.ts::audit: issue-1`; `.paul/phases/54-runner-availability-and-command-reporting/54-01-SUMMARY.md`; README + `src/index.ts` runtime-dependence note. |
+| 2 | Async callable wrappers needed `await` | **Closed** (Phase 55) | `.paul/phases/55-callable-wrapper-contract-consistency/55-01-SUMMARY.md`; recovery-classifier `missing-await` / `async-wrapper-iterated` cases. |
+| 3 | Wrappers rejected positional arguments | **Closed** (Phase 55 + Phase 57) | Phase 55 normalized `read`, `grep`; Phase 57 normalized `find`, `glob`, `ls`. See `test/live-audit-helpers.test.ts::audit: issue-5`. |
+| 4 | `ptc.list_callable_tools()` lists tools, not `ptc.*` helpers | **Closed** | Added `ptc.list_helpers()` (curated inventory); README + `src/index.ts` distinguish the two surfaces. `test/live-audit-helpers.test.ts::audit: issue-4`. |
+| 5 | Positional-argument behavior inconsistent across wrappers | **Closed** | Phase 57 post-process wrappers for `find`, `glob`, `ls` accept at most 1 positional and raise wrapper-named `TypeError` on excess. `test/live-audit-helpers.test.ts::audit: issue-5`. |
+| 6 | `ptc.read_many` returned error strings for missing files | **Closed** (Phase 56) | `.paul/phases/56-result-normalization-and-partial-error-semantics/56-01-SUMMARY.md`; opt-in `on_error='collect'` partial envelope. |
+| 7 | Path normalization inconsistent across wrappers/helpers | **Closed** (Phase 56) | Phase 56 path-normalization invariant in `src/index.ts` and README; covered by Phase 56 tests. |
+| 8 | `details.ptcValue` override shape vs generated type hints | **Closed** (regression-pinned + docs) | `test/live-audit-helpers.test.ts::audit: issue-8`; README + `src/index.ts` callable-boundary callout explicitly states generated type hints reflect the normalized fallback, not the override shape. |
+| 9 | `ptc.run_tests` joined argv with spaces in `metrics.command` | **Closed** (Phase 54 + Phase 57) | `metrics.command` is shell-quoted by `shlex.join`. `test/live-audit-helpers.test.ts::audit: issue-9`. |
+| 10 | `ptc.batch_tool(..., on_error='collect')` mis-classified tool-level failures | **Closed** (Phase 56) | `.paul/phases/56-result-normalization-and-partial-error-semantics/56-01-SUMMARY.md`; tool-level failure classification logic and tests. |

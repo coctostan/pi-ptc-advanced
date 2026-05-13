@@ -4,15 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Phase 56 complete; Milestone 19 advances to Phase 57 (Live Proof and Release Readiness).
+**Current focus:** Milestone 19 complete; `0.18.0` release baseline is ready with manual publish boundary preserved.
 ## Current Position
-Milestone: Milestone 19 — Live Runtime Helper Hardening (`0.18.0`)
-Phase: 57 of 57 (Live Proof and Release Readiness)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-13 — Phase 56 unified, PR #13 merged, and Milestone 19 transitioned to Phase 57 planning readiness.
+Milestone: Milestone 19 - Live Runtime Helper Hardening (`0.18.0`)
+Phase: 57 of 57 (Live Proof and Release Readiness) — complete
+Plan: 57-01 (`.paul/phases/57-live-proof-and-release-readiness/57-01-PLAN.md`; summary: `.paul/phases/57-live-proof-and-release-readiness/57-01-SUMMARY.md`)
+Status: UNIFY complete — Milestone 19 release baseline ready; GitHub Flow merge gate owns PR #14 closure
+Last activity: 2026-05-13 — Phase 57 plan 57-01 UNIFY complete: live-audit closeout reconciled, `ptc.list_helpers()` recorded, `0.18.0` release baseline cut, and Milestone 19 marked complete.
 Progress:
-- Milestone 19 — Live Runtime Helper Hardening: [████████░░] 80% (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ○)
+- Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
@@ -58,12 +58,15 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 57 ready to plan]
+  ✓        ✓        ✓     [Phase 57 plan 57-01 reconciled; Milestone 19 complete]
 ```
 
 ## Accumulated Context
 ### Decisions
 - Phase 55 normalized callable-wrapper contract guidance: direct callable Pi wrappers remain awaitable, `grep("pattern", path="...")` is supported in the runtime adapter, and Phase 56 keeps result/path/error semantics separate.
+- Phase 57 shipped `ptc.list_helpers()` as the curated `ptc.*` helper inventory distinct from live callable-tool discovery via `ptc.list_callable_tools()`.
+- Phase 57 kept `details.ptcValue` guidance in README only, not the generated `code_execution` description, to preserve prompt-description invariants and avoid widening Pi-side prompt-injection behavior.
+- Phase 57 left `.paul/dean-baseline.json` untouched as historical acknowledgement evidence while documenting that 0.18.0 materially supersedes the old audit posture with `0 critical / 0 high / 3 moderate / 0 low`.
 - Personal fork ownership is now the primary path; upstream PR preparation is retained only as optional reference material
 - Phase 39 APPLY fixed `ptc.find_files()` to avoid `glob(limit=...)` dependency and normalize string/list glob payloads before slicing, then converted the three Phase 36 known-bug assertions into passing bounded regression proof
 - Phase 39 UNIFY reconciled plan-vs-actual into `39-01-SUMMARY.md`, recorded post-unify quality history, and transitioned the project to Phase 40
@@ -144,6 +147,7 @@ PLAN ──▶ APPLY ──▶ UNIFY
 ### Deferred Issues
 - Bridge teardown when pi adds getToolExecutor()
 - `src/python-runtime/runtime.py` remains a significant debt hotspot at 1089 lines after Phase 52 helper additions; future changes should avoid casual growth without extraction justification
+- `src/python-runtime/runtime.py` is now 1601 lines after Phase 57; `ptc.list_helpers()` and positional-wrapper consistency were bounded and additive, but future helper work should consider extraction/refactor before further growth.
 - Existing docs/test/runtime hotspots remain in `README.md` (899 lines), `src/index.ts` (534 lines), and `test/index.test.ts` (1222 lines); future proof/docs/render work should keep using focused companion files or extract sections before growing those anchors further
 - Full-suite verification now passes at `230` passing / `0` failing after Phase 52 UNIFY; maintain this as the current baseline for subsequent milestones
 - Phase 44 removed packaged Python bytecode/cache artifacts from the tarball surface and added packed-artifact installability proof; preserve this publish-surface invariant in future release work
@@ -162,18 +166,19 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - PR #11: MERGED — https://github.com/coctostan/pi-ptc-next/pull/11; squash merge `5bd2108` to `main`; GitHub Actions `Verify release baseline` and Socket checks SUCCESS; local `main` fast-forwarded; remote/local feature branch deleted.
 - PR #12: MERGED — https://github.com/coctostan/pi-ptc-next/pull/12; squash merge `bb54af2` to `main`; GitHub Actions `Verify release baseline` and Socket checks SUCCESS; remote/local feature branch deleted (Phase 55).
 - PR #13: MERGED — https://github.com/coctostan/pi-ptc-next/pull/13; squash merge `b1a42a9` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote/local feature branch deleted (Phase 56).
+- PR #14: OPEN after UNIFY commit/push — https://github.com/coctostan/pi-ptc-next/pull/14; branch `phase-57-live-proof-and-release-readiness`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; merge state CLEAN; ready for squash merge.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-13
-Stopped at: Phase 56 unified and merged; Phase 57 ready to plan.
-Next action: `/paul:plan` for Phase 57 (Live Proof and Release Readiness).
-Resume file: `.paul/phases/56-result-normalization-and-partial-error-semantics/56-01-SUMMARY.md`
-wip_result: skipped - on base branch `main`; PAUSE does not create WIP commits on base branch
+Stopped at: Phase 57 plan 57-01 UNIFY complete; Milestone 19 complete; PR #14 CI clean and ready for squash merge.
+Next action: squash-merge PR #14, sync `main`, then route to `/paul:milestone` for the next milestone/release decision.
+Resume file: `.paul/ROADMAP.md`
+wip_result: UNIFY artifacts committed and pushed in `3a13000`; PR #14 checks are green before merge.
 Resume context:
-- Phase 55 completed and reconciled in `.paul/phases/55-callable-wrapper-contract-consistency/55-01-SUMMARY.md`; PR #12 merged and local `main` is in sync with `origin/main`.
-- Phase 56 closed: path normalization parity, `read_many` partial envelope, and `batch_tool(..., on_error='collect')` tool-level failure classification shipped via PR #13 (merged); SUMMARY at `.paul/phases/56-result-normalization-and-partial-error-semantics/56-01-SUMMARY.md`.
-- Deviations recorded: new `test/runtime-path-and-partial.test.ts` (plan escape hatch); `runs/` added to `.gitignore`; `runtime.py` grew +140 lines (over 40–80 budget) — IRIS-flagged for future-milestone refactor consideration.
-- Expected resume action: `/paul:plan` for Phase 57.
+- Phase 57 reconciled plan-vs-actual into `.paul/phases/57-live-proof-and-release-readiness/57-01-SUMMARY.md`.
+- Milestone 19 is complete: Phase 54 runner availability/command reporting, Phase 55 callable-wrapper contract consistency, Phase 56 result normalization/partial-error semantics, and Phase 57 live proof/release readiness are all closed.
+- Release baseline `pi-ptc-advanced@0.18.0` is prepared; manual publish boundary remains in force (no publish/tag/GitHub release automation).
+- Expected resume action after merge gate: `/paul:milestone` to decide the next milestone or manual release follow-up.
 
 ---
-*STATE.md — Updated for Phase 56 closure and Phase 57 planning readiness (last updated: 2026-05-13)*
+*STATE.md — Updated for Phase 57 plan 57-01 UNIFY and Milestone 19 completion (last updated: 2026-05-13)*

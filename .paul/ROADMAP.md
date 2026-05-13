@@ -5,8 +5,8 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 
 ## Current Milestone
 **Milestone 19 — Live Runtime Helper Hardening** (`0.18.0`)
-Status: 🚧 In Progress
-Phases: 2 of 4 complete
+Status: ✅ Complete — release baseline ready; manual publish boundary preserved
+Phases: 4 of 4 complete
 
 Focus: Convert live `code_execution` manual-test findings into tighter runtime behavior, clearer helper contracts, and regression proof.
 
@@ -17,7 +17,7 @@ Source findings: [`docs/issues/2026-05-13-code-execution-helper-edge-cases.md`](
 | 54 | Runner Availability and Command Reporting | 1/1 | ✅ Complete | 2026-05-13 |
 | 55 | Callable Wrapper Contract Consistency | 1/1 | ✅ Complete | 2026-05-13 |
 | 56 | Result Normalization and Partial-Error Semantics | 1/1 | ✅ Complete | 2026-05-13 |
-| 57 | Live Proof and Release Readiness | TBD | Ready to plan | - |
+| 57 | Live Proof and Release Readiness | 1/1 | ✅ Complete | 2026-05-13 |
 
 ### Phase 54: Runner Availability and Command Reporting
 Focus: Decide and implement the default-runtime story for `ptc.run_tests(pattern)`, including Node availability, runner-unavailable guidance, and unambiguous command metadata.
@@ -33,9 +33,28 @@ Plans: `56-01-PLAN.md`
 
 ### Phase 57: Live Proof and Release Readiness
 Focus: Add focused live/manual-style regression proof, refresh docs and release notes, and verify the `0.18.0` package baseline.
-Plans: TBD (defined during /paul:plan)
+Plans: `57-01-PLAN.md` (TDD; live-audit closeout for issues 1, 4, 5, 8, 9 + `0.18.0` release readiness)
+Summary: `57-01-SUMMARY.md` — live-audit closeout, `ptc.list_helpers()`, and `0.18.0` release baseline.
 
 ## Completed Milestones
+
+<details>
+<summary>Milestone 19 — Live Runtime Helper Hardening (0.18.0) - 2026-05-13 (4 phases)</summary>
+
+| Phase | Name | Plans | Completed |
+|-------|------|-------|-----------|
+| 54 | Runner Availability and Command Reporting | 1/1 | 2026-05-13 |
+| 55 | Callable Wrapper Contract Consistency | 1/1 | 2026-05-13 |
+| 56 | Result Normalization and Partial-Error Semantics | 1/1 | 2026-05-13 |
+| 57 | Live Proof and Release Readiness | 1/1 | 2026-05-13 |
+
+Notes:
+- Hardened `ptc.run_tests(pattern)` runner availability and shell-quoted command reporting.
+- Normalized callable-wrapper guidance and positional shorthand boundaries for direct callable Pi wrappers.
+- Tightened path normalization, `ptc.read_many(..., on_error='collect')`, and `ptc.batch_tool(..., on_error='collect')` partial-error semantics.
+- Closed the live-audit helper edge-case note, added `ptc.list_helpers()`, and prepared the `0.18.0` release baseline with improved audit posture (`0 critical / 0 high / 3 moderate / 0 low`).
+
+</details>
 <details>
 <summary>Milestone 18 — PTC Leverage and Output Shape (0.17.0) - 2026-05-12 (5 phases)</summary>
 
@@ -275,4 +294,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-13 after completing Phase 56 and routing to Phase 57 planning*
+*Last updated: 2026-05-13 after creating Phase 57 plan 57-01 and routing to APPLY*

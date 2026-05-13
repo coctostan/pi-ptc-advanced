@@ -162,7 +162,7 @@ Important rules:
 ${dockerBehavior}
 Prefer these patterns:
 - Many file reads from explicit paths: ptc.read_many(paths, max_concurrency=...)
-- Inspect ptc.list_callable_tools() before branching on optional tools; otherwise use the callable tool list below directly.
+- Inspect ptc.list_callable_tools() before branching on optional tools; otherwise use the callable tool list below directly. ptc.list_callable_tools() lists callable Pi tools, NOT ptc.* helpers; use ptc.list_helpers() for the curated ptc.* helper inventory.
 - Bounded concurrency for arbitrary coroutines: ptc.gather_limit(coros, limit=...)
 - Relative file discovery: glob(...) or ptc.find_files(..., relative=True, relative_to=None)
 - Absolute file discovery for later read()/write(): ptc.find_files_abs(..., relative=False)
@@ -191,6 +191,8 @@ Python helpers currently available in this session:
 -   - Runs Node's built-in \`node --test\` with the supplied pattern from the active runtime workspace and returns a ptc_report with pass/fail/duration metrics, quoted command metadata, scalar runner_path/runner_resolution fields, a bounded failures table, and a runner_available flag. Requires Node in the active runtime; Python-only or Docker runtimes may return runner_available=false as structured report data. Node-only for this phase; no cross-runner support or package-script dispatch.
 - ptc.expect_kind(value, kind) -> Any
 - ptc.list_callable_tools() -> list[dict[str, Any]]
+- ptc.list_helpers() -> list[dict[str, Any]]
+-   - Curated ptc.* helper inventory (name, signature, summary). Counterpart to list_callable_tools(), which lists callable Pi tools that cross the RPC boundary.
 - ptc.get_tool_schema(name) -> dict[str, Any]
 - ptc.help(tool_name) -> dict[str, Any]
 - ptc.extract_handles(value, kind=None) -> list[SupportedHandle]
