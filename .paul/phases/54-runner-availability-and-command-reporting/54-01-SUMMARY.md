@@ -75,6 +75,21 @@ key-decisions:
 ### DOCS / IRIS / ARCH / SETH / DAVE / GABE / DANA / OMAR / REED / PETE / VERA / ARIA / LUKE / SKIP
 - **post-apply advisory:** no blocking findings from the changed set. README and generated guidance were updated with test-enforced runtime-availability wording; no CI, API, data, UI, dependency-manifest, auth, privacy, or observability surface was changed.
 
+### Pre/Post-UNIFY Dispatch
+- `[dispatch] pre-unify: 0 modules registered for this hook`.
+- `[dispatch] post-unify: WALT appended `.paul/QUALITY-HISTORY.md` row for 54-01; CODI appended `.paul/CODI-HISTORY.md` row with `skipped-no-symbols`; SKIP emitted no separate durable knowledge entry because the summary frontmatter already captures source-backed decisions; RUBY reported no refactor action beyond the existing baseline full-suite concern.`
+
+### WALT post-unify quality delta
+| Metric | Before | After | Delta | Trajectory |
+|--------|--------|-------|-------|------------|
+| Tests passing | 235 | 236 | +1 | ▲ improved |
+| Tests failing | 1 | 1 | 0 | ● stable baseline concern |
+| Coverage | — | — | — | — skipped |
+| Lint | — | — | — | — skipped |
+| Types | 0 | 0 | 0 | ● stable |
+
+**Overall:** ▲ improved with baseline concern; no Phase 54 regression.
+
 ## Files Created/Modified
 
 | File | Change | Purpose |
@@ -103,4 +118,4 @@ key-decisions:
 
 ## Next Phase Readiness
 
-Phase 54 implementation is ready for UNIFY with a verification concern: focused Phase 54 checks pass and audit has no new critical/high findings, while full suite retains the same unrelated baseline failure seen before APPLY.
+Phase 54 UNIFY reconciliation is complete with a merge-gate concern: focused Phase 54 checks pass and audit has no new critical/high findings, while full suite retains the same unrelated baseline failure seen before APPLY.

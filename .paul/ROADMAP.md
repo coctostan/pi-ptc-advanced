@@ -14,7 +14,7 @@ Source findings: [`docs/issues/2026-05-13-code-execution-helper-edge-cases.md`](
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 54 | Runner Availability and Command Reporting | 1/1 | Applying | - |
+| 54 | Runner Availability and Command Reporting | 1/1 | Unifying / merge gate pending | PR #11 |
 | 55 | Callable Wrapper Contract Consistency | TBD | Not started | - |
 | 56 | Result Normalization and Partial-Error Semantics | TBD | Not started | - |
 | 57 | Live Proof and Release Readiness | TBD | Not started | - |
@@ -275,4 +275,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-13 after completing Phase 54 APPLY for Milestone 19*
+*Last updated: 2026-05-13 after Phase 54 UNIFY reconciliation and PR #11 merge-gate routing*

@@ -4,15 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Phase 54 APPLY complete for Milestone 19 — Live Runtime Helper Hardening (`0.18.0`); awaiting UNIFY.
+**Current focus:** Phase 54 UNIFY artifacts complete for Milestone 19 — Live Runtime Helper Hardening (`0.18.0`); GitHub Flow merge gate pending.
 ## Current Position
 Milestone: Milestone 19 — Live Runtime Helper Hardening (`0.18.0`)
 Phase: 54 of 57 (Runner Availability and Command Reporting)
 Plan: `54-01-PLAN.md`
-Status: APPLY complete — awaiting UNIFY
-Last activity: 2026-05-13 — Completed Phase 54 APPLY, created `.paul/phases/54-runner-availability-and-command-reporting/54-01-SUMMARY.md`, and recorded focused verification pass plus the unchanged full-suite baseline failure.
+Status: UNIFY artifacts complete — GitHub Flow merge gate pending
+Last activity: 2026-05-13 — Reconciled Phase 54 UNIFY, finalized `.paul/phases/54-runner-availability-and-command-reporting/54-01-SUMMARY.md`, updated quality/CODI histories, and prepared PR #11 for GitHub Flow merge gate.
 Progress:
-- Milestone 19 — Live Runtime Helper Hardening: [██░░░░░░░░] 20% (Phase 54 ◕ APPLY complete; Phase 55 ○; Phase 56 ○; Phase 57 ○)
+- Milestone 19 — Live Runtime Helper Hardening: [██░░░░░░░░] 20% (Phase 54 ◕ UNIFY artifacts complete / merge gate pending; Phase 55 ○; Phase 56 ○; Phase 57 ○)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
 - Phase 46 — Extension Runtime Compatibility Alignment: [██████████] 100% ✓
@@ -58,7 +58,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ●        ●        ○     [Phase 54 APPLY complete — awaiting UNIFY]
+  ●        ●        ◕     [Phase 54 UNIFY artifacts complete — merge gate pending]
 ```
 
 ## Accumulated Context
@@ -158,12 +158,12 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - PR #7: MERGED — https://github.com/coctostan/pi-ptc-next/pull/7; GitHub Actions `Verify release baseline` and Socket checks SUCCESS.
 - PR #8: MERGED — https://github.com/coctostan/pi-ptc-next/pull/8; squash merge `b91d71d` to `main`; GitHub Actions `Verify release baseline` and Socket checks SUCCESS; remote feature branch deleted by merge automation.
 - PR #9: MERGED — https://github.com/coctostan/pi-ptc-next/pull/9; squash merge `1f9305a` to `main`; GitHub Actions `Verify release baseline` SUCCESS; feature branch `feature/53-test-runner-verb` deleted by merge automation; local `main` fast-forwarded.
-- PR #11: OPEN — https://github.com/coctostan/pi-ptc-next/pull/11 for Phase 54 `feature/54-runner-availability-command-reporting`; GitHub Actions `Verify release baseline` pending at APPLY postflight creation.
+- PR #11: OPEN — https://github.com/coctostan/pi-ptc-next/pull/11 for Phase 54 `feature/54-runner-availability-command-reporting`; UNIFY artifacts pushed; merge gate pending required CI/check reporting.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-13
-Stopped at: Phase 54 APPLY complete; session paused before UNIFY.
-Next action: Run UNIFY for `.paul/phases/54-runner-availability-and-command-reporting/54-01-PLAN.md`
+Stopped at: Phase 54 UNIFY artifacts complete; GitHub Flow merge gate pending CI/check reporting.
+Next action: Recheck PR #11 checks and complete GitHub Flow merge gate when CI is available/passing.
 Resume file: `.paul/phases/54-runner-availability-and-command-reporting/54-01-SUMMARY.md`
 wip_result: skipped — on base branch `main`; PAUSE does not create WIP commits on base branch
 Resume context:
@@ -171,7 +171,8 @@ Resume context:
 - Focused verification passed: `PI_RTK_BYPASS=1 npm run build && PI_RTK_BYPASS=1 node --test test/run-tests-helper.test.ts test/index.test.ts` (16/16).
 - Full `npm test` retains the same unrelated baseline failure in `test/hashline-edit-contract.test.ts` README edit-example `diffData` mismatch (236 pass / 1 fail post-apply vs 235 pass / 1 fail pre-apply).
 - Audit: `npm audit --json` remains 0 critical / 0 high / 3 moderate.
-- Continue to UNIFY for the Phase 54 plan.
+- Post-unify histories updated: `.paul/QUALITY-HISTORY.md`, `.paul/CODI-HISTORY.md`.
+- PR #11: https://github.com/coctostan/pi-ptc-next/pull/11; merge gate pending required CI/check reporting before merge/phase transition.
 
 ---
-*STATE.md — Updated after Phase 54 APPLY (last updated: 2026-05-13)*
+*STATE.md — Updated after Phase 54 UNIFY reconciliation (last updated: 2026-05-13)*
