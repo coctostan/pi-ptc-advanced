@@ -666,7 +666,7 @@ npm run verify:personal:full
 npm run verify:release-package
 ```
 
-The package check validates the current **`pi-ptc-advanced@0.18.0`** release baseline without introducing changelog, CI, or publish automation.
+The package check validates the current **`pi-ptc-advanced@1.0.0`** release baseline without running publish automation.
 The profile is still constrained by Pi runtime visibility: if Pi does not expose one of those requested tools to PTC with callable metadata in the current session, the tool will stay unavailable inside `code_execution` and PTC will emit a warning describing the gap.
 See [`docs/personal-fork-maintenance.md`](docs/personal-fork-maintenance.md) for the full maintainer workflow and the explicit manual git sync/upgrade boundary.
 
