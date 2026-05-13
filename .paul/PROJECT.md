@@ -9,9 +9,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 ## Current State
 | Attribute | Value |
 |-----------|-------|
-| Version | 0.18.0 in progress (Milestone 19 active) |
-| Status | Active Milestone 19 hardening — Phase 56 ready to plan |
-| Last Updated | 2026-05-13 |
+| Version | 0.18.0 release baseline complete (Milestone 19) |
+| Status | Milestone 19 complete — ready for next milestone or manual release decision |
+| Last Updated | 2026-05-13 after Phase 57 UNIFY |
 
 ## Requirements
 ### Validated (Shipped)
@@ -47,7 +47,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-- [ ] Phase 56 — Result Normalization and Partial-Error Semantics (ready to plan)
+- None — Milestone 19 is complete; next milestone has not started.
 ### Validated (Shipped)
 - [x] Restored the P0 file-discovery helper path by removing `glob(limit=...)` dependency and proving bounded success for `ptc.read_tree()`, `ptc.find_files()`, and `ptc.find_files_abs()` in live audit coverage — Phase 39
 - [x] Improved syntax/compile-time error surfacing so pre-terminal Python failures now expose actionable `SyntaxError`/traceback context instead of generic RPC closure messaging — Phase 40
@@ -66,12 +66,14 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added `ptc.run_tests(pattern)` as a first-class Node `node --test` helper that returns a Phase 50 `ptc_report` with pass/fail/duration metrics, a bounded failures table, runner-availability data, a fixed 120s timeout, and reentry-safe subprocess execution, plus README/CHANGELOG/generated-guidance coverage — Phase 53
 - [x] Hardened `ptc.run_tests(pattern)` runner availability reporting with scalar `runner_path` / `runner_resolution` metadata, shell-quoted command display for patterns containing spaces, active-runtime Node/PATH guidance, and README edit-payload contract alignment — Phase 54
 - [x] Normalized callable wrapper guidance and grep positional shorthand: direct callable Pi wrappers are explicitly awaitable, `grep("pattern", path="...")` is supported, and Phase 56 result/error semantics remain separately scoped — Phase 55
+- [x] Tightened result normalization and partial-error semantics: direct/batched read/grep paths now share workspace-relative path normalization; `ptc.read_many(..., on_error='collect')` returns a typed partial envelope; and `ptc.batch_tool(..., on_error='collect')` classifies normalized tool-level failures while preserving raw payloads — Phase 56
+- [x] Closed Milestone 19 release readiness: remaining live-audit helper edge cases are covered by issue-numbered regressions, `ptc.list_helpers()` exposes the curated helper inventory, all issue-note items carry explicit status, and the `0.18.0` release baseline is prepared with improved audit posture (`0 critical / 0 high / 3 moderate / 0 low`) — Phase 57
 - [x] Full live audit: 51 tests across 3 phases proving 94% of helpers work, with stress testing (concurrency, large files, output budgets) and 7 multi-tool composition workflows all passing. 1 P0 bug found (glob/limit), 2 P1, 2 P2 issues documented — Milestone 14
 - [x] Systematic live-tool audit of all 21 Python helpers and 8 pipeline capabilities — Phase 36
 - [x] Added user-facing recipe workflow documentation and ecosystem composition proof — Phase 35
 - [x] Added concrete cross-repo recipe artifacts plus deterministic benchmark baseline — Phase 34
 ### Planned (Next)
-- Phase 57 — Live Proof and Release Readiness
+- Next milestone / manual release decision TBD after PR #14 merge.
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -95,7 +97,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 - Package name: `pi-ptc-advanced`
 - Key source areas: `src/index.ts`, `src/code-executor.ts`, `src/custom-tool-manager.ts`, `src/tool-registry.ts`, `src/tool-adapters.ts`, `src/rpc-protocol.ts`
 - Maintainer-facing integration docs now live in `README.md`; deeper local planning/history artifacts live under `.paul/`
-- Latest GitHub Flow evidence: Phase 55 merged through PR #12 with callable-wrapper contract consistency complete; Milestone 19 is active at Phase 56 planning.
+- Latest GitHub Flow evidence: Phase 57 prepared PR #14 for the `0.18.0` release baseline; CI and Socket checks passed before UNIFY merge-gate routing.
 
 ## Constraints
 ### Technical Constraints
@@ -168,6 +170,8 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Keep `ptc.run_tests` Node-only while making runner availability explicit | Phase 54 adds scalar runner resolution metadata and quoted command display without widening into package-script or cross-runner support | 2026-05-13 | Active |
 | Keep README live payload examples aligned to normalized hashline payloads | CI caught drift in the edit example's `diffData`; README examples must include the same structured shape asserted by contract tests | 2026-05-13 | Active |
 | Keep callable Pi wrappers explicitly awaitable while supporting obvious positional shorthand only at bounded adapter seams | Direct wrappers are async RPC calls; the grep runtime adapter already owns live grep normalization, so supporting `grep("pattern", path="...")` there avoids broader wrapper-generator churn and preserves Phase 56 result/error semantics for a separate pass | 2026-05-13 | Active |
+| Ship `ptc.list_helpers()` as the curated helper inventory, separate from `ptc.list_callable_tools()` | Models need a deterministic way to distinguish built-in `ptc.*` helper functions from live callable Pi tools; a literal inventory avoids reflection drift and keeps optional-tool branching clear | 2026-05-13 | Active |
+| Keep `details.ptcValue` guidance in README rather than generated `code_execution` prompt text | The generated description intentionally stays concise and preserves existing prompt-description invariants, while README remains the durable contract for this advanced boundary case | 2026-05-13 | Active |
 
 ## Success Metrics
 | Metric | Target | Current | Status |
@@ -180,7 +184,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Python helper ergonomics for structured anchored builtin results | Yes | Builtin contracts, wrappers, and `code_execution` guidance now expose richer anchored result models | Achieved |
 | Explicit metadata/policy contract for extension tools | Yes | `ptc.callable` / `ptc.policy` normalization, legacy compatibility, policy tests, and combined-stack guidance landed | Achieved |
 | Full real two-extension loading smoke harness with `pi-hashline-readmap` | Optional | Explicitly evaluated and deferred; lightweight smoke coverage remains the first-pass upstream verification point | Deferred |
-| Repo-owned CI verification path for the current publish baseline | Yes | `npm run verify:ci` remains available while package metadata and release-package verification now target `pi-ptc-advanced@0.16.0` | Achieved |
+| Repo-owned CI verification path for the current publish baseline | Yes | `npm run verify:ci` remains available while package metadata and release-package verification now target `pi-ptc-advanced@0.18.0` | Achieved |
 | Execution-level proof and user-facing docs for Milestone 11 helper ergonomics | Yes | Dedicated runtime proof, tool-description assertions, README updates, and doc-contract coverage landed in Phase 29 | Achieved |
 | Bounded reduction and output-budget helpers for Python orchestration flows | Yes | `ptc.reduce_tool(...)` and `ptc.fit_output(...)` landed with focused execution proof and executor-aligned output-budget defaults | Achieved |
 | Ecosystem-style proof and user-facing docs for Milestone 12 orchestration/output-budget helpers | Yes | Dedicated runtime proof, README examples, tool-description guidance, and doc-contract coverage landed in Phase 32 | Achieved |
@@ -188,6 +192,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Path ergonomics and bridge helpers for Python analysis flows | Yes | `relative` / `relative_to` path formatting, `ptc.tabulate(...)`, shallow `ptc.diff(...)`, focused tests, README/tool guidance, and CHANGELOG landed in Phase 51 | Achieved |
 | Callable-tool prompt metadata and on-demand help | Yes | Optional `promptSnippet` / `promptGuidelines` propagation plus `ptc.help(tool_name)` landed with runtime, docs, generated-guidance, and contract-test proof in Phase 52 | Achieved |
 | Bounded Node test runner verb for Python flows | Yes | `ptc.run_tests(pattern)` returns a Phase 50 `ptc_report` with pass/fail/duration metrics, a bounded failures table, runner-availability data, fixed 120s timeout, and reentry-safe subprocess execution; landed with runtime, docs, generated-guidance, and live tests in Phase 53 | Achieved |
+| Live-audit helper edge cases closed for Milestone 19 | Yes | Issue-numbered regressions cover remaining live-audit items; `ptc.list_helpers()` documents the curated helper surface; release notes and issue status reconcile all 10 items | Achieved |
 | Deterministic recipe-target contract and seeded M4 workflow corpus | Yes | Additive `recipe_target` metadata, benchmark-result passthrough, and four deterministic recipe cases landed in Phase 33 | Achieved |
 
 ## Tech Stack
@@ -209,4 +214,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-05-13 after Phase 55 completion and transition to Phase 56 planning*
+*Last updated: 2026-05-13 after Phase 57 UNIFY and Milestone 19 completion*
