@@ -13,7 +13,7 @@ Focus: Make `pi-ptc-advanced@1.0.0` cleanly publishable and understandable as a 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 58 | Public Identity Rename | 1/1 | ✅ Complete | 2026-05-13 |
-| 59 | README and Docs Polish | TBD | 🔵 Ready to plan | - |
+| 59 | README and Docs Polish | 1/1 | ✅ Complete | 2026-05-13 |
 | 60 | 1.0 Release Gate | TBD | Not started | - |
 | 61 | Repo Rename and Migration Proof | TBD | Not started | - |
 
@@ -23,7 +23,7 @@ Plans: `58-01-PLAN.md` (TDD; 1.0.0 package/public identity baseline) — complet
 
 ### Phase 59: README and Docs Polish
 Focus: Rewrite README for actual users: what it does, install, quickstart, examples, helper surface, verification, limitations. Move fork lineage/credits to a bottom section; update/remove “personal fork” framing in public-facing docs.
-Plans: TBD (defined during /paul:plan)
+Plans: `59-01-PLAN.md` (TDD; public README/docs polish) — complete (`59-01-SUMMARY.md`)
 
 ### Phase 60: 1.0 Release Gate
 Focus: Add/refresh 1.0 release notes, changelog, release-readiness tests, npm pack/publish dry-run checklist, and manual publish instructions. Verification stops before actual `npm publish`.
@@ -291,4 +291,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-13 after completing Phase 58 and routing to Phase 59 planning*
+*Last updated: 2026-05-13 after Phase 59 UNIFY closeout (59-01-SUMMARY.md)*
