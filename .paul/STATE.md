@@ -7,10 +7,10 @@ See: `.paul/PROJECT.md`
 **Current focus:** Milestone 20 begins: polish and rename the public package/repo/docs surface for `pi-ptc-advanced@1.0.0` NPM release readiness.
 ## Current Position
 Milestone: Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release (`1.0.0`)
-Phase: 59 of 61 (README and Docs Polish)
-Plan: 59-01 (`.paul/phases/59-readme-and-docs-polish/59-01-PLAN.md`)
-Status: UNIFY complete — Phase 59 closed
-Last activity: 2026-05-13 — Phase 59 UNIFY complete; 59-01-SUMMARY.md created; PR #16 awaiting merge gate.
+Phase: 60 of 61 (1.0 Release Gate)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-05-13 — Phase 59 complete (PR #16 merged into main as 50f99a9); transitioned to Phase 60.
 Progress:
 - Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [█████░░░░░] 50% (Phase 58 ✓; Phase 59 ✓; Phase 60 ○; Phase 61 ○)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
@@ -59,7 +59,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Phase 59 UNIFY complete — awaiting PR #16 merge + transition]
+  ○        ○        ○     [Phase 60 ready to plan]
 ```
 
 ## Accumulated Context
@@ -171,18 +171,19 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - PR #13: MERGED — https://github.com/coctostan/pi-ptc-next/pull/13; squash merge `b1a42a9` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote/local feature branch deleted (Phase 56).
 - PR #14: MERGED — https://github.com/coctostan/pi-ptc-next/pull/14; squash merge `3a1ffbf` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote feature branch deleted by merge automation; local `main` fast-forwarded.
 - PR #15: MERGED — https://github.com/coctostan/pi-ptc-next/pull/15; squash merge `a574a6d` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote feature branch deleted by merge automation; local `main` fast-forwarded.
+- PR #16: MERGED — https://github.com/coctostan/pi-ptc-next/pull/16; squash merge `50f99a9` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote feature branch `feature/59-readme-docs-polish` deleted by merge automation; local `main` fast-forwarded (Phase 59).
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-13
-Stopped at: Phase 59 UNIFY complete; PR #16 awaiting merge gate before Phase 60 transition.
-Next action: complete PR #16 merge gate, then transition to Phase 60 planning.
-Resume file: `.paul/phases/59-readme-and-docs-polish/59-01-SUMMARY.md`
+Stopped at: Phase 59 complete and merged; Phase 60 (1.0 Release Gate) ready to plan.
+Next action: `/paul:plan` for Phase 60 (1.0 Release Gate).
+Resume file: `.paul/ROADMAP.md`
 wip_result: skipped — current branch is base branch `main`; PAUSE does not create WIP commits on base branch.
 Resume context:
-- Phase 59 UNIFY: 59-01-SUMMARY.md created reconciling all 3 ACs PASS, WALT/TODD/DEAN module evidence recorded, 1 auto-fixed deviation (surgical README edits after wholesale rewrite removed pinned payloads).
-- GitHub Flow merge gate: PR #16 open against `main`; CI `Verify release baseline` ×2 and Socket Security ×2 in progress at last check.
-- Transition: Phase 59 is 1/1 plan complete; PROJECT/ROADMAP evolution and transition to Phase 60 pending PR merge confirmation.
-- Expected resume action: confirm PR #16 merged, then proceed to Phase 60 planning.
+- Milestone 20 at 50%: Phase 58 ✓, Phase 59 ✓ (merged via PR #16 as 50f99a9), Phase 60 ○, Phase 61 ○.
+- Phase 60 focus per ROADMAP: 1.0 release gate — release notes, changelog, release-readiness tests, npm pack/publish dry-run checklist, manual publish instructions; stop before actual `npm publish`.
+- Existing baseline for Phase 60: `pi-ptc-advanced@1.0.0` metadata in `package.json` / `package-lock.json`; `scripts/verify-release-package.sh` proves metadata + tarball + clean-install; `docs/releases/1.0.0.md` polished; `CHANGELOG.md` carries the 1.0 entry; npm audit baseline 0c/0h/3m/0l.
+- Expected resume action: `/paul:plan` for Phase 60.
 
 ---
-*STATE.md — Updated for Phase 59 UNIFY completion and Phase 60 transition readiness (last updated: 2026-05-13)*
+*STATE.md — Updated for Phase 60 readiness after Phase 59 merge (last updated: 2026-05-13)*
