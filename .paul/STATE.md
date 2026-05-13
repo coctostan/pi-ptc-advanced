@@ -9,8 +9,8 @@ See: `.paul/PROJECT.md`
 Milestone: Milestone 19 — Live Runtime Helper Hardening (`0.18.0`)
 Phase: 57 of 57 (Live Proof and Release Readiness)
 Plan: 57-01 (`.paul/phases/57-live-proof-and-release-readiness/57-01-PLAN.md`)
-Status: Planning complete — awaiting APPLY
-Last activity: 2026-05-13 — Phase 57 plan 57-01 created (TDD; live-audit closeout + 0.18.0 release readiness).
+Status: APPLY complete — awaiting UNIFY
+Last activity: 2026-05-13 — Phase 57 plan 57-01 APPLY complete: live-audit closeout, `ptc.list_helpers()`, and `0.18.0` release baseline cut + verified.
 Progress:
 - Milestone 19 — Live Runtime Helper Hardening: [████████░░] 80% (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ○)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
@@ -58,7 +58,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ○        ○     [Phase 57 plan 57-01 ready for APPLY]
+  ✓        ✓        ○     [Phase 57 plan 57-01 APPLY complete; UNIFY pending]
 ```
 
 ## Accumulated Context
@@ -165,15 +165,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-13
-Stopped at: Phase 57 plan 57-01 created and ready for APPLY.
-Next action: `/paul:apply` for Phase 57 plan 57-01 (TDD: live-audit closeout + 0.18.0 release readiness).
+Stopped at: Phase 57 plan 57-01 APPLY ✓; verification chain green (`npm test`, `npm run build`, `verify-release-package.sh`); ready for UNIFY.
+Next action: `/paul:unify` for Phase 57 plan 57-01 to reconcile and close Milestone 19.
 Resume file: archived to `.paul/handoffs/archive/HANDOFF-2026-05-13-phase57-ready-to-plan.md` (consumed by /paul:plan)
 wip_result: skipped - on base branch `main`; PAUSE does not create WIP commits on base branch
 Resume context:
 - Phase 55 completed and reconciled in `.paul/phases/55-callable-wrapper-contract-consistency/55-01-SUMMARY.md`; PR #12 merged and local `main` is in sync with `origin/main`.
 - Phase 56 closed: path normalization parity, `read_many` partial envelope, and `batch_tool(..., on_error='collect')` tool-level failure classification shipped via PR #13 (merged); SUMMARY at `.paul/phases/56-result-normalization-and-partial-error-semantics/56-01-SUMMARY.md`.
 - Deviations recorded: new `test/runtime-path-and-partial.test.ts` (plan escape hatch); `runs/` added to `.gitignore`; `runtime.py` grew +140 lines (over 40–80 budget) — IRIS-flagged for future-milestone refactor consideration.
-- Expected resume action: `/paul:apply` for Phase 57 plan 57-01.
+- Expected resume action: `/paul:unify` for Phase 57 plan 57-01.
 
 ---
 *STATE.md — Updated for Phase 57 plan 57-01 creation and APPLY readiness (last updated: 2026-05-13)*
