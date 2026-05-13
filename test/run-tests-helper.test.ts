@@ -100,6 +100,9 @@ test("ptc.run_tests returns a structured ptc_report for passing Node test files"
   assert.ok(output.metrics.command.includes("node"));
   assert.ok(output.metrics.command.includes("--test"));
   assert.ok(output.metrics.command.includes("passing.test.js"));
+  assert.equal(typeof output.metrics.runner_path, "string");
+  assert.ok(output.metrics.runner_path.length > 0);
+  assert.equal(output.metrics.runner_resolution, "path");
   assert.equal(typeof output.metrics.duration_ms, "number");
   assert.equal(result.details.reportProduced, true);
   assert.deepEqual(result.details.report, output);
@@ -252,10 +255,30 @@ test("ptc.run_tests reports runner-unavailable as structured data when node is m
   assert.equal(output.metrics.passed, 0);
   assert.equal(output.metrics.failed, 0);
   assert.equal(output.metrics.skipped, 0);
+  assert.equal(output.metrics.runner_path, null);
+  assert.equal(output.metrics.runner_resolution, "missing_on_path");
   assert.ok(
-    Array.isArray(output.warnings) && output.warnings.some((w: string) => /node|runner/i.test(w)),
-    "runner-unavailable report should include a warning mentioning node/runner"
+    Array.isArray(output.warnings) &&
+      output.warnings.some((w: string) => /node.*active runtime.*path|active runtime.*node.*path/i.test(w)),
+    "runner-unavailable report should explain that node availability depends on the active runtime PATH"
   );
+});
+
+
+test("ptc.run_tests command metadata quotes safe patterns containing spaces", async () => {
+  const { executor, workspace } = createExecutor();
+  writePassingFixture(workspace, "passing case.test.js");
+
+  const result = await executor.execute(
+    `report = ptc.run_tests("passing case.test.js")\nreturn report\n`,
+    { cwd: workspace, ctx: { cwd: workspace } as any }
+  );
+
+  const output = JSON.parse(result.output);
+  assert.equal(output.kind, "ptc_report");
+  assert.equal(output.metrics.pattern, "passing case.test.js");
+  assert.equal(output.metrics.runner_available, true);
+  assert.equal(output.metrics.command, "node --test 'passing case.test.js'");
 });
 
 test("README documents ptc.run_tests as a Node-only test runner verb", () => {
