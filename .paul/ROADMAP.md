@@ -17,7 +17,7 @@ Source findings: [`docs/issues/2026-05-13-code-execution-helper-edge-cases.md`](
 | 54 | Runner Availability and Command Reporting | 1/1 | ✅ Complete | 2026-05-13 |
 | 55 | Callable Wrapper Contract Consistency | 1/1 | ✅ Complete | 2026-05-13 |
 | 56 | Result Normalization and Partial-Error Semantics | 1/1 | ✅ Complete | 2026-05-13 |
-| 57 | Live Proof and Release Readiness | TBD | Ready to plan | - |
+| 57 | Live Proof and Release Readiness | 0/1 | 🚧 Planning complete — APPLY pending | - |
 
 ### Phase 54: Runner Availability and Command Reporting
 Focus: Decide and implement the default-runtime story for `ptc.run_tests(pattern)`, including Node availability, runner-unavailable guidance, and unambiguous command metadata.
@@ -33,7 +33,7 @@ Plans: `56-01-PLAN.md`
 
 ### Phase 57: Live Proof and Release Readiness
 Focus: Add focused live/manual-style regression proof, refresh docs and release notes, and verify the `0.18.0` package baseline.
-Plans: TBD (defined during /paul:plan)
+Plans: `57-01-PLAN.md` (TDD; live-audit closeout for issues 1, 4, 5, 8, 9 + `0.18.0` release readiness)
 
 ## Completed Milestones
 <details>
@@ -275,4 +275,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-13 after completing Phase 56 and routing to Phase 57 planning*
+*Last updated: 2026-05-13 after creating Phase 57 plan 57-01 and routing to APPLY*
