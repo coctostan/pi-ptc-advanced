@@ -278,6 +278,61 @@ Representative structured payloads:
   "path": "sample.ts",
   "summary": "Updated sample.ts",
   "diff": "2:5bd|const two = 2; → 2:086|const two = 22;",
+  "diffData": {
+    "version": 1,
+    "entries": [
+      {
+        "kind": "remove",
+        "oldLine": 2,
+        "text": "const two = 2;"
+      },
+      {
+        "kind": "add",
+        "newLine": 2,
+        "text": "const two = 22;"
+      }
+    ],
+    "stats": {
+      "added": 1,
+      "removed": 1,
+      "context": 0
+    },
+    "language": "typescript",
+    "inlineDiffs": [
+      {
+        "removeLineIndex": 0,
+        "addLineIndex": 1,
+        "removeSpans": [
+          {
+            "kind": "equal",
+            "text": "const two = "
+          },
+          {
+            "kind": "remove",
+            "text": "2"
+          },
+          {
+            "kind": "equal",
+            "text": ";"
+          }
+        ],
+        "addSpans": [
+          {
+            "kind": "equal",
+            "text": "const two = "
+          },
+          {
+            "kind": "add",
+            "text": "22"
+          },
+          {
+            "kind": "equal",
+            "text": ";"
+          }
+        ]
+      }
+    ]
+  },
   "firstChangedLine": 2,
   "warnings": [],
   "noopEdits": [],
@@ -359,7 +414,7 @@ The runtime also exposes a `ptc` helper object:
 - `ptc.get_tool_schema(name) -> dict[str, Any]`
 - `ptc.help(tool_name) -> dict[str, Any]`
 - `ptc.run_tests(pattern) -> dict[str, Any]`
-  - Runs Node's built-in `node --test <pattern>` from inside `code_execution` and returns a `ptc_report` with pass/fail/duration metrics, a bounded failures table, and a `runner_available` flag. Node-only for this phase: no vitest/jest/pytest, no package-script dispatch, no Docker image changes; missing `node` is reported as `runner_available: false` rather than raising. Use it for focused test reporting, not as a replacement for normal repo verification commands like `npm test`, `npm run build`, or PALS verification gates.
+  - Runs Node's built-in `node --test <pattern>` from inside `code_execution` and returns a `ptc_report` with pass/fail/duration metrics, quoted command metadata, scalar `runner_path`/`runner_resolution` fields, a bounded failures table, and a `runner_available` flag. Requires Node in the active runtime; Python-only or Docker runtimes may report `runner_available: false` as structured data rather than raising. Node-only for this phase: no vitest/jest/pytest, no package-script dispatch, no Docker image changes. Use it for focused test reporting, not as a replacement for normal repo verification commands like `npm test`, `npm run build`, or PALS verification gates.
 - `ptc.extract_handles(value, kind=None) -> list[SupportedHandle]`
 - `ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]`
 - `ptc.json_dump(value)`
