@@ -4,34 +4,34 @@
 Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime interop and structured Python integration.
 
 ## Current Milestone
-**Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release** (`1.0.0`)
-Status: ✅ Complete
-Phases: 4 of 4 complete
+**Milestone 21 — Code Execution Source Visibility UX**
+Status: 🚧 In Progress
+Phases: 0 of 4 complete
 
-Focus: Make `pi-ptc-advanced@1.0.0` cleanly publishable and understandable as a standalone public npm package, with fork lineage credited but no longer dominating the user-facing product surface.
+Focus: Make `code_execution` transparent in Pi TUI by showing generated Python source in a collapsed/expandable UI affordance, backed by a stable structured payload field for running, success, and failure states.
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 58 | Public Identity Rename | 1/1 | ✅ Complete | 2026-05-13 |
-| 59 | README and Docs Polish | 1/1 | ✅ Complete | 2026-05-13 |
-| 60 | 1.0 Release Gate | 1/1 | ✅ Complete | 2026-05-14 |
-| 61 | Repo Rename and Migration Proof | 1/1 | ✅ Complete | 2026-05-14 |
+| 62 | Current Behavior Audit | TBD | Not started | - |
+| 63 | Stable Source Payload Contract | TBD | Not started | - |
+| 64 | Pi TUI Collapsed/Expanded Rendering | TBD | Not started | - |
+| 65 | Regression Tests and Docs | TBD | Not started | - |
 
-### Phase 58: Public Identity Rename
-Focus: Rename repo-facing/package metadata from `pi-ptc-next` / fork framing to `pi-ptc-advanced`; update package URLs, docs references, install path assumptions, package description/keywords, and release baseline to `1.0.0`.
-Plans: `58-01-PLAN.md` (TDD; 1.0.0 package/public identity baseline) — complete
+### Phase 62: Current Behavior Audit
+Focus: Reproduce current `code_execution` visibility for running, success, and failure states; locate where Python source is stored today; determine whether gaps are in payload, streaming state, TUI rendering, or collapsed presentation.
+Plans: TBD (defined during /paul:plan)
 
-### Phase 59: README and Docs Polish
-Focus: Rewrite README for actual users: what it does, install, quickstart, examples, helper surface, verification, limitations. Move fork lineage/credits to a bottom section; update/remove “personal fork” framing in public-facing docs.
-Plans: `59-01-PLAN.md` (TDD; public README/docs polish) — complete (`59-01-SUMMARY.md`)
+### Phase 63: Stable Source Payload Contract
+Focus: Ensure every `code_execution` invocation exposes source in a stable details/metadata field while keeping final result text compact and backward-compatible; cover running, success, and failure paths.
+Plans: TBD (defined during /paul:plan)
 
-### Phase 60: 1.0 Release Gate
-Focus: Add/refresh 1.0 release notes, changelog, release-readiness tests, npm pack/publish dry-run checklist, and manual publish instructions. Verification stops before actual `npm publish`.
-Plans: `60-01-PLAN.md` (TDD; publish dry-run checklist + release-gate drift guards) — complete (`60-01-SUMMARY.md`)
+### Phase 64: Pi TUI Collapsed/Expanded Rendering
+Focus: Render Python source in Pi TUI as collapsed by default with a first-line preview; expand reveals full formatted source for running, completed success, and failed calls.
+Plans: TBD (defined during /paul:plan)
 
-### Phase 61: Repo Rename and Migration Proof
-Focus: Prepare/verify post-rename assumptions: GitHub URL references, install instructions, redirects/old-name notes, CI/package metadata after rename. Include a human-action checkpoint for actual GitHub repo rename if needed.
-Plans: `61-01-PLAN.md` (TDD; repo rename checklist + migration proof with human-action checkpoint) — complete (`61-01-SUMMARY.md`)
+### Phase 65: Regression Tests and Docs
+Focus: Add payload/rendering regressions and update README/tool guidance so users and maintainers understand where source appears and how to inspect it.
+Plans: TBD (defined during /paul:plan)
 
 ## Completed Milestones
 

@@ -4,14 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Milestone 20 begins: polish and rename the public package/repo/docs surface for `pi-ptc-advanced@1.0.0` NPM release readiness.
+**Current focus:** Milestone 21 begins: make `code_execution` Python source visible in Pi TUI with collapsed/expanded rendering backed by stable details metadata.
 ## Current Position
-Milestone: Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release (`1.0.0`) — COMPLETE
-Phase: Milestone complete; next phase not selected
+Milestone: Milestone 21 — Code Execution Source Visibility UX
+Phase: 62 of 65 (Current Behavior Audit)
 Plan: Not started
-Status: Ready for next milestone planning
-Last activity: 2026-05-14 — Phase 61 UNIFY complete; PR #18 merged as 95e63c6; Milestone 20 complete.
+Status: Ready to plan
+Last activity: 2026-05-14 — Milestone 21 created from discussion context; ready to plan Phase 62.
 Progress:
+- Milestone 21 — Code Execution Source Visibility UX: [░░░░░░░░░░] 0% (Phase 62 ○; Phase 63 ○; Phase 64 ○; Phase 65 ○)
 - Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [██████████] 100% ✓ (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ✓)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
@@ -59,10 +60,14 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Milestone 20 complete; next milestone not selected]
+  ○        ○        ○     [Milestone 21 ready for first PLAN]
 ```
 
 ## Accumulated Context
+### Milestone 21 Context
+- Goal: make `code_execution` Python source visible in Pi TUI with collapsed-by-default first-line preview and expandable full source.
+- Scope includes running, successful, and failed execution states.
+- Source should be exposed through stable details/metadata for TUI/API/debug/test consumers, not injected into ordinary result text.
 ### Decisions
 - Phase 55 normalized callable-wrapper contract guidance: direct callable Pi wrappers remain awaitable, `grep("pattern", path="...")` is supported in the runtime adapter, and Phase 56 keeps result/path/error semantics separate.
 - Phase 57 shipped `ptc.list_helpers()` as the curated `ptc.*` helper inventory distinct from live callable-tool discovery via `ptc.list_callable_tools()`.
@@ -177,15 +182,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-14
-Stopped at: Milestone 20 complete; local `main` synced to PR #18 merge 95e63c6; lifecycle closeout changes pending commit.
-Next action: `/paul:milestone` or `/paul:discuss` to choose the next milestone.
-Resume file: `.paul/PROJECT.md`
+Stopped at: Milestone 21 created; Phase 62 ready to plan.
+Next action: `/paul:plan` for Phase 62 (Current Behavior Audit).
+Resume file: `.paul/ROADMAP.md`
 wip_result: skipped — clean tree on base branch `main`; PAUSE does not create WIP commits without dirty state.
 Resume context:
 - Milestone 20 at 100%: Phase 58 ✓, Phase 59 ✓, Phase 60 ✓, Phase 61 ✓ (merged via PR #18 as 95e63c6).
 - Phase 61 APPLY result: `docs/releases/REPO-RENAME-CHECKLIST.md`, Phase 61 drift guards, active-doc cross-links, and confirmed read-only GitHub rename proof; no automated repo settings mutation performed.
 - Phase 61 focus per ROADMAP: Repo Rename and Migration Proof — GitHub repo rename/migration documentation and verification after public release gate readiness.
-- Expected resume action: `/paul:milestone` or `/paul:discuss` for next scope selection.
+- Expected resume action: `/paul:plan` for Phase 62.
 
 ---
-*STATE.md — Updated for Phase 61 UNIFY closeout and Milestone 20 completion (last updated: 2026-05-14)*
+*STATE.md — Updated for Milestone 21 creation (last updated: 2026-05-14)*

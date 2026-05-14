@@ -9,9 +9,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 ## Current State
 | Attribute | Value |
 |-----------|-------|
-| Version | 1.0.0 release readiness complete (Milestone 20) |
-| Status | Milestone 20 complete — ready for next milestone planning |
-| Last Updated | 2026-05-14 after Phase 61 repo rename and migration proof |
+| Version | Milestone 21 in progress after 1.0 release-readiness completion |
+| Status | Active Milestone 21 — Phase 62 ready to plan |
+| Last Updated | 2026-05-14 after Milestone 21 creation |
 
 ## Requirements
 ### Validated (Shipped)
@@ -47,7 +47,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-- [ ] Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release (Phase 61 ready to plan; Phases 58–60 complete)
+- [ ] Milestone 21 — Code Execution Source Visibility UX (Phase 62 ready to plan; Phases 63–65 planned)
 ### Validated (Shipped)
 - [x] Restored the P0 file-discovery helper path by removing `glob(limit=...)` dependency and proving bounded success for `ptc.read_tree()`, `ptc.find_files()`, and `ptc.find_files_abs()` in live audit coverage — Phase 39
 - [x] Improved syntax/compile-time error surfacing so pre-terminal Python failures now expose actionable `SyntaxError`/traceback context instead of generic RPC closure messaging — Phase 40
@@ -77,7 +77,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added a repo-owned `docs/releases/PUBLISH-CHECKLIST.md` plus release-readiness drift guards for the 1.0 release gate, documenting dry-run/manual publish steps without performing publish/tag/release/rename actions — Phase 60
 - [x] Confirmed and read-only verified the GitHub repository rename to `coctostan/pi-ptc-advanced`, added `docs/releases/REPO-RENAME-CHECKLIST.md`, and guarded active docs with Phase 61 release-readiness tests while preserving manual npm publish/tag/GitHub release boundaries — Phase 61
 ### Planned (Next)
-- Next milestone TBD — use `/paul:milestone` or `/paul:plan` after choosing the next scope
+- Phase 62 — Current Behavior Audit
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -223,4 +223,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-05-14 after Phase 61 UNIFY closeout (repo rename and migration proof; Milestone 20 complete)*
+*Last updated: 2026-05-14 after Milestone 21 creation (Code Execution Source Visibility UX)*
