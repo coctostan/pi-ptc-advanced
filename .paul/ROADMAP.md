@@ -12,14 +12,14 @@ Focus: Make `code_execution` transparent in Pi TUI by showing generated Python s
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 62 | Current Behavior Audit | TBD | Not started | - |
+| 62 | Current Behavior Audit | 1/1 | 🚧 APPLY complete | - |
 | 63 | Stable Source Payload Contract | TBD | Not started | - |
 | 64 | Pi TUI Collapsed/Expanded Rendering | TBD | Not started | - |
 | 65 | Regression Tests and Docs | TBD | Not started | - |
 
 ### Phase 62: Current Behavior Audit
 Focus: Reproduce current `code_execution` visibility for running, success, and failure states; locate where Python source is stored today; determine whether gaps are in payload, streaming state, TUI rendering, or collapsed presentation.
-Plans: TBD (defined during /paul:plan)
+Plans: `62-01-PLAN.md` (research; current behavior audit for code_execution source visibility) — APPLY complete; ready for UNIFY
 
 ### Phase 63: Stable Source Payload Contract
 Focus: Ensure every `code_execution` invocation exposes source in a stable details/metadata field while keeping final result text compact and backward-compatible; cover running, success, and failure paths.
