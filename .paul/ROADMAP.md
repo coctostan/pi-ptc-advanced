@@ -5,8 +5,8 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 
 ## Current Milestone
 **Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release** (`1.0.0`)
-Status: 🚧 In Progress
-Phases: 3 of 4 complete
+Status: ✅ Complete
+Phases: 4 of 4 complete
 
 Focus: Make `pi-ptc-advanced@1.0.0` cleanly publishable and understandable as a standalone public npm package, with fork lineage credited but no longer dominating the user-facing product surface.
 
@@ -15,7 +15,7 @@ Focus: Make `pi-ptc-advanced@1.0.0` cleanly publishable and understandable as a 
 | 58 | Public Identity Rename | 1/1 | ✅ Complete | 2026-05-13 |
 | 59 | README and Docs Polish | 1/1 | ✅ Complete | 2026-05-13 |
 | 60 | 1.0 Release Gate | 1/1 | ✅ Complete | 2026-05-14 |
-| 61 | Repo Rename and Migration Proof | 1/1 | 🚧 Planning | - |
+| 61 | Repo Rename and Migration Proof | 1/1 | ✅ Complete | 2026-05-14 |
 
 ### Phase 58: Public Identity Rename
 Focus: Rename repo-facing/package metadata from `pi-ptc-next` / fork framing to `pi-ptc-advanced`; update package URLs, docs references, install path assumptions, package description/keywords, and release baseline to `1.0.0`.
@@ -31,7 +31,7 @@ Plans: `60-01-PLAN.md` (TDD; publish dry-run checklist + release-gate drift guar
 
 ### Phase 61: Repo Rename and Migration Proof
 Focus: Prepare/verify post-rename assumptions: GitHub URL references, install instructions, redirects/old-name notes, CI/package metadata after rename. Include a human-action checkpoint for actual GitHub repo rename if needed.
-Plans: `61-01-PLAN.md` (TDD; repo rename checklist + migration proof with human-action checkpoint) — ready for APPLY
+Plans: `61-01-PLAN.md` (TDD; repo rename checklist + migration proof with human-action checkpoint) — complete (`61-01-SUMMARY.md`)
 
 ## Completed Milestones
 

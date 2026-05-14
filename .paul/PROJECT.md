@@ -9,9 +9,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 ## Current State
 | Attribute | Value |
 |-----------|-------|
-| Version | 1.0.0 release readiness in progress (Milestone 20) |
-| Status | Active Milestone 20 — Phase 61 ready to plan |
-| Last Updated | 2026-05-14 after Phase 60 release gate |
+| Version | 1.0.0 release readiness complete (Milestone 20) |
+| Status | Milestone 20 complete — ready for next milestone planning |
+| Last Updated | 2026-05-14 after Phase 61 repo rename and migration proof |
 
 ## Requirements
 ### Validated (Shipped)
@@ -75,8 +75,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Retargeted the active public package/release baseline to `pi-ptc-advanced@1.0.0`, updated package metadata and release verification, and reframed active README/runbook/release docs around the public identity while preserving fork/upstream lineage and manual publish/repo-rename boundaries — Phase 58
 - [x] Polished public README, release documentation, and maintainer/runbook framing for `pi-ptc-advanced@1.0.0` while preserving manual npm-publish/repo-rename boundaries and drift guards — Phase 59
 - [x] Added a repo-owned `docs/releases/PUBLISH-CHECKLIST.md` plus release-readiness drift guards for the 1.0 release gate, documenting dry-run/manual publish steps without performing publish/tag/release/rename actions — Phase 60
+- [x] Confirmed and read-only verified the GitHub repository rename to `coctostan/pi-ptc-advanced`, added `docs/releases/REPO-RENAME-CHECKLIST.md`, and guarded active docs with Phase 61 release-readiness tests while preserving manual npm publish/tag/GitHub release boundaries — Phase 61
 ### Planned (Next)
-- Phase 61 — Repo Rename and Migration Proof
+- Next milestone TBD — use `/paul:milestone` or `/paul:plan` after choosing the next scope
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -222,4 +223,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-05-14 after Phase 60 UNIFY closeout (1.0 release gate)*
+*Last updated: 2026-05-14 after Phase 61 UNIFY closeout (repo rename and migration proof; Milestone 20 complete)*

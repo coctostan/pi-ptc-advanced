@@ -6,13 +6,13 @@ See: `.paul/PROJECT.md`
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
 **Current focus:** Milestone 20 begins: polish and rename the public package/repo/docs surface for `pi-ptc-advanced@1.0.0` NPM release readiness.
 ## Current Position
-Milestone: Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release (`1.0.0`)
-Phase: 61 of 61 (Repo Rename and Migration Proof)
-Plan: 61-01 (TDD; repo rename checklist + migration proof)
-Status: APPLY complete; ready for UNIFY
-Last activity: 2026-05-14 — Phase 61 APPLY complete; repo rename manually confirmed and read-only verified; release-readiness 19/19 PASS; local verify:ci still has pre-existing Node-v26 live-harness failures.
+Milestone: Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release (`1.0.0`) — COMPLETE
+Phase: Milestone complete; next phase not selected
+Plan: Not started
+Status: Ready for next milestone planning
+Last activity: 2026-05-14 — Phase 61 UNIFY complete; PR #18 merged as 95e63c6; Milestone 20 complete.
 Progress:
-- Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [████████░░] 75% (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ○)
+- Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [██████████] 100% ✓ (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ✓)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
 - Phase 45 — Pi API and Documentation Delta Audit: [██████████] 100% ✓
@@ -59,7 +59,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Phase 61 plan 61-01 APPLY complete; ready for UNIFY]
+  ○        ○        ○     [Milestone 20 complete; next milestone not selected]
 ```
 
 ## Accumulated Context
@@ -177,15 +177,15 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
 Last session: 2026-05-14
-Stopped at: Phase 61 APPLY complete on branch `phase-61-repo-rename-proof`; awaiting UNIFY.
-Next action: `/paul:unify` for Phase 61 plan 61-01.
-Resume file: `.paul/phases/61-repo-rename-and-migration-proof/61-01-PLAN.md`
+Stopped at: Milestone 20 complete; local `main` synced to PR #18 merge 95e63c6; lifecycle closeout changes pending commit.
+Next action: `/paul:milestone` or `/paul:discuss` to choose the next milestone.
+Resume file: `.paul/PROJECT.md`
 wip_result: skipped — clean tree on base branch `main`; PAUSE does not create WIP commits without dirty state.
 Resume context:
-- Milestone 20 at 75%: Phase 58 ✓, Phase 59 ✓, Phase 60 ✓ (merged via PR #17 as fc30755), Phase 61 ○.
+- Milestone 20 at 100%: Phase 58 ✓, Phase 59 ✓, Phase 60 ✓, Phase 61 ✓ (merged via PR #18 as 95e63c6).
 - Phase 61 APPLY result: `docs/releases/REPO-RENAME-CHECKLIST.md`, Phase 61 drift guards, active-doc cross-links, and confirmed read-only GitHub rename proof; no automated repo settings mutation performed.
 - Phase 61 focus per ROADMAP: Repo Rename and Migration Proof — GitHub repo rename/migration documentation and verification after public release gate readiness.
-- Expected resume action: `/paul:unify` for Phase 61 plan 61-01.
+- Expected resume action: `/paul:milestone` or `/paul:discuss` for next scope selection.
 
 ---
-*STATE.md — Updated for Phase 61 plan 61-01 APPLY complete (last updated: 2026-05-14)*
+*STATE.md — Updated for Phase 61 UNIFY closeout and Milestone 20 completion (last updated: 2026-05-14)*
