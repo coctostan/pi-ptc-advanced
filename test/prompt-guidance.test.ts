@@ -137,21 +137,15 @@ test("code_execution registers prompt metadata for Pi default system prompts", a
     const latestCodeExecutionTool = codeExecutionTools[codeExecutionTools.length - 1];
     assert.equal(
       latestCodeExecutionTool.promptSnippet,
-      "Run Python with local Pi tool calls for repo-wide analysis, batching, aggregation, and compact results."
+      "Run Python orchestration for repo-wide or batched analysis using local tool wrappers."
     );
 
     assert.deepEqual(latestCodeExecutionTool.promptGuidelines, [
-      "Use code_execution for repo-wide analysis, repeated lookups, grouping, ranking, counting, or other tasks with 3+ dependent tool calls.",
-      "Use direct tools instead for one-file reads, one-off grep/find calls, or small inspections.",
-      "Prefer nu for pipeline-style structured-data or filesystem-metadata analysis with where, sort-by, group-by, first, or histogram.",
-      "Use code_execution when custom per-item logic, stateful aggregation, complex return shapes, or multiple callable-tool orchestration is needed.",
-      "Keep large intermediate results inside Python and return only the compact final answer the user needs.",
-      "Use the callable tool list in the code_execution description; call ptc.list_callable_tools() only when branching on optional tools or when the needed tool may be unavailable.",
-      "Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool."
+      "Use for repeated tool calls or aggregation; prefer direct tools for one-off reads/searches.",
     ]);
     assert.ok(
-      latestCodeExecutionTool.promptGuidelines.some((guideline) => /ptc\.help\(tool_name\) only when optional callable-tool prompt metadata/i.test(guideline)),
-      "promptGuidelines should describe ptc.help as on-demand metadata, not unconditional introspection"
+      latestCodeExecutionTool.promptGuidelines.every((guideline) => guideline.length < 100),
+      "promptGuidelines should stay concise"
     );
   } finally {
     harness.cleanup();

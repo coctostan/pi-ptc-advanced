@@ -18,22 +18,15 @@ import {
 } from "./recovery-state";
 import { renderPtcReportLines } from "./report";
 import { createSandbox } from "./sandbox-manager";
-import { describePythonHelpers } from "./tools/python-tool-contract";
 import { ToolRegistry } from "./tool-registry";
 import type { ExecutionDetails, PtcSettings, PtcToolDefinition, SandboxManager, ToolInfo } from "./types";
 import { debugLog, isMutationPrompt, loadSettingsFromEnv, shouldAutoRoutePromptToCodeExecution } from "./utils";
 
 const CODE_EXECUTION_PROMPT_SNIPPET =
-  "Run Python with local Pi tool calls for repo-wide analysis, batching, aggregation, and compact results.";
+  "Run Python orchestration for repo-wide or batched analysis using local tool wrappers.";
 
 const CODE_EXECUTION_PROMPT_GUIDELINES = [
-  "Use code_execution for repo-wide analysis, repeated lookups, grouping, ranking, counting, or other tasks with 3+ dependent tool calls.",
-  "Use direct tools instead for one-file reads, one-off grep/find calls, or small inspections.",
-  "Prefer nu for pipeline-style structured-data or filesystem-metadata analysis with where, sort-by, group-by, first, or histogram.",
-  "Use code_execution when custom per-item logic, stateful aggregation, complex return shapes, or multiple callable-tool orchestration is needed.",
-  "Keep large intermediate results inside Python and return only the compact final answer the user needs.",
-  "Use the callable tool list in the code_execution description; call ptc.list_callable_tools() only when branching on optional tools or when the needed tool may be unavailable.",
-  "Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool.",
+  "Use for repeated tool calls or aggregation; prefer direct tools for one-off reads/searches.",
 ];
 
 const CODE_EXECUTION_AUTO_ROUTE_PROMPT =
@@ -134,88 +127,8 @@ function renderCompletedOutput(
   return new Text(lines.join("\n"), 0, 0);
 }
 
-function buildToolDescription(currentSettings: PtcSettings, callableTools: ToolInfo[]): string {
-  const callableHelperLines = describePythonHelpers(callableTools);
-  const callable = callableTools.map((tool) => tool.ptc?.pythonName || tool.name).join(", ");
-  const awaitableCallableHelperLines = callableHelperLines.map((line) => `await ${line}`);
-  const dockerBehavior = currentSettings.useDocker
-    ? "- Docker isolation is required for this session; if Docker is unavailable, execution fails instead of falling back to subprocess."
-    : "- Local subprocess mode is active because PTC_ALLOW_UNSANDBOXED_SUBPROCESS=true. Nested tool policy still applies, but Python itself is not isolated by Docker in this mode.";
-  return `Execute Python code with local programmatic tool calling.
-
-Prefer this tool first for repo-wide analysis, repeated lookups, loops, grouping, ranking, counting, filtering, or any task with 3+ dependent tool calls. Use direct tools instead for one-file reads, one-off grep/find calls, or tiny lookups.
-Strong signals to use code_execution:
-- Scan many files and return counts, grouped summaries, rankings, or compact JSON
-- Run the same tool across many inputs and aggregate the results
-- Keep large intermediate results out of the chat context
-Examples:
-- Count imports across src/**/*.ts and return the top 10 packages
-- Analyze the first 8 test files and return compact JSON only
-- Check many endpoints or records, then return only the failures
-Important rules:
-- Top-level await is already available. Do not call asyncio.run(...).
-- Use generated helpers such as read(), glob(), find(), grep(), ls(), and ptc.* helpers. Do not call _rpc_call(...) directly.
-- Direct callable Pi tool wrappers are async; call them with await, e.g. await read(path: str, ...) or await grep("pattern", path="..."). ptc.* helpers follow their listed sync/async signatures.
-- Return a compact final answer only. If you return a dict/list, it will be JSON-serialized automatically.
-- Intermediate tool results stay local to this tool run and are not sent back to the model unless you include them in the final output.
-- Prefer compact JSON summaries over raw dumps.
-${dockerBehavior}
-Prefer these patterns:
-- Many file reads from explicit paths: ptc.read_many(paths, max_concurrency=...)
-- Inspect ptc.list_callable_tools() before branching on optional tools; otherwise use the callable tool list below directly. ptc.list_callable_tools() lists callable Pi tools, NOT ptc.* helpers; use ptc.list_helpers() for the curated ptc.* helper inventory.
-- Bounded concurrency for arbitrary coroutines: ptc.gather_limit(coros, limit=...)
-- Relative file discovery: glob(...) or ptc.find_files(..., relative=True, relative_to=None)
-- Absolute file discovery for later read()/write(): ptc.find_files_abs(..., relative=False)
-Python helpers currently available in this session:
-- ${awaitableCallableHelperLines.join("\n- ")}
-- ptc.gather_limit(coros, limit=...) -> list
-- ptc.read_many(paths, max_concurrency=..., offset=None, line_limit=None, on_error=None) -> list[str] | dict[str, Any]
--   - Default returns list[str]; missing/unreadable entries become a bounded "[read_many error] ..." marker instead of leaking a traceback. Pass on_error='collect' for a typed envelope: kind="read_many_partial" with per-entry {index, path, ok, value | error} and stats {total, succeeded, failed}.
-- ptc.read_tree(pattern=..., path='.', max_files=1000, concurrency=..., offset=None, line_limit=None, relative=False, relative_to=None) -> list[dict[str, Any]]
-- ptc.find_files(pattern='**/*', path='.', max_files=1000, relative=True, relative_to=None) -> list[str]
-- ptc.find_files_abs(pattern='**/*', path='.', max_files=1000, relative=False, relative_to=None) -> list[str]
-- ptc.read_text(path, offset=None, limit=None) -> str
-- await ptc.batch_tool(calls, max_concurrency=None, on_error=None) -> list[Any] | dict[str, Any]
--   - on_error='collect' returns a kind="batch_partial" envelope with per-call success/error entries instead of raising on first failure
--   - In on_error='collect', tool-level normalized error payloads ({ok: false, error: ...} or kind="execution_error") are classified as failed entries (ok: false, error: summary) while the raw payload is preserved under value. Default on_error='raise' is unchanged.
-- await ptc.first_success(calls, max_concurrency=None) -> Any
-- await ptc.reduce_tool(calls, reducer, initial, max_concurrency=None) -> Any
-- ptc.fit_output(value, max_chars=None, max_items=None, max_depth=None) -> dict[str, Any]
-- ptc.report(title, metrics=None, tables=None, samples=None, warnings=None) -> dict[str, Any]
--   - Returns kind="ptc_report" for structured repo/dataset summaries; recognized reports get compact completed-result rendering and structured details.report while free-form returns still work.
-- ptc.tabulate(rows, headers=None, title=None) -> dict[str, Any]
--   - Produces a report-compatible table payload; use inside ptc.report(tables=[...]).
-- ptc.diff(before, after) -> dict[str, Any]
--   - Produces a shallow JSON-safe before/after diff for explicit values.
-- ptc.run_tests(pattern: str) -> dict[str, Any]
--   - Runs Node's built-in \`node --test\` with the supplied pattern from the active runtime workspace and returns a ptc_report with pass/fail/duration metrics, quoted command metadata, scalar runner_path/runner_resolution fields, a bounded failures table, and a runner_available flag. Requires Node in the active runtime; Python-only or Docker runtimes may return runner_available=false as structured report data. Node-only for this phase; no cross-runner support or package-script dispatch.
-- ptc.expect_kind(value, kind) -> Any
-- ptc.list_callable_tools() -> list[dict[str, Any]]
-- ptc.list_helpers() -> list[dict[str, Any]]
--   - Curated ptc.* helper inventory (name, signature, summary). Counterpart to list_callable_tools(), which lists callable Pi tools that cross the RPC boundary.
-- ptc.get_tool_schema(name) -> dict[str, Any]
-- ptc.help(tool_name) -> dict[str, Any]
-- ptc.extract_handles(value, kind=None) -> list[SupportedHandle]
-- ptc.first_handle(value, kind=None) -> Optional[SupportedHandle]
-- ptc.json_dump(value) -> str
-- Use orchestration helpers for repeated multi-tool calls, ordered fallback logic, or bounded final-output shaping.
-- Use the callable tool list below directly unless your Python code needs to branch on optional tools.
-Prefer these for string content:
-- ptc.read_text(path) always returns str (extracts raw text from structured results)
-- ptc.read_many(paths) always returns list[str]
-- Direct read()/grep() wrappers, ptc.read_* helpers, and ptc.batch_tool read/grep payloads all return workspace-relative path fields when the target is under the host workspace root (out-of-workspace absolute paths are preserved as-is).
-- ptc.read_tree(pattern) returns list[dict] where each entry["content"] is str
-- Use ptc.help(tool_name) only when optional callable-tool prompt metadata is needed to choose or parameterize a tool; do not run introspection as a routine prelude.
-- ptc.tabulate(...) and ptc.diff(...) are bridge helpers for report payloads and explicit before/after comparisons; prefer nu for grouping, histograms, ranking, or pipeline-style data analysis.
-- Use ptc.run_tests(pattern) only when the user asks to run a focused Node \`node --test\` pattern from inside code_execution; it requires Node in the active runtime and may report runner_available=false in Python-only/Docker runtimes. Treat it as structured reporting, not a substitute for normal repo verification commands like \`npm test\`, \`npm run build\`, or PALS gates.
-Use read(path) directly when you need structured anchored data (ReadResult with .lines[].anchor).
-Callable tool set for this session: ${callable || "(none)"}. Use this list directly unless your Python code needs to branch on optional tools.
-Example:
-entries = await ptc.read_tree(pattern="**/*.ts", path="src", max_files=1000, concurrency=6)
-return {
-  "files": len(entries),
-  "sample_lengths": [len(entry["content"]) for entry in entries[:3]],
-}`;
+function buildToolDescription(): string {
+  return "Run Python orchestration for repo-wide or batched analysis using local tool wrappers. Use ptc.list_helpers() and ptc.help(name) for available helpers. Direct wrappers include read, grep, find, ls, and glob.";
 }
 function getExtensionRoot(): string {
   return __dirname.endsWith("/dist") || __dirname.endsWith("\\dist")
@@ -250,13 +163,12 @@ function buildCodeExecutionTool(
   return {
     name: "code_execution",
     label: "Code Execution",
-    description: buildToolDescription(currentSettings, callableTools),
+    description: buildToolDescription(),
     promptSnippet: CODE_EXECUTION_PROMPT_SNIPPET,
     promptGuidelines: CODE_EXECUTION_PROMPT_GUIDELINES,
     parameters: Type.Object({
       code: Type.String({
-        description:
-          "Python code to execute. Top-level await is supported; do not call asyncio.run(...). Prefer returning a compact final result.",
+        description: "Python code to execute."
       }),
     }),
     execute: async (toolCallId, { code }, signal, onUpdate, ctx) => {
