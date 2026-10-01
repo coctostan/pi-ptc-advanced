@@ -54,7 +54,7 @@ function renderKeyHint(keybinding: Keybinding, description: string, theme: Theme
 }
 
 function buildToolDescription(): string {
-  return "Run Python orchestration for repo-wide or batched analysis using local tool wrappers. Use ptc.list_helpers() and ptc.help(name) for available helpers. Direct wrappers include read, grep, find, ls, and glob.";
+  return "Run Python orchestration for repo-wide or batched analysis using local tool wrappers. Use ptc.list_helpers() and ptc.help(name) for available helpers. Direct wrappers include read, grep, find, ls, and glob. Expand results to inspect Python source.";
 }
 function getExtensionRoot(): string {
   return __dirname.endsWith("/dist") || __dirname.endsWith("\\dist")

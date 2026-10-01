@@ -174,3 +174,50 @@ test("auto-routing does not append duplicate prompt text when systemPromptOption
     harness.cleanup();
   }
 });
+
+
+test("M21 guidance: registered description advertises source inspection without prompt bloat", async () => {
+  const harness = await bootstrapPtcExtension();
+  try {
+    const tool = harness.registered.filter((entry) => entry.name === "code_execution").at(-1);
+    assert.ok(tool);
+    for (const sentence of [
+      "Run Python orchestration for repo-wide or batched analysis using local tool wrappers.",
+      "Use ptc.list_helpers() and ptc.help(name) for available helpers.",
+      "Direct wrappers include read, grep, find, ls, and glob.",
+      "Expand results to inspect Python source.",
+    ]) assert.ok(tool.description.includes(sentence), `Missing description sentence: ${sentence}`);
+    assert.ok(tool.description.length < 250, "registered description must remain under 250 characters");
+    assert.equal(tool.promptSnippet, "Run Python orchestration for repo-wide or batched analysis using local tool wrappers.");
+    assert.deepEqual(tool.promptGuidelines, [
+      "Use for repeated tool calls or aggregation; prefer direct tools for one-off reads/searches.",
+    ]);
+  } finally {
+    await harness.eventHandlers.get("session_shutdown")?.();
+    harness.cleanup();
+  }
+});
+
+test("M21 README: bounded source-inspection subsection explains states, expansion and metadata limits", () => {
+  const { readFileSync }: typeof import("node:fs") = module.require("node:fs");
+  const readme = readFileSync(require.resolve("../README.md"), "utf8");
+  const section = readme.match(/^### Inspecting Python source\s*\n([\s\S]*?)(?=^#{2,3} |$(?![\s\S]))/m)?.[1];
+  assert.ok(section, "Missing source-inspection README subsection");
+  for (const [concept, pattern] of [
+    ["collapsed default", /collapsed.{0,40}default|default.{0,40}collapsed/i],
+    ["first physical line", /first physical line/i],
+    ["full numbered expansion", /full.{0,40}numbered|numbered.{0,40}full/i],
+    ["running and success", /running[\s\S]*success/i],
+    ["source-bearing Python failures", /source-bearing Python failures/i],
+    ["configurable Pi expansion", /Pi[\s\S]*configur[\s\S]*tool.expansion/i],
+    ["source and failure metadata", /details\.userCode[\s\S]*details\.failure[\s\S]*metadata/i],
+    ["not ordinary output", /not[\s\S]{0,80}ordinary[\s\S]{0,40}output/i],
+    ["CRLF display versus raw lines", /CRLF[\s\S]*display|display[\s\S]*CRLF/i],
+    ["report preservation", /ptc\.report[\s\S]*details\.report/i],
+    ["legacy source-less fallback", /legacy[\s\S]*source.less/i],
+    ["pre-execution and transport limits", /pre.execution[\s\S]*transport/i],
+    ["multiline Python example", /```python\n[^\n]+\n[^\n]+\n```/],
+    ["focused proof command", /npm run build && node --test test\/code-execution-source-visibility\.test\.ts/],
+  ] as const) assert.match(section, pattern, `Missing inspection concept: ${concept}`);
+  assert.doesNotMatch(section, /ctrl\+o/i, "do not promise a universal expansion key");
+});
