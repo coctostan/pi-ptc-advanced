@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
-import { getKeybindings, Text, type Component, type Keybinding } from "@mariozechner/pi-tui";
+import { getKeybindings, type Keybinding } from "@mariozechner/pi-tui";
 import { CodeExecutor } from "./code-executor";
 import { PtcPythonError } from "./execution/execution-errors";
 import { CustomToolManager } from "./custom-tool-manager";
@@ -16,7 +16,7 @@ import {
   noteCodeExecutionSuccess,
   type PtcRecoveryState,
 } from "./recovery-state";
-import { renderPtcReportLines } from "./report";
+import { renderCodeExecutionResult } from "./code-execution-renderer";
 import { createSandbox } from "./sandbox-manager";
 import { ToolRegistry } from "./tool-registry";
 import type { ExecutionDetails, PtcSettings, PtcToolDefinition, SandboxManager, ToolInfo } from "./types";
@@ -43,38 +43,6 @@ interface PtcBeforeAgentStartEvent {
   systemPromptOptions?: PtcSystemPromptOptions;
 }
 
-function renderExecutingCode(
-  codeLines: string[],
-  currentLine: number,
-  totalLines: number,
-  theme: Theme
-): Component {
-  const lines: string[] = [];
-  lines.push(theme.fg("muted", `Executing Python code (line ${currentLine}/${totalLines}):`));
-  lines.push("");
-
-  codeLines.forEach((line, index) => {
-    const lineNumber = index + 1;
-    const isCurrentLine = lineNumber === currentLine;
-    let prefix = `${String(lineNumber).padStart(3, " ")} │ `;
-    let content = line;
-
-    if (isCurrentLine) {
-      prefix = theme.fg("success", `→ ${String(lineNumber).padStart(2, " ")} │ `);
-      content = theme.fg("text", line);
-    } else if (lineNumber < currentLine) {
-      prefix = theme.fg("muted", prefix);
-      content = theme.fg("muted", line);
-    } else {
-      prefix = theme.fg("muted", prefix);
-    }
-
-    lines.push(prefix + content);
-  });
-
-  return new Text(lines.join("\n"), 0, 0);
-}
-
 function formatKeys(keys: string[]): string {
   if (keys.length === 0) return "";
   if (keys.length === 1) return keys[0];
@@ -83,48 +51,6 @@ function formatKeys(keys: string[]): string {
 
 function renderKeyHint(keybinding: Keybinding, description: string, theme: Theme): string {
   return theme.fg("dim", formatKeys(getKeybindings().getKeys(keybinding))) + theme.fg("muted", ` ${description}`);
-}
-
-function formatPythonSourceLines(codeLines: string[]): string[] {
-  return codeLines.map((line, index) => `${String(index + 1).padStart(3, " ")} │ ${line}`);
-}
-
-function renderCompletedOutput(
-  resultText: string,
-  details: ExecutionDetails | undefined,
-  theme: Theme,
-  expanded: boolean
-): Component {
-  if (!details) {
-    return new Text(resultText || "(No output)", 0, 0);
-  }
-
-  const summary = theme.fg(
-    "muted",
-    `[PTC] nested calls=${details.nestedToolCalls}, nested results=${details.nestedResultCount}, ` +
-      `estimated avoided tokens≈${details.estimatedAvoidedTokens}, duration=${Math.round(details.durationMs / 1000)}s`
-  );
-
-  const body = details.report ? renderPtcReportLines(details.report, expanded) : [resultText || "(No output)"];
-  const lines = [summary, "", ...body];
-
-  if (details.userCode?.length) {
-    lines.push("");
-    if (expanded) {
-      lines.push(theme.fg("muted", "Python source"));
-      lines.push(...formatPythonSourceLines(details.userCode));
-    } else {
-      const lineLabel = details.userCode.length === 1 ? "line" : "lines";
-      lines.push(
-        theme.fg(
-          "muted",
-          `Python source: ${details.userCode.length} ${lineLabel} (${renderKeyHint("app.tools.expand", "to inspect Python source", theme)})`
-        )
-      );
-    }
-  }
-
-  return new Text(lines.join("\n"), 0, 0);
 }
 
 function buildToolDescription(): string {
@@ -222,21 +148,16 @@ function buildCodeExecutionTool(
     },
     renderResult(result, { expanded, isPartial }, theme) {
       const details = result.details as ExecutionDetails | undefined;
-      if (isPartial && details?.userCode && details.currentLine) {
-        return renderExecutingCode(
-          details.userCode,
-          details.currentLine,
-          details.totalLines || details.userCode.length,
-          theme
-        );
-      }
-
       const text = result.content
         .filter((content): content is { type: "text"; text: string } => content.type === "text")
         .map((content) => content.text)
         .join("");
 
-      return renderCompletedOutput(text, details, theme, expanded ?? false);
+      return renderCodeExecutionResult(text, details, {
+        expanded: expanded ?? false,
+        isPartial: isPartial ?? false,
+        expandHint: renderKeyHint("app.tools.expand", "to inspect Python source", theme),
+      }, theme);
     },
   };
 }

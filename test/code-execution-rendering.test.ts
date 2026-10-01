@@ -434,3 +434,29 @@ test("M21 source disclosure uses the configured expand action, not a hardcoded k
     assert.doesNotMatch(text, /ctrl\+o/i);
   } finally { harness.cleanup(); setKeybindings(previous); }
 });
+
+
+test("M21 pure preview formats only the first source line and respects ANSI-aware terminal width", () => {
+  const { formatSourcePreview } = require("../dist/code-execution-renderer.js");
+  const { visibleWidth } = require("@mariozechner/pi-tui");
+  const source = ["first = 1", "unread later line"];
+  Object.defineProperty(source, "1", { get() { throw new Error("collapsed preview visited later source"); } });
+  assert.equal(formatSourcePreview(source, 80, "alt+x expand"), "Python source: 2 lines: first = 1 (alt+x expand)");
+  assert.equal(formatSourcePreview([], 80, "expand"), "");
+  for (const width of [40, 80, 120]) {
+    const preview = formatSourcePreview(["界🙂".repeat(100)], width, "\x1b[2malt+x expand\x1b[0m");
+    assert.ok(visibleWidth(preview) <= width);
+    assert.doesNotMatch(preview, /\n/);
+  }
+});
+
+test("M21 pure expanded formatter preserves physical lines and source ordering without mutation", () => {
+  const { formatPythonSourceLines, formatCodeExecutionLines } = require("../dist/code-execution-renderer.js");
+  const source = Object.freeze(["if True:\r", "    a = 1\r", "", "return a"]);
+  assert.deepEqual(formatPythonSourceLines(source, fakeTheme(), 2), ["  1 │ if True:", "→  2 │     a = 1", "  3 │ ", "  4 │ return a"]);
+  const result = sourceResult([...source], { currentLine: 2, totalLines: 4 }, "working");
+  const lines = formatCodeExecutionLines("working", result.details, { expanded: true, isPartial: true, expandHint: "expand" }, fakeTheme(), 80);
+  assert.equal(lines[0], "Executing Python code (line 2/4):");
+  assert.ok(lines.includes("→  2 │     a = 1"));
+  assert.equal(source[0], "if True:\r");
+});
