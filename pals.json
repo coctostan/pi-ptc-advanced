@@ -1,7 +1,8 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "2.0.0-pals2.0",
   "modules": {
     "carl": { "enabled": true, "description": "Session boundary manager (Pi extension)", "session_strategy": "phase-boundary", "continue_threshold": 0.4, "safety_ceiling": 0.8 },
+    "codi": { "enabled": true, "description": "Codegraph-driven structural injection (safe skip when codegraph is unavailable)" },
     "todd": { "enabled": true, "description": "Test-driven development enforcement" },
     "walt": { "enabled": true, "description": "Quality gating & validation" },
     "dean": { "enabled": true, "description": "Dependency evaluation & audit notifier" },
@@ -23,7 +24,7 @@
   },
   "git": {
     "workflow": "github-flow",
-    "remote": "https://github.com/coctostan/pi-ptc-next.git",
+    "remote": "https://github.com/coctostan/pi-ptc-advanced.git",
     "base_branch": "main",
     "merge_method": "squash",
     "worktree_isolation": false,
@@ -34,6 +35,9 @@
     "update_branch_when_behind": true,
     "require_pr_before_next_phase": true,
     "require_reviews": false
+  },
+  "agents": {
+    "implementer": { "enabled": true, "model": null }
   },
   "integrations": {
     "sonarqube": { "enabled": false, "project_key": "" }
