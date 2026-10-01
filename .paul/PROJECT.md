@@ -10,8 +10,8 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 | Attribute | Value |
 |-----------|-------|
 | Version | Milestone 21 in progress after 1.0 release-readiness completion |
-| Status | Active Milestone 21 — Phase 64 reconciled, Phase 65 planning prepared; PR #23 CI/merge gate blocks progression |
-| Last Updated | 2026-10-01 after Phase 64 reconciliation / prepared Phase 65 transition |
+| Status | Active Milestone 21 — Phase 64 reconciled; scoped CI fix verified; Phase 65 prepared only, awaiting explicit PR #23 merge intent and passing current-head checks |
+| Last Updated | 2026-10-01 after standard CI fix 65-01; main-loop position unchanged |
 
 ## Requirements
 ### Validated (Shipped)
@@ -104,7 +104,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 - Package name: `pi-ptc-advanced`
 - Key source areas: `src/index.ts`, `src/code-executor.ts`, `src/custom-tool-manager.ts`, `src/tool-registry.ts`, `src/tool-adapters.ts`, `src/rpc-protocol.ts`
 - Maintainer-facing integration docs now live in `README.md`; deeper local planning/history artifacts live under `.paul/`
-- Latest GitHub Flow evidence: Phase 64 PR #23 OPEN with failing Verify release baseline checks and successful Socket checks. Same read-payload/Unknown type failures occurred on exact main base; CI remains blocking. Detailed evidence: `.paul/phases/64-pi-tui-collapsed-expanded-rendering/64-01-CI-EVIDENCE.md`.
+- Latest GitHub Flow evidence: Phase 64 PR #23 OPEN. Approved standard fix 65-01 (`R7 — no spec impact`) pins the compatible hashline fixture; repair 5c522d2 passes both Verify release baseline and Socket checks, full 278/278 plus release proof. Metadata-head checks remain mandatory at merge preflight; explicit merge intent absent. Source: `.paul/phases/65-regression-tests-and-docs/65-01-FIX-SUMMARY.md`.
 - Two unrelated hotfix PRs (#21, #22, `code_execution` prompt trimming) merged directly to `main` after PR #20 outside the PALS FIX lifecycle; noted for traceability, out of Phase 63 scope.
 
 ## Constraints
@@ -232,4 +232,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-10-01 after Phase 64 reconciliation and prepared Phase 65 transition; PR #23 CI/merge gate pending*
+*Last updated: 2026-10-01 after scoped CI fix 65-01; Phase 65 remains prepared only, PR #23 explicit merge gate pending*

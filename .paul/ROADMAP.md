@@ -6,7 +6,7 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 ## Current Milestone
 **Milestone 21 — Code Execution Source Visibility UX**
 Status: 🚧 In Progress
-Phases: 3 of 4 reconciled (Phase 64 transition prepared on feature branch; PR #23 CI/merge pending)
+Phases: 3 of 4 reconciled (Phase 64 transition prepared on feature branch; scoped CI fix verified, PR #23 explicit merge gate pending)
 
 Focus: Make `code_execution` transparent in Pi TUI by showing generated Python source in a collapsed/expandable UI affordance, backed by a stable structured payload field for running, success, and failure states.
 
@@ -14,8 +14,8 @@ Focus: Make `code_execution` transparent in Pi TUI by showing generated Python s
 |-------|------|-------|--------|-----------|
 | 62 | Current Behavior Audit | 1/1 | ✅ Complete | 2026-05-14 |
 | 63 | Stable Source Payload Contract | 1/1 | ✅ Complete | 2026-05-14 |
-| 64 | Pi TUI Collapsed/Expanded Rendering | 1/1 | ✅ Reconciled / transition prepared; PR #23 CI/merge pending | 2026-10-01 (reconciled) |
-| 65 | Regression Tests and Docs | TBD | 🔵 Planning prepared; blocked by Phase 64 PR #23 CI/merge | - |
+| 64 | Pi TUI Collapsed/Expanded Rendering | 1/1 | ✅ Reconciled / transition prepared; CI repair verified, PR #23 explicit merge gate pending | 2026-10-01 (reconciled) |
+| 65 | Regression Tests and Docs | TBD | 🔵 Planning prepared only; blocked by Phase 64 PR #23 merge gate / current-head checks | - |
 
 ### Phase 62: Current Behavior Audit
 Focus: Reproduce current `code_execution` visibility for running, success, and failure states; locate where Python source is stored today; determine whether gaps are in payload, streaming state, TUI rendering, or collapsed presentation.
@@ -27,11 +27,12 @@ Plans: `63-01-PLAN.md` (tdd; stable source payload/error/progress details contra
 
 ### Phase 64: Pi TUI Collapsed/Expanded Rendering
 Focus: Render Python source in Pi TUI as collapsed by default with a first-line preview; expand reveals full formatted source for running, completed success, and failed calls.
-Plans: `64-01-PLAN.md` — COMPLETE (2026-10-01, `64-01-SUMMARY.md` finalized; AC-1–7 PASS, visual approved, D1–D4 discard routes explicitly approved). Explicit inventory: one plan, 1/1 complete; last_plan=true. Phase 65 transition metadata prepared on feature branch; PR #23 CI/merge gate still blocks live progression.
+Plans: `64-01-PLAN.md` — COMPLETE (2026-10-01, `64-01-SUMMARY.md` finalized; AC-1–7 PASS, visual approved, D1–D4 discard routes explicitly approved). Explicit inventory: one plan, 1/1 complete; last_plan=true. Phase 65 transition metadata prepared on feature branch. Approved side-loop `65-01-FIX.md` repairs CI fixture drift; explicit PR #23 merge intent and passing current-head checks still gate live progression.
 
 ### Phase 65: Regression Tests and Docs
 Focus: Add payload/rendering regressions and update README/tool guidance so users and maintainers understand where source appears and how to inspect it.
 Plans: TBD (defined during /paul:plan after Phase 64 PR #23 passes CI and is explicitly merged; prepared route only)
+Side-loop only: `65-01-FIX.md` / `65-01-FIX-SUMMARY.md` (`R7 — no spec impact`) repairs Phase 64 PR #23 CI. This is not a Phase 65 PLAN or source-visibility implementation; main-loop plan inventory and milestone intent remain unchanged.
 
 ## Completed Milestones
 
@@ -291,4 +292,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-10-01 after Phase 64 reconciliation / prepared Phase 65 transition; PR #23 CI/merge still gates progression*
+*Last updated: 2026-10-01 after standard CI fix 65-01; PR #23 explicit merge gate / current-head checks still gate Phase 65 planning*

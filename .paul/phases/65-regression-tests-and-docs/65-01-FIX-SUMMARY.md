@@ -3,8 +3,8 @@ phase: 65-regression-tests-and-docs
 plan: 01
 type: fix
 chain_node: R7 — no spec impact
-status: applied-awaiting-live-ci
-completed: null
+status: complete
+completed: 2026-10-01T02:55:12Z
 ---
 
 ## Fix Summary
@@ -28,6 +28,8 @@ Pin upstream **v0.8.16 / f1234813c5f2ea0a0476143b41a59cf2094e945b**, which retai
 | `test/ci-hashline-fixture.test.ts` | Two fail-closed workflow regression guards |
 | Phase 64 `64-01-CI-EVIDENCE.md` | Append approved diagnosis, operand correction and repair cross-reference |
 | Current-phase FIX / FIX-SUMMARY and `.paul/STATE.md` | Authorization, scope, verification, side-loop status; main loop unchanged |
+| `.paul/PROJECT.md`, `.paul/ROADMAP.md` | Refresh CI-repair / pending-merge status only; milestone intent and main-loop plan inventory unchanged |
+| `.paul/quality-history.md`, `.paul/CODI-HISTORY.md`, `.paul/MODULE-LEDGER.md` | One 65-01 quality/CODI snapshot and derived module harvest; prior Phase 64 evidence retained |
 
 No `src/*`, README, prompts, result payloads, Python runtime, package metadata/lockfiles, dependency contracts, active sibling checkout or remote URLs changed. No dependency-risk waiver, publish, merge, Phase 65 PLAN or milestone-intent amendment.
 
@@ -39,7 +41,7 @@ No `src/*`, README, prompts, result payloads, Python runtime, package metadata/l
 - `node node_modules/typescript/bin/tsc --noEmit`, YAML parse / required CI keys, and `git diff --check` pass. No configured lint/format/coverage command. An initial `npm run typecheck` attempt found no such script; direct TypeScript verification recovered successfully.
 - Audit unchanged: **0 critical / 7 high / 2 moderate**; existing acknowledgement is expired and was not renewed. No new findings or dependency repair inferred.
 - Evidence commands and setup recovery: FIX.md § APPLY evidence; process `proc_3496` baseline and `proc_128a` complete passing CI-parity logs. Temporary `/tmp` vs `/private/tmp` path-only probe failures disappeared with canonical fixture root; assertions were not weakened.
-- **Live repaired-head CI: pending.** Local success does not close the live CI gate.
+- **Live repaired-head CI: PASS** at **5c522d2c661dd33ae03f7291343be840d0d5c0bc**. Both Verify release baseline runs SUCCESS: [36807823614 (pull_request)](https://github.com/coctostan/pi-ptc-advanced/actions/runs/36807823614) and [36807820344 (push)](https://github.com/coctostan/pi-ptc-advanced/actions/runs/36807820344). Detailed PR log confirms 29 focused / 278 full pass, no failures/skips, exact fixture checkout and release-package success. Both Socket checks SUCCESS at this head. Any later metadata head must pass fresh checks before merge.
 
 ### Quality
 | Metric | Before | After | Delta |
@@ -50,13 +52,13 @@ No `src/*`, README, prompts, result payloads, Python runtime, package metadata/l
 | Type errors | — | 0 | Verified current result |
 | Coverage / lint | — | — | Not configured |
 
-### Module Execution Reports
-Parent dispatched installed post-apply hooks in registry priority order and retains the following annotations. Post-unify history/report finalization awaits live CI; no Phase 64 history rows are duplicated.
+## Module Execution Reports
+Parent dispatched installed post-apply hooks in registry priority order, then completed post-unify WALT(100), SKIP(200), CODI(220), RUBY(300). Carried-forward and final reports are durable below; prior Phase 64 history rows are not duplicated.
 
 | Module | Status | Evidence / outcome |
 |---|---|---|
 | WALT | PASS | 274/2 -> 278/0, 29 focused pass, full verify:ci / release proof, TypeScript clean, diff clean; strict no-regression gate passes locally |
-| ARCH | PASS | New test imports only node:test, node:assert/strict, node:fs, node:path; no production layer or local imports changed; 33-line test, 46-line CI file, no size/growth concern |
+| ARCH | PASS | New test imports only node:test, node:assert/strict, node:fs, node:path; no production layer or local imports changed; measured 32-line test, 45-line CI file, no size/growth concern |
 | SETH | PASS | Public fixture SHA is not a secret; trusted static clone and SHA verification before install; no dynamic user input, validation bypass or new runtime sink |
 | GABE | SKIP | No API files in changed set |
 | DEAN | PASS_WITH_CONCERNS | Unchanged audit 0 critical / 7 high / 2 moderate; no new vulnerabilities, no implicit renewed acknowledgement |
@@ -72,6 +74,15 @@ Parent dispatched installed post-apply hooks in registry priority order and reta
 | DOCS | PASS | Runbook verify:ci command remains accurate; test-only scope has no public-doc drift; CI comments explain the pin; Phase 65 source-visibility docs remain unstarted |
 | IRIS | PASS | Changed test/config only; no unused symbol, empty/broad catch, dead code or review-marker finding; no configured linter required |
 | SKIP | NOTE | Source-backed fixture-pinning decision candidate below; no unrelated history scan or lifecycle writes by module |
+| CODI | SKIP | No sibling/main PLAN or CODI injection exists for this standard config fix; outcome no-dispatch-found, R/U/K/Symbols=—, blast_radius=n; one history row |
+| RUBY | PASS | Measured new test 32 lines, workflow 45 lines; tiny test/config-only repair, no production debt/extraction candidate; no refactor |
+
+### Post-Unify Reports and Side Effects
+- **WALT:** Captured APPLY evidence yields improved quality (274/2 -> 278/0; two repaired failures + two guards), current types 0, no coverage/lint metrics invented. Appended exactly one 65-01 quality-history row and trajectory update; no checks rerun in UNIFY.
+- **SKIP:** Final source supports the complete decision entry below. Parent retains it here; no separate knowledge-store write is required for this bounded fix.
+- **CODI:** Hook entry inspected summary scope and absent 65-01-PLAN (no Phase 65 PLAN created). Classified `no-dispatch-found` and appended one newline-terminated history row; no inferred graph symbols/counts or lifecycle authority.
+- **RUBY:** Scoped changed-file review finds no debt; measured sizes above. Boundary I/O is a single workflow-fixture read in a test, not mixed production domain effects.
+- **Parent:** Harvested this finalized module section into MODULE-LEDGER with one row per module. Prior rows remain untouched; derived ledger cannot authorize merge, routing or module configuration changes.
 
 ### Knowledge Candidate (SKIP)
 **Source:** This FIX-SUMMARY § Root Cause and Repair / Verification.
@@ -82,5 +93,5 @@ Parent dispatched installed post-apply hooks in registry priority order and reta
 **Content / rationale:** Pin a verified compatible tag plus immutable SHA and remove fallback; retain exact assertions and validation instead of masking accidental environment drift.
 **Impact:** Future fixture upgrades require deliberate compatibility review and regression proof. This does not amend M21 source-visibility intent or certify latest upstream compatibility.
 
-### Result
-Local repair and post-apply verification pass. Await live CI, then finalize post-unify evidence once. Explicit merge intent and current-head passing checks remain mandatory; Phase 65 main loop stays unstarted.
+## Result
+**FIX COMPLETE (standard)** — both targeted failures repaired; local and live CI pass; post-unify evidence finalized once. **Chain node: R7 — no spec impact.** Repair commit: `5c522d2`; reconciliation metadata follows on the same PR branch and must also pass checks. PR #23 remains OPEN; explicit merge intent and current-head passing checks remain mandatory. Phase 65 main loop and M21 intent are unchanged; no main-loop planning, merge, base sync or branch cleanup performed.
