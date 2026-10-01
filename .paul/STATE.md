@@ -4,15 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Milestone 21 begins: make `code_execution` Python source visible in Pi TUI with collapsed/expanded rendering backed by stable details metadata.
+**Current focus:** Standard CI fix 65-01 complete (`R7 — no spec impact`); Phase 64 PR #23 repair checks pass. Await explicit merge intent and passing current-head checks. Phase 65 remains prepared only, not planned.
 ## Current Position
 Milestone: Milestone 21 — Code Execution Source Visibility UX
-Phase: 64 of 65 (Pi TUI Collapsed/Expanded Rendering)
-Plan: Not started
-Status: Phase 63 complete; ready to plan Phase 64
-Last activity: 2026-05-16 — Verified PR #20 merged (squash `bde0db1`, CI + Socket checks SUCCESS), closed the Phase 63 merge gate, and transitioned to Phase 64 planning readiness.
+Phase: 65 of 65 (Regression Tests and Docs) — prepared transition only; Phase 64 PR #23 explicit merge gate unresolved
+Plan: Not started (Phase 65); previous plan `.paul/phases/64-pi-tui-collapsed-expanded-rendering/64-01-PLAN.md` reconciled
+Status: Phase 65 planning prepared but blocked by Phase 64 PR #23 merge gate; CI repair verified, current-head checks required before merge
+Last activity: 2026-10-01 — Completed approved standard fix 65-01. Pinned compatible hashline fixture and fail-closed guards; Node 22 baseline 274/2 -> 278/0, verify:ci/release/type/YAML/diff checks pass. Repair 5c522d2 passes both CI and Socket checks; post-unify history/module reports finalized once. Metadata follow-up requires fresh checks. No merge or Phase 65 PLAN.
 Progress:
-- Milestone 21 — Code Execution Source Visibility UX: [█████░░░░░] 50% (Phase 62 ✓; Phase 63 ✓; Phase 64 ○; Phase 65 ○)
+- Milestone 21 — Code Execution Source Visibility UX: [███████░░░] 75% reconciled (Phases 62/63 ✓; Phase 64 reconciliation ✓, CI repair verified, explicit merge pending; Phase 65 ○ prepared, blocked)
 - Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [██████████] 100% ✓ (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ✓)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
@@ -60,7 +60,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ○        ○        ○     [Phase 63 complete; ready for Phase 64 PLAN]
+  ○        ○        ○     [Phase 65 prepared only; Phase 64 reconciliation ✓✓✓; fix 65-01 complete; PR #23 explicit merge gate OPEN]
 ```
 
 ## Accumulated Context
@@ -75,6 +75,16 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 63 UNIFY reconciled plan-vs-actual into `63-01-SUMMARY.md`, recorded post-unify module evidence, committed/pushed PR #20, and is blocked from phase transition only by GitHub Flow PR checks/merge gate.
 - 2026-05-16: PR #20 confirmed MERGED (squash `bde0db1` to `main`, 2026-05-14T16:45:24Z) with `Verify release baseline` and Socket Security checks SUCCESS; local `main` is already fast-forwarded and clean, closing the Phase 63 merge gate and completing the phase.
 - Note: two unrelated hotfix PRs (`#21` trim code_execution tool prompt, `#22` further trim) merged directly to `main` after PR #20 without PALS FIX lifecycle artifacts; out of Phase 63 scope, flagged here for visibility only.
+- 2026-10-01: Phase 64 PLAN created `64-01-PLAN.md` (M21-only, no PRD/R# invention): 3 TDD tasks, a renderer companion module, and one blocking human visual checkpoint. Execution/payload/prompt/report semantics remain protected; Phase 65 owns user docs and broader end-to-end proof. No APPLY approval inferred.
+- Phase 64 planning verification: build and focused render/index/RPC/error tests passed 33/33 under Node v26.7.0. Full suite not rerun in PLAN; APPLY must establish a fresh baseline for historical unsupported-Node hashline failures.
+- DEAN pre-plan: historical baseline expired 2026-06-11; current npm audit is 0 critical / 7 high / 2 moderate / 0 low. Installed no-fresh-baseline rule is non-blocking with no current critical findings; no baseline refresh/override inferred. Counts carry into APPLY comparison.
+- Automatic pals.json migration preserved existing settings, stamped `2.0.0-pals2.0`, and added installed CODI and agents.implementer defaults. PLAN exceeds the advisory 16 KB ceiling; compact repeated task/context prose by cited references if needed, preserving verbatim intent and module evidence.
+- PLAN identified an exact-match remote guard risk from pals.json targeting the old pi-ptc-next slug. Resolved later by explicit config-repair approval; PLAN/visual approval alone did not authorize repair or merge.
+- 2026-10-01: User explicitly approved APPLY (`yes`). Parent executed inline on feature/64-pi-tui-collapsed-expanded-rendering; created shared renderer and thin wiring, preserved protected semantics, committed RED cab0658 and GREEN 403e3cd. Task evidence: 64-01-APPLY-LOG.md.
+- Fresh baseline/full comparison: 259 pass / 9 fail → 267 pass / same 9 fail, all unsupported --experimental-transform-types hashline live checks under Node v26.7.0. Focused 33/33 → 41/41; build/typecheck/diff hygiene pass; audit unchanged 0 critical / 7 high / 2 moderate.
+- Repo-source load probe confirmed exactly this repository's src/index.ts and no errors; cleanup-corrected probe exited 0. Human visual batch `approved`; post-apply advisory/enforcement completed with no new local test/audit regressions. Subsequent UNIFY approval/reconciliation recorded below.
+- Explicit approvals: APPLY `yes`, visual `approved`, one-field canonical-target repair `yes`, UNIFY `1`, D1–D4 discard routing `approve all 4`. 64-01-SUMMARY finalized; AC-1–7 PASS with unchanged local baseline/audit concerns. Mandatory post-unify evidence durable, history rows appended once. ROADMAP explicit one-plan inventory 1/1 complete -> last_plan=true; Phase 65 transition prepared on feature branch, blocked by Phase 64 PR #23 CI/merge. No new intent requirements, no repair or merge approval.
+- 2026-10-01: Human `approve` authorized standard side-loop fix 65-01 (`R7 — no spec impact`). Missing v0.8.6 / floating latest fixture caused read-field drift and TypeBox Unknown type; compatible v0.8.16 plus exact SHA guard repairs both, no runtime/README/dependency contract changes. Node 22 full 278/278 and live repair-head checks pass. Final FIX-SUMMARY owns evidence; main loop unchanged, explicit merge intent absent.
 ### Decisions
 - Phase 55 normalized callable-wrapper contract guidance: direct callable Pi wrappers remain awaitable, `grep("pattern", path="...")` is supported in the runtime adapter, and Phase 56 keeps result/path/error semantics separate.
 - Phase 57 shipped `ptc.list_helpers()` as the curated `ptc.*` helper inventory distinct from live callable-tool discovery via `ptc.list_callable_tools()`.
@@ -173,6 +183,7 @@ PLAN ──▶ APPLY ──▶ UNIFY
 ### Fixes
 | Fix 45-02 (standard, PARTIAL): bump CI Actions `node-version` 20→22 to fix `.ts` test loader | Phase 45 side-loop | `.github/workflows/ci.yml`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX.md`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX-SUMMARY.md` (commit `e777394`) |
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
+| Fix 65-01 (standard, COMPLETE): repair Phase 64 PR #23 fixture drift | Chain: R7 — no spec impact | Current Phase 65 prepared-only side-loop; main loop unchanged | `.github/workflows/ci.yml`, `test/ci-hashline-fixture.test.ts`, `65-01-FIX.md`, finalized `65-01-FIX-SUMMARY.md`; local/full CI 278/278; repair 5c522d2 CI + Socket SUCCESS; no merge authorization |
 
 ### Git State
 - Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
@@ -190,16 +201,19 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - PR #20: MERGED — https://github.com/coctostan/pi-ptc-advanced/pull/20; squash merge `bde0db1` to `main` (2026-05-14T16:45:24Z); GitHub Actions `Verify release baseline` and Socket Security checks SUCCESS; remote feature branch was not auto-deleted on merge, so local/remote `feature/63-stable-source-payload-contract` were cleaned up manually during Phase 63 transition verification on 2026-05-16; local `main` already fast-forwarded (Phase 63).
 - Note: PR #21 and PR #22 (unrelated `code_execution` prompt-trim hotfixes) merged to `main` after PR #20 outside the PALS FIX lifecycle; out of Phase 63 scope, recorded for traceability only.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
+- Phase 64 PR #23 OPEN on feature/64-pi-tui-collapsed-expanded-rendering; product/config/reconciliation commits plus repair 5c522d2 pushed. Both Verify release baseline runs 36807823614 / 36807820344 and Socket checks SUCCESS at repaired head; full 278/278, release proof pass. Final fix metadata follows on this branch and must pass fresh checks. No merge; FIX-SUMMARY is repair receipt, CI-EVIDENCE retains prior failures / corrected operands.
 ## Session Continuity
-Last session: 2026-05-16
-Stopped at: Phase 63 merge gate closed (PR #20 merged); transitioned to Phase 64 planning readiness.
-Next action: `/paul:plan` for Phase 64 (Pi TUI Collapsed/Expanded Rendering)
-Resume file: `.paul/ROADMAP.md`
-wip_result: n/a — clean working tree on `main` after merge-gate verification
+Last session: 2026-10-01
+Stopped at: Standard fix 65-01 complete and reconciled; Phase 64 PR #23 awaits explicit merge intent and passing current-head checks.
+Next action: Confirm current PR #23 head checks pass, then obtain explicit human merge intent. After approved merge, sync base and clean branch before exposing Phase 65 /paul:plan.
+Resume file: `.paul/phases/65-regression-tests-and-docs/65-01-FIX-SUMMARY.md` (finalized standard side-loop; main loop unchanged)
+wip_result: Phase 64 reconciliation and scoped CI fix are complete; repair-head live CI and Socket checks pass. Metadata follow-up rides the existing PR and requires fresh checks. Merge intent remains unapproved; Phase 65 main-loop planning has not begun.
 Resume context:
-- Milestone 21 active: Code Execution Source Visibility UX; Phase 63 is now complete (2 of 4 phases done).
-- Phase 64 should plan Pi TUI collapsed/expanded rendering against the stable `details.userCode` / `details.failure` contract documented in `63-01-SUMMARY.md`'s "Handoff to Phase 64" section.
-- Expected resume action: `/paul:plan` for Phase 64.
+- Phase 64 reconciliation complete with D1–D4 discarded as intent changes; evidence retained. Fix 65-01 subsequently repaired the CI blocker without spec changes or waiver. Phase 65 ○○○ transition prepared only; Milestone 21 3/4 reconciled. Live next action is PR #23 explicit merge gate / current-head checks, not Phase 65 PLAN.
+- Success/running/failure/report visual batch uses `pi --no-extensions --extension /Users/maxwellnewman/pi/workspace/pi-ptc-next/src/index.ts --no-session`; no duplicate PTC extension.
+- Historical Phase 64 APPLY: focused 41 passing; full 267 passing / unchanged 9 Node 26 option failures; audit unchanged; refactor no-op. Fix 65-01 supported Node 22 proof: focused 29 / full 278 passing, no failures, release package/type/YAML/diff checks pass.
+- Pre-unify zero registered modules; post-unify WALT/SKIP/CODI/RUBY complete. History rows appended once for 64-01 (do not duplicate), SKIP rationale in SUMMARY, RUBY scoped no-refactor review. SUMMARY finalized; explicit ROADMAP inventory selected last_plan=true. Mandatory transition metadata rides current feature PR; new Phase 65 action must not run while Phase 64 CI/merge gate is open.
+- Prepared route after gate closes: /paul:plan for Phase 65 — Regression Tests and Docs. Standard fix 65-01 completed; quality/CODI rows appended once for this side-loop (do not duplicate). No Phase 65 PLAN created. Latest-head passing checks, explicit merge intent, approved merge, base sync and branch cleanup remain required.
 
 ---
-*STATE.md — Updated for Phase 63 merge-gate closeout and Phase 64 transition (last updated: 2026-05-16)*
+*STATE.md — Updated after standard CI fix 65-01; Phase 65 prepared only, PR #23 explicit merge gate pending (2026-10-01)*

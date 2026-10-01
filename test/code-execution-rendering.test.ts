@@ -195,12 +195,12 @@ function reportCompletedResult(): ToolResult {
   };
 }
 
-function renderToText(tool: RegisteredTool, result: ToolResult, options: RenderOptions): string {
+function renderToText(tool: RegisteredTool, result: ToolResult, options: RenderOptions, width = 120): string {
   const component = tool.renderResult!(result, options, fakeTheme());
-  return component.render(120).join("\n");
+  return component.render(width).join("\n");
 }
 
-test("completed collapsed code_execution results keep output first and advertise hidden Python source", async () => {
+test("M21 completed collapsed code_execution results keep output first and preview only the first source line", async () => {
   const harness = await registerCodeExecutionTool();
   try {
     const text = renderToText(harness.tool, completedResult(), { expanded: false, isPartial: false });
@@ -209,7 +209,7 @@ test("completed collapsed code_execution results keep output first and advertise
     assert.match(text, /\{"files":2,"status":"ok"\}/);
     assert.match(text, /Python source: 2 lines/);
     assert.match(text, /to inspect Python source/);
-    assert.doesNotMatch(text, /1\s+│\s+entries = await ptc\.read_tree/);
+    assert.match(text, /entries = await ptc\.read_tree/);
     assert.doesNotMatch(text, /2\s+│\s+return \{'files': len\(entries\)\}/);
   } finally {
     harness.cleanup();
@@ -298,4 +298,165 @@ test("partial code_execution rendering keeps the current-line executing-code vie
   } finally {
     harness.cleanup();
   }
+});
+
+// M21 fixtures use Pi's public registration path; source remains metadata.
+function sourceResult(code: string[], extra: Record<string, unknown> = {}, text = "result body"): ToolResult {
+  const result = completedResult();
+  result.content[0].text = text;
+  result.details = { ...result.details, userCode: code, ...extra };
+  return result;
+}
+
+function failedResult(includeTraceback = true): ToolResult {
+  const traceback = "Traceback (most recent call last):\nValueError: phase64 failure";
+  return sourceResult(["a = 1", "raise ValueError('phase64 failure')"], {
+    failure: { type: "python", message: "phase64 failure", traceback },
+  }, includeTraceback ? `Python error: phase64 failure\n${traceback}` : "Python error: phase64 failure");
+}
+
+test("M21 collapsed defaults preview the first physical line across all source-bearing states", async () => {
+  const harness = await registerCodeExecutionTool();
+  try {
+    const cases: Array<[ToolResult, boolean]> = [
+      [sourceResult(["first = 1", "later_secret = 2"]), false],
+      [sourceResult(["first = 1", "later_secret = 2"], { currentLine: 2, totalLines: 2 }), true],
+      [sourceResult(["first = 1", "later_secret = 2"], {}, "working"), true],
+      [sourceResult(["first = 1", "later_secret = 2"], { nestedToolCalls: 1 }, "nested tool update"), true],
+      [failedResult(), false], [reportCompletedResult(), false],
+    ];
+    for (const [result, isPartial] of cases) {
+      for (const expanded of [false, undefined]) {
+        const before = JSON.stringify(result);
+        const text = renderToText(harness.tool, result, { expanded, isPartial });
+        assert.match(text, /Python source: \d+ lines?/);
+        assert.ok(text.includes((result.details!.userCode as string[])[0]));
+        assert.doesNotMatch(text, /later_secret|raise ValueError|→/);
+        assert.equal(JSON.stringify(result), before);
+      }
+    }
+  } finally { harness.cleanup(); }
+});
+
+test("M21 partials without valid progress remain running and expand all source without an invented arrow", async () => {
+  const harness = await registerCodeExecutionTool();
+  try {
+    for (const currentLine of [undefined, 0, -1, 4, 1.5]) {
+      const result = sourceResult(["if True:", "    value = 1", "return value"], { currentLine }, "nested tool working");
+      for (const expanded of [false, true]) {
+        const text = renderToText(harness.tool, result, { expanded, isPartial: true });
+        assert.match(text, /Executing Python code/);
+        assert.match(text, /nested tool working/);
+        assert.doesNotMatch(text, /nested calls=|line \d+\/|→/);
+        if (expanded) assert.match(text, /2\s+│ {5}value = 1/);
+        else assert.doesNotMatch(text, /value = 1/);
+      }
+    }
+  } finally { harness.cleanup(); }
+});
+
+test("M21 structured failures label status and show a compact summary or expanded diagnostics before source", async () => {
+  const harness = await registerCodeExecutionTool();
+  try {
+    for (const includeTraceback of [false, true]) {
+      const result = failedResult(includeTraceback);
+      const collapsed = renderToText(harness.tool, result, { expanded: false });
+      assert.match(collapsed, /Python execution failed/);
+      assert.match(collapsed, /phase64 failure/);
+      assert.match(collapsed, /a = 1/);
+      assert.doesNotMatch(collapsed, /Traceback|raise ValueError/);
+      const expanded = renderToText(harness.tool, result, { expanded: true });
+      assert.match(expanded, /Python execution failed/);
+      assert.match(expanded, /Python error: phase64 failure/);
+      assert.equal(expanded.split("Traceback (most recent call last):").length - 1, 1);
+      assert.match(expanded, /2\s+│ raise ValueError/);
+      assert.ok(expanded.indexOf("Traceback") < expanded.indexOf("Python source"));
+    }
+  } finally { harness.cleanup(); }
+});
+
+test("M21 missing or empty source preserves legacy bodies and never extracts source from args or output", async () => {
+  const harness = await registerCodeExecutionTool();
+  try {
+    const legacy: ToolResult = { content: [{ type: "text", text: "legacy Python error" }] };
+    const withoutSource = completedResult();
+    delete withoutSource.details!.userCode;
+    for (const result of [legacy, withoutSource, sourceResult([]), { content: [] } as ToolResult]) {
+      for (const expanded of [false, true]) {
+        const before = JSON.stringify(result);
+        const component = harness.tool.renderResult!(result, { expanded }, fakeTheme(), { args: { code: "invented source" } });
+        const text = component.render(120).join("\n");
+        assert.doesNotMatch(text, /Python source|invented source|Python execution failed/);
+        assert.equal(JSON.stringify(result), before);
+        if (!result.content.length) assert.match(text, /\(No output\)/);
+      }
+    }
+  } finally { harness.cleanup(); }
+});
+
+test("M21 preview is one width-safe row for Unicode and blank first lines, with no stale expanded source", async () => {
+  const harness = await registerCodeExecutionTool();
+  const { visibleWidth } = require("@mariozechner/pi-tui");
+  try {
+    for (const first of ["界🙂e\u0301".repeat(100), "", "\r", "\t" + "long".repeat(100)]) {
+      const result = sourceResult([first, "    later = 2\r", "", "return later\r"]);
+      const before = JSON.stringify(result);
+      const collapsed = harness.tool.renderResult!(result, {}, fakeTheme());
+      for (const width of [40, 80, 120, 40]) {
+        const rows = collapsed.render(width);
+        const sourceStart = rows.findIndex((row: string) => row.includes("Python source"));
+        assert.ok(sourceStart >= 0);
+        assert.equal(rows.length - sourceStart, 1, "preview must occupy exactly one terminal row");
+        assert.ok(visibleWidth(rows[sourceStart]) <= width);
+        assert.doesNotMatch(rows.join("\n"), /later = 2|return later/);
+        if (!first.replace(/\r$/, "")) assert.match(rows[sourceStart], /\(blank line\)/);
+      }
+      const expanded = renderToText(harness.tool, result, { expanded: true });
+      assert.match(expanded, /2\s+│ {5}later = 2/);
+      assert.match(expanded, /3\s+│\s*\n/);
+      assert.match(expanded, /4\s+│ return later/);
+      assert.doesNotMatch(expanded, /\r/);
+      assert.doesNotMatch(renderToText(harness.tool, result, { expanded: false }), /later = 2/);
+      assert.equal(JSON.stringify(result), before);
+    }
+    assert.match(renderToText(harness.tool, sourceResult(["return 1"]), {}), /Python source: 1 line\b/);
+  } finally { harness.cleanup(); }
+});
+
+test("M21 source disclosure uses the configured expand action, not a hardcoded key", async () => {
+  const { getKeybindings, setKeybindings, KeybindingsManager } = require("@mariozechner/pi-tui");
+  const previous = getKeybindings();
+  setKeybindings(new KeybindingsManager({ "app.tools.expand": { defaultKeys: "alt+x" } }));
+  const harness = await registerCodeExecutionTool();
+  try {
+    const text = renderToText(harness.tool, sourceResult(["return 1"]), {});
+    assert.match(text, /alt\+x to inspect Python source/);
+    assert.doesNotMatch(text, /ctrl\+o/i);
+  } finally { harness.cleanup(); setKeybindings(previous); }
+});
+
+
+test("M21 pure preview formats only the first source line and respects ANSI-aware terminal width", () => {
+  const { formatSourcePreview } = require("../dist/code-execution-renderer.js");
+  const { visibleWidth } = require("@mariozechner/pi-tui");
+  const source = ["first = 1", "unread later line"];
+  Object.defineProperty(source, "1", { get() { throw new Error("collapsed preview visited later source"); } });
+  assert.equal(formatSourcePreview(source, 80, "alt+x expand"), "Python source: 2 lines: first = 1 (alt+x expand)");
+  assert.equal(formatSourcePreview([], 80, "expand"), "");
+  for (const width of [40, 80, 120]) {
+    const preview = formatSourcePreview(["界🙂".repeat(100)], width, "\x1b[2malt+x expand\x1b[0m");
+    assert.ok(visibleWidth(preview) <= width);
+    assert.doesNotMatch(preview, /\n/);
+  }
+});
+
+test("M21 pure expanded formatter preserves physical lines and source ordering without mutation", () => {
+  const { formatPythonSourceLines, formatCodeExecutionLines } = require("../dist/code-execution-renderer.js");
+  const source = Object.freeze(["if True:\r", "    a = 1\r", "", "return a"]);
+  assert.deepEqual(formatPythonSourceLines(source, fakeTheme(), 2), ["  1 │ if True:", "→  2 │     a = 1", "  3 │ ", "  4 │ return a"]);
+  const result = sourceResult([...source], { currentLine: 2, totalLines: 4 }, "working");
+  const lines = formatCodeExecutionLines("working", result.details, { expanded: true, isPartial: true, expandHint: "expand" }, fakeTheme(), 80);
+  assert.equal(lines[0], "Executing Python code (line 2/4):");
+  assert.ok(lines.includes("→  2 │     a = 1"));
+  assert.equal(source[0], "if True:\r");
 });

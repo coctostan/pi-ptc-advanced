@@ -34,9 +34,11 @@ jobs:
 
       - name: Clone and install pi-hashline-readmap as sibling repo
         run: |
-          git clone --depth 1 --branch v0.8.6 https://github.com/coctostan/pi-hashline-readmap.git ../pi-hashline-readmap \
-            || git clone --depth 1 https://github.com/coctostan/pi-hashline-readmap.git ../pi-hashline-readmap
-          (cd ../pi-hashline-readmap && npm install --no-audit --no-fund)
+          # Keep the live payload and Sinclair TypeBox fixture contracts stable.
+          # Fail closed if the tag disappears or moves; never fall back to latest.
+          git clone --depth 1 --branch v0.8.16 https://github.com/coctostan/pi-hashline-readmap.git ../pi-hashline-readmap
+          test "$(git -C ../pi-hashline-readmap rev-parse HEAD)" = f1234813c5f2ea0a0476143b41a59cf2094e945b
+          npm install --no-audit --no-fund --prefix ../pi-hashline-readmap
           echo "PI_HASHLINE_READMAP_ROOT=$GITHUB_WORKSPACE/../pi-hashline-readmap" >> "$GITHUB_ENV"
 
       - name: Run repo verification suite
