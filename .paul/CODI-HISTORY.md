@@ -18,3 +18,4 @@ See modules/codi/references/codi-instrumentation.md for schema, outcome taxonomy
 
 | 62-01 | 2026-05-14 | no-dispatch-found | — | — | — | — | n |
 | 63-01 | 2026-05-14 | no-dispatch-found | — | — | — | — | n |
+| 64-01 | 2026-10-01 | injected-degraded | — | — | — | renderExecutingCode, renderCompletedOutput | y |

@@ -10,8 +10,8 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 | Attribute | Value |
 |-----------|-------|
 | Version | Milestone 21 in progress after 1.0 release-readiness completion |
-| Status | Active Milestone 21 — Phase 63 complete, Phase 64 ready to plan |
-| Last Updated | 2026-05-16 after Phase 63 merge-gate closeout |
+| Status | Active Milestone 21 — Phase 64 reconciled, Phase 65 planning prepared; PR #23 CI/merge gate blocks progression |
+| Last Updated | 2026-10-01 after Phase 64 reconciliation / prepared Phase 65 transition |
 
 ## Requirements
 ### Validated (Shipped)
@@ -47,7 +47,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-- [ ] Milestone 21 — Code Execution Source Visibility UX (Phase 62 audit complete; Phase 63 stable source payload contract complete; Phase 64 ready to plan; Phase 65 planned)
+- [ ] Milestone 21 — Code Execution Source Visibility UX (Phases 62/63 complete; Phase 64 implemented/reconciled with PR #23 CI/merge gate outstanding; Phase 65 docs/regressions planning prepared, not started)
 ### Validated (Shipped)
 - [x] Restored the P0 file-discovery helper path by removing `glob(limit=...)` dependency and proving bounded success for `ptc.read_tree()`, `ptc.find_files()`, and `ptc.find_files_abs()` in live audit coverage — Phase 39
 - [x] Improved syntax/compile-time error surfacing so pre-terminal Python failures now expose actionable `SyntaxError`/traceback context instead of generic RPC closure messaging — Phase 40
@@ -78,8 +78,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Confirmed and read-only verified the GitHub repository rename to `coctostan/pi-ptc-advanced`, added `docs/releases/REPO-RENAME-CHECKLIST.md`, and guarded active docs with Phase 61 release-readiness tests while preserving manual npm publish/tag/GitHub release boundaries — Phase 61
 - [x] Completed a current behavior audit for `code_execution` source visibility, classifying running, completed-success, and failed execution gaps and separating Phase 63 payload-contract work from Phase 64 TUI rendering work — Phase 62
 - [x] Stabilized the `code_execution` source payload contract: success, partial/progress, nested tool-call updates, and structured user-code Python failures all carry `details.userCode` (plus `details.failure` for failures), without injecting source into normal success/error text, keeping Phase 64 rendering fully decoupled — Phase 63
+- [x] Implemented and reconciled collapsed first-physical-line preview / expanded full numbered Python source across source-bearing running, success/report and structured-failure results; preserved execution/payload/prompt/report contracts and recorded visual approval — Phase 64 (feature branch; PR #23 CI/merge pending, not yet shipped on main)
 ### Planned (Next)
-- Phase 64 — Pi TUI Collapsed/Expanded Rendering
+- Phase 65 — Regression Tests and Docs (prepared only; Phase 64 PR #23 must pass CI and be explicitly merged before planning starts)
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -103,7 +104,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 - Package name: `pi-ptc-advanced`
 - Key source areas: `src/index.ts`, `src/code-executor.ts`, `src/custom-tool-manager.ts`, `src/tool-registry.ts`, `src/tool-adapters.ts`, `src/rpc-protocol.ts`
 - Maintainer-facing integration docs now live in `README.md`; deeper local planning/history artifacts live under `.paul/`
-- Latest GitHub Flow evidence: Phase 63 PR #20 passed GitHub Actions `Verify release baseline` and Socket checks, then squash-merged to `main` as `bde0db1` (2026-05-14).
+- Latest GitHub Flow evidence: Phase 64 PR #23 OPEN with failing Verify release baseline checks and successful Socket checks. Same read-payload/Unknown type failures occurred on exact main base; CI remains blocking. Detailed evidence: `.paul/phases/64-pi-tui-collapsed-expanded-rendering/64-01-CI-EVIDENCE.md`.
 - Two unrelated hotfix PRs (#21, #22, `code_execution` prompt trimming) merged directly to `main` after PR #20 outside the PALS FIX lifecycle; noted for traceability, out of Phase 63 scope.
 
 ## Constraints
@@ -188,6 +189,8 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 | Split source visibility remediation into payload/error/progress contract work first, then TUI collapsed/expanded rendering | Phase 62 found the renderer can display `details.userCode` when present, but completed success currently omits source from RPC completion details and failed executions bypass source-bearing result details; Phase 63 should stabilize metadata before Phase 64 changes presentation | 2026-05-14 | Active |
 | Turn source-bearing user-code Python failures into structured failed tool results instead of thrown errors | Pi drops thrown-error details at the tool boundary, so failure metadata (`details.failure`, `details.userCode`) must travel through a structured result to survive for Phase 64 rendering | 2026-05-14 | Active |
 | Leave `src/code-executor.ts` unchanged for Phase 63 | Tests confirmed it already passes typed/user-code Python errors through the executor boundary correctly; no source edits were needed | 2026-05-14 | Active |
+| Measure collapsed source preview before Text wrapping and prioritize source over hint | Explicit width/key/theme inputs preserve one-row collapse without formatting later source or mutating metadata; full source remains on expansion | 2026-10-01 | Active; Phase 64 / 64-01-SUMMARY.md |
+| Record D1–D4 as discarded intent changes, not evidence or CI waivers | Human `approve all 4` preserves existing M21 scope; baseline/advisory/CI concerns remain in evidence and strict merge gate | 2026-10-01 | Active; Phase 64 / 64-01-SUMMARY.md |
 ## Success Metrics
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
@@ -229,4 +232,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-05-16 after Phase 63 merge-gate closeout and Phase 64 transition*
+*Last updated: 2026-10-01 after Phase 64 reconciliation and prepared Phase 65 transition; PR #23 CI/merge gate pending*
