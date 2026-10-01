@@ -10,8 +10,8 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 | Attribute | Value |
 |-----------|-------|
 | Version | Milestone 21 in progress after 1.0 release-readiness completion |
-| Status | Active Milestone 21 — Phase 64 reconciled; scoped CI fix verified; Phase 65 prepared only, awaiting explicit PR #23 merge intent and passing current-head checks |
-| Last Updated | 2026-10-01 after standard CI fix 65-01; main-loop position unchanged |
+| Status | Active Milestone 21 — Phases 62–64 complete; PR #23 explicitly merged; Phase 65 plan 65-02 awaits APPLY approval |
+| Last Updated | 2026-10-01 after explicit Phase 64 merge and Phase 65 planning |
 
 ## Requirements
 ### Validated (Shipped)
@@ -47,7 +47,7 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Added bounded Python reduction and output-budget helpers `ptc.reduce_tool(...)` / `ptc.fit_output(...)` aligned to the session output cap, with focused execution proof — Phase 31
 - [x] Added execution-level ecosystem proof plus README/tool-description guidance for `ptc.batch_tool(...)`, `ptc.first_success(...)`, `ptc.reduce_tool(...)`, and `ptc.fit_output(...)`, including compact hashline/codegraph/web composition examples — Phase 32
 ### Active (In Progress)
-- [ ] Milestone 21 — Code Execution Source Visibility UX (Phases 62/63 complete; Phase 64 implemented/reconciled with PR #23 CI/merge gate outstanding; Phase 65 docs/regressions planning prepared, not started)
+- [ ] Milestone 21 — Code Execution Source Visibility UX (Phases 62–64 complete; Phase 65 docs/regressions plan 65-02 created, awaiting APPLY approval)
 ### Validated (Shipped)
 - [x] Restored the P0 file-discovery helper path by removing `glob(limit=...)` dependency and proving bounded success for `ptc.read_tree()`, `ptc.find_files()`, and `ptc.find_files_abs()` in live audit coverage — Phase 39
 - [x] Improved syntax/compile-time error surfacing so pre-terminal Python failures now expose actionable `SyntaxError`/traceback context instead of generic RPC closure messaging — Phase 40
@@ -78,9 +78,9 @@ A `pi-ptc-next` enhancement that makes `code_execution` invoke the same active P
 - [x] Confirmed and read-only verified the GitHub repository rename to `coctostan/pi-ptc-advanced`, added `docs/releases/REPO-RENAME-CHECKLIST.md`, and guarded active docs with Phase 61 release-readiness tests while preserving manual npm publish/tag/GitHub release boundaries — Phase 61
 - [x] Completed a current behavior audit for `code_execution` source visibility, classifying running, completed-success, and failed execution gaps and separating Phase 63 payload-contract work from Phase 64 TUI rendering work — Phase 62
 - [x] Stabilized the `code_execution` source payload contract: success, partial/progress, nested tool-call updates, and structured user-code Python failures all carry `details.userCode` (plus `details.failure` for failures), without injecting source into normal success/error text, keeping Phase 64 rendering fully decoupled — Phase 63
-- [x] Implemented and reconciled collapsed first-physical-line preview / expanded full numbered Python source across source-bearing running, success/report and structured-failure results; preserved execution/payload/prompt/report contracts and recorded visual approval — Phase 64 (feature branch; PR #23 CI/merge pending, not yet shipped on main)
+- [x] Implemented and reconciled collapsed first-physical-line preview / expanded full numbered Python source across source-bearing running, success/report and structured-failure results; preserved execution/payload/prompt/report contracts and recorded visual approval — Phase 64 (PR #23 explicitly squash-merged to main as c81c6fa; CI repair verified)
 ### Planned (Next)
-- Phase 65 — Regression Tests and Docs (prepared only; Phase 64 PR #23 must pass CI and be explicitly merged before planning starts)
+- Phase 65 — Regression Tests and Docs (65-02-PLAN.md: real execution-to-render proof and bounded README/tool guidance; PLAN complete, APPLY approval pending)
 ### Out of Scope
 - [ ] Long-term IR refactors during the early interop milestones
 - [ ] Broad helper ergonomics changes beyond what is required for trustworthy structured interop
@@ -104,7 +104,7 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 - Package name: `pi-ptc-advanced`
 - Key source areas: `src/index.ts`, `src/code-executor.ts`, `src/custom-tool-manager.ts`, `src/tool-registry.ts`, `src/tool-adapters.ts`, `src/rpc-protocol.ts`
 - Maintainer-facing integration docs now live in `README.md`; deeper local planning/history artifacts live under `.paul/`
-- Latest GitHub Flow evidence: Phase 64 PR #23 OPEN. Approved standard fix 65-01 (`R7 — no spec impact`) pins the compatible hashline fixture; repair 5c522d2 passes both Verify release baseline and Socket checks, full 278/278 plus release proof. Metadata-head checks remain mandatory at merge preflight; explicit merge intent absent. Source: `.paul/phases/65-regression-tests-and-docs/65-01-FIX-SUMMARY.md`.
+- Latest GitHub Flow evidence: Phase 64 PR #23 MERGED after explicit human `yes`, final head ef843f4 CI x2 / Socket x2 SUCCESS; squash c81c6fa at 2026-10-01T14:10:01Z, main synced clean 0/0, old local/remote branch deleted. Standard CI fix 65-01 remains finalized evidence; Phase 65 planning now on feature/65-regression-tests-and-docs. Sources: live gh/git merge receipt and `.paul/STATE.md` § Git State.
 - Two unrelated hotfix PRs (#21, #22, `code_execution` prompt trimming) merged directly to `main` after PR #20 outside the PALS FIX lifecycle; noted for traceability, out of Phase 63 scope.
 
 ## Constraints
@@ -232,4 +232,4 @@ This work improves trustworthiness and interoperability across Pi extensions by 
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-10-01 after scoped CI fix 65-01; Phase 65 remains prepared only, PR #23 explicit merge gate pending*
+*Last updated: 2026-10-01 after explicit PR #23 merge and Phase 65 plan 65-02 creation; APPLY approval pending*
