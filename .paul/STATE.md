@@ -9,7 +9,7 @@ See: `.paul/PROJECT.md`
 Milestone: Milestone 21 — Code Execution Source Visibility UX
 Phase: 65 of 65 (Regression Tests and Docs)
 Plan: 65-02 — `.paul/phases/65-regression-tests-and-docs/65-02-PLAN.md` (execute; main loop, distinct from completed 65-01-FIX)
-Status: APPLY complete (PASS_WITH_CONCERNS); awaiting UNIFY permission. Phase 64 merge gate closed; Phase 65 postflight pending.
+Status: APPLY complete (PASS_WITH_CONCERNS); awaiting UNIFY permission. Phase 64 merge gate closed. Phase 65 PR #24 OPEN; CI pending.
 Last activity: 2026-10-01 — Human `appove` explicitly approved 65-02 APPLY. Three tasks committed (1db7732, 84e5e2d, acc4474); supported Node 22 full 278→285, focused 54/54, release/types/diff PASS. Missing-text guards failed before edits and now pass. Audit unchanged 0 critical / 7 high / 2 moderate; advisory 88-line integration fixture. Evidence: 65-02-APPLY-LOG.md.
 Progress:
 - Milestone 21 — Code Execution Source Visibility UX: [███████░░░] 75% phases complete (Phases 62/63/64 ✓; Phase 65 PLAN/APPLY ✓, UNIFY ○)
@@ -204,12 +204,13 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Note: PR #21 and PR #22 (unrelated `code_execution` prompt-trim hotfixes) merged to `main` after PR #20 outside the PALS FIX lifecycle; out of Phase 63 scope, recorded for traceability only.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 - Phase 64 PR #23 MERGED — https://github.com/coctostan/pi-ptc-advanced/pull/23; explicit human `yes`, checked head ef843f4bc06d373e387eae19f9da6713459cc64c, CI runs 36809122122 / 36809125998 and both Socket checks SUCCESS. Squash c81c6faf243fa855226832e50316fd3b67bef57a (2026-10-01T14:10:01Z); main synced clean 0/0, local/remote old branch deleted. Planning branch feature/65-regression-tests-and-docs created from that base; no Phase 65 PR yet.
+- Phase 65 PR #24 OPEN — https://github.com/coctostan/pi-ptc-advanced/pull/24; feature/65-regression-tests-and-docs pushed, configured target verified exactly. APPLY receipt checked head 9d2381e5ac3e2649c0c53cd7422df27f9d7e42f3: Verify release baseline IN_PROGRESS (run 36881404562); later metadata head requires fresh checks. No merge intent, UNIFY not started.
 ## Session Continuity
 Last session: 2026-10-01
-Stopped at: Phase 65 / 65-02 APPLY complete with non-blocking concerns; GitHub Flow postflight pending, then UNIFY permission required.
-Next action: Continue to UNIFY for `.paul/phases/65-regression-tests-and-docs/65-02-PLAN.md` after configured postflight; no merge intent inferred.
+Stopped at: Phase 65 / 65-02 APPLY complete with non-blocking concerns; configured postflight completed (PR #24 OPEN / CI pending); UNIFY permission required.
+Next action: Continue to UNIFY for `.paul/phases/65-regression-tests-and-docs/65-02-PLAN.md`; no merge intent inferred.
 Resume file: `.paul/phases/65-regression-tests-and-docs/65-02-APPLY-LOG.md`
-wip_result: Three task commits complete; four product paths only. Parent-owned planning/lifecycle evidence awaiting commit/push/PR on feature branch.
+wip_result: Three task commits and parent planning/lifecycle evidence pushed on feature/65-regression-tests-and-docs. PR #24 open; receipt metadata follows on same branch. Four product paths only; local/release verification passed.
 Resume context:
 - Main-loop 65-02 distinct from completed 65-01-FIX. ROADMAP remains one plan, 0/1 complete until UNIFY; no M21/PRD/R# intent amendment.
 - AC-1–5 parent-verified. Task 1 exact raw source and real execution/render evidence, Task 2 precise expected missing-text failures, Task 3 green docs/description/full release proof.
