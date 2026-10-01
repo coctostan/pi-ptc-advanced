@@ -4,15 +4,15 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Phase 65 / 65-02 APPLY complete: real execution-to-render regressions and bounded README/tool guidance verified; UNIFY permission pending because audit/size advisories remain.
+**Current focus:** Phase 65 / 65-02 UNIFY complete; final-phase transition prepared. PR #24 merge gate remains open; M21 completion/audit is prepared only after merge.
 ## Current Position
 Milestone: Milestone 21 — Code Execution Source Visibility UX
 Phase: 65 of 65 (Regression Tests and Docs)
 Plan: 65-02 — `.paul/phases/65-regression-tests-and-docs/65-02-PLAN.md` (execute; main loop, distinct from completed 65-01-FIX)
-Status: APPLY complete (PASS_WITH_CONCERNS); awaiting UNIFY permission. Phase 64 merge gate closed. Phase 65 PR #24 OPEN; CI pending.
-Last activity: 2026-10-01 — Human `appove` explicitly approved 65-02 APPLY. Three tasks committed (1db7732, 84e5e2d, acc4474); supported Node 22 full 278→285, focused 54/54, release/types/diff PASS. Missing-text guards failed before edits and now pass. Audit unchanged 0 critical / 7 high / 2 moderate; advisory 88-line integration fixture. Evidence: 65-02-APPLY-LOG.md.
+Status: UNIFIED (PASS_WITH_CONCERNS); all four M21 phases unified, final-phase transition prepared. BLOCKED at Phase 65 PR #24 merge gate pending final-head checks and explicit merge intent. Milestone completion/audit not yet executed.
+Last activity: 2026-10-01 — Human `approve all` approved D1–D3 discard routes; finalized 65-02-SUMMARY.md, AC-1–5 PASS. Mandatory module/history/knowledge evidence durable, no duplicate prior rows; ledger append skipped with non-blocking missing-contract warning. ROADMAP explicit 1/1 inventory gives last_plan=true; PROJECT/ROADMAP/STATE final-phase transition prepared for feature commit/push, no merge or milestone closure.
 Progress:
-- Milestone 21 — Code Execution Source Visibility UX: [███████░░░] 75% phases complete (Phases 62/63/64 ✓; Phase 65 PLAN/APPLY ✓, UNIFY ○)
+- Milestone 21 — Code Execution Source Visibility UX: [██████████] 100% phase work unified (Phases 62–65 ✓); PR #24 merge gate and separate milestone completion/audit pending
 - Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [██████████] 100% ✓ (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ✓)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
@@ -60,7 +60,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Phase 65 / 65-02 APPLY complete; UNIFY permission pending; Phase 64 merge gate CLOSED]
+  ✓        ✓        ✓     [Phase 65 / 65-02 loop closed; final-phase transition prepared; PR #24 merge gate OPEN]
 ```
 
 ## Accumulated Context
@@ -87,6 +87,7 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - 2026-10-01: Human `approve` authorized standard side-loop fix 65-01 (`R7 — no spec impact`). Missing v0.8.6 / floating latest fixture caused read-field drift and TypeBox Unknown type; compatible v0.8.16 plus exact SHA guard repairs both, no runtime/README/dependency contract changes. Node 22 full 278/278 and live repair-head checks pass. Final FIX-SUMMARY owns evidence; main loop unchanged, explicit merge intent absent.
 - 2026-10-01: PR #23 explicitly squash-merged after human `yes` and passing final-head checks; c81c6fa on clean synced main, old feature branch deleted locally/remotely. Phase 65 PLAN authorized by `proceed`, not APPLY. 65-02 is the single declared main-loop plan (0/1); completed 65-01-FIX remains a side-loop. Planning selects execute for integration proof/docs/static text, with test-first docs guards; no new runtime logic. CODI degraded (stale entrypoint edges, renderer unresolved); audit unchanged 0 critical / 7 high / 2 moderate, expired acknowledgement untouched. Fresh supported Node 22 baseline required in APPLY.
 - 2026-10-01: Human `appove` approved 65-02 APPLY only. Parent executed inline on feature/65-regression-tests-and-docs; real Python/registered-render cases and test-first text guards added before bounded README/247-char description edits. Fresh supported verify:ci baseline 278/278 → final 285/285, focused final 54/54; release/noEmit/diff PASS. One padding-expectation retry, no production defect/scope deviation. Audit counts unchanged; PETE/IRIS flag 88-line test fixture and ARCH carries existing fan-out advisory. APPLY log retains module/task evidence; no merge or automatic milestone completion.
+- 2026-10-01: Human `yes` authorized UNIFY; `approve all` authorized sole D1–D3 discard batch. 65-02-SUMMARY finalized, AC-1–5 PASS; WALT/SKIP/CODI/RUBY post-unify complete, one quality/CODI row and one lesson retained. Audit/maintenance/degraded instrumentation remain evidence, no spec amendment/waiver. ROADMAP one main-loop plan, 1/1 -> last_plan=true; final-phase transition prepared, PR #24 merge gate OPEN. M21 completion/audit is a separate next lifecycle action only after merge. Consumed handoff archived; ledger contract unavailable, append non-blocking skipped.
 ### Decisions
 - Phase 55 normalized callable-wrapper contract guidance: direct callable Pi wrappers remain awaitable, `grep("pattern", path="...")` is supported in the runtime adapter, and Phase 56 keeps result/path/error semantics separate.
 - Phase 57 shipped `ptc.list_helpers()` as the curated `ptc.*` helper inventory distinct from live callable-tool discovery via `ptc.list_callable_tools()`.
@@ -204,20 +205,18 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Note: PR #21 and PR #22 (unrelated `code_execution` prompt-trim hotfixes) merged to `main` after PR #20 outside the PALS FIX lifecycle; out of Phase 63 scope, recorded for traceability only.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 - Phase 64 PR #23 MERGED — https://github.com/coctostan/pi-ptc-advanced/pull/23; explicit human `yes`, checked head ef843f4bc06d373e387eae19f9da6713459cc64c, CI runs 36809122122 / 36809125998 and both Socket checks SUCCESS. Squash c81c6faf243fa855226832e50316fd3b67bef57a (2026-10-01T14:10:01Z); main synced clean 0/0, local/remote old branch deleted. Planning branch feature/65-regression-tests-and-docs created from that base; no Phase 65 PR yet.
-- Phase 65 PR #24 OPEN — https://github.com/coctostan/pi-ptc-advanced/pull/24; feature/65-regression-tests-and-docs pushed, configured target verified exactly. APPLY receipt checked head 9d2381e5ac3e2649c0c53cd7422df27f9d7e42f3: Verify release baseline IN_PROGRESS (run 36881404562); later metadata head requires fresh checks. No merge intent, UNIFY not started.
+- Phase 65 PR #24 OPEN — https://github.com/coctostan/pi-ptc-advanced/pull/24; last pre-UNIFY checked head b4a710d3e299b0b6c0bb39371f22e9d0c147304a: both CI runs and both Socket checks SUCCESS, feature 5 ahead / 0 behind refreshed origin/main. Configured target exactly verified; historical origin redirect untouched. Final UNIFY/transition metadata is committed/pushed on feature/65-regression-tests-and-docs; any resulting head requires fresh checks. No merge intent. Metadata commit located by `docs(65-02): complete regression proof and final-phase transition` in feature git log.
 ## Session Continuity
-Last session: 2026-10-01
-Stopped at: Phase 65 / 65-02 APPLY complete with non-blocking concerns; configured postflight completed (PR #24 OPEN / CI pending); UNIFY permission required.
-Next action: Continue to UNIFY for `.paul/phases/65-regression-tests-and-docs/65-02-PLAN.md`; no merge intent inferred.
-Resume file: `.paul/phases/65-regression-tests-and-docs/65-02-APPLY-LOG.md`
-wip_result: Three task commits and parent planning/lifecycle evidence pushed on feature/65-regression-tests-and-docs. PR #24 open; receipt metadata follows on same branch. Four product paths only; local/release verification passed.
+Last session: 2026-10-01T16:18:43Z
+Stopped at: Phase 65 / 65-02 UNIFY complete, mandatory final-phase transition prepared; live PR #24 merge gate blocks downstream routing.
+Next action: Complete PR #24 merge gate only after final-head CI/Socket verification and explicit merge intent; no merge intent inferred.
+Prepared after-gate action: `/skill:paul-milestone` to complete Milestone 21 including fresh-context adherence audit; not unlocked while PR #24 is open.
+Resume file: `.paul/phases/65-regression-tests-and-docs/65-02-SUMMARY.md`
 Resume context:
-- Main-loop 65-02 distinct from completed 65-01-FIX. ROADMAP remains one plan, 0/1 complete until UNIFY; no M21/PRD/R# intent amendment.
-- AC-1–5 parent-verified. Task 1 exact raw source and real execution/render evidence, Task 2 precise expected missing-text failures, Task 3 green docs/description/full release proof.
-- Supported Node v22.23.1/npm 10.9.4 isolated PATH and canonical pinned fixture recipe in APPLY log. Do not revert to unsupported Node 26 for full live proof or mutate active sibling/dependencies.
-- DEAN counts unchanged 0 critical / 7 high / 2 moderate, acknowledgement expired and not renewed. PETE/IRIS advisory fixture helper 88 lines; no broad refactor recommended. ARCH existing test fan-out now 49.
-- No runtime/render/contracts/safety/package/fixture changes; src/index.ts diff is exactly one static-description line (247 chars). Prior visual approval not a new observation.
-- All APPLY hooks retained in 65-02-APPLY-LOG; post-unify mandatory hooks/history/sole delta-route decision still pending. Do not duplicate prior 64-01/65-01-FIX rows. No hidden ledger, implicit UNIFY permission or merge intent.
+- AC-1–5 / three tasks PASS. Human `approve all` explicitly approved D1–D3 discard routes; sole decision record is finalized SUMMARY. Retained concerns are not waivers; no intent amended.
+- WALT/SKIP/CODI/RUBY post-unify complete; exactly one 65-02 quality/CODI row and one lesson. Existing ledger unchanged because authoritative contract unavailable (non-blocking derived-aid warning). No module rerun/duplicate history required.
+- Consumed handoff archived at `.paul/handoffs/archive/HANDOFF-2026-10-01-phase65-pre-unify.md`. Four product paths only; protected runtime/render/package/CI/fixture unchanged; 247-char description.
+- ROADMAP explicit main-loop inventory 1/1 complete -> last_plan=true. Final-phase PROJECT/ROADMAP/STATE aligned; all four phases unified, milestone completion/audit separate. After checked merge/base sync/cleanup, use prepared after-gate action without direct-to-base metadata write.
 
 ---
-*STATE.md — Updated after approved Phase 65 / 65-02 APPLY; UNIFY permission pending (2026-10-01)*
+*STATE.md — Phase 65 / 65-02 unified; final-phase transition prepared, live PR #24 merge gate retains authority (2026-10-01)*

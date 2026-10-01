@@ -5,8 +5,8 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 
 ## Current Milestone
 **Milestone 21 — Code Execution Source Visibility UX**
-Status: 🚧 In Progress
-Phases: 3 of 4 complete (Phase 64 PR #23 squash-merged; Phase 65 plan 65-02 awaits APPLY approval)
+Status: All phases unified; PR #24 merge gate and separate milestone completion/audit pending
+Phases: 4 of 4 unified (100% phase work); final Phase 65 PR #24 remains OPEN. Milestone closure not yet executed.
 
 Focus: Make `code_execution` transparent in Pi TUI by showing generated Python source in a collapsed/expandable UI affordance, backed by a stable structured payload field for running, success, and failure states.
 
@@ -15,7 +15,7 @@ Focus: Make `code_execution` transparent in Pi TUI by showing generated Python s
 | 62 | Current Behavior Audit | 1/1 | ✅ Complete | 2026-05-14 |
 | 63 | Stable Source Payload Contract | 1/1 | ✅ Complete | 2026-05-14 |
 | 64 | Pi TUI Collapsed/Expanded Rendering | 1/1 | ✅ Complete; PR #23 merged (`c81c6fa`) | 2026-10-01 |
-| 65 | Regression Tests and Docs | 0/1 | 🔵 Planning; 65-02 awaits APPLY approval | - |
+| 65 | Regression Tests and Docs | 1/1 | ✅ Unified; PR #24 merge gate pending | 2026-10-01 |
 
 ### Phase 62: Current Behavior Audit
 Focus: Reproduce current `code_execution` visibility for running, success, and failure states; locate where Python source is stored today; determine whether gaps are in payload, streaming state, TUI rendering, or collapsed presentation.
@@ -31,7 +31,7 @@ Plans: `64-01-PLAN.md` — COMPLETE (2026-10-01, `64-01-SUMMARY.md` finalized; A
 
 ### Phase 65: Regression Tests and Docs
 Focus: Add payload/rendering regressions and update README/tool guidance so users and maintainers understand where source appears and how to inspect it.
-Plans: `65-02-PLAN.md` (execute; real execution-to-render regressions and bounded README/tool guidance) — PLANNED, awaiting APPLY approval. Explicit main-loop inventory: one plan, 0/1 complete; 65-01 is the completed FIX side-loop, not a main-loop plan.
+Plans: `65-02-PLAN.md` — COMPLETE (2026-10-01; finalized `65-02-SUMMARY.md`, AC-1–5 PASS, mandatory post-unify evidence durable, human `approve all` authorized D1–D3 discard routes). Explicit main-loop inventory: one plan, 1/1 complete; last_plan=true. 65-01 remains the completed FIX side-loop. Final-phase PROJECT/ROADMAP/STATE transition prepared on feature branch; PR #24 merge gate pending, no merge intent inferred. After merge/base sync/cleanup: Milestone 21 completion including fresh-context adherence audit.
 Side-loop only: `65-01-FIX.md` / `65-01-FIX-SUMMARY.md` (`R7 — no spec impact`) repairs Phase 64 PR #23 CI. This is not a Phase 65 PLAN or source-visibility implementation; main-loop plan inventory and milestone intent remain unchanged.
 
 ## Completed Milestones
