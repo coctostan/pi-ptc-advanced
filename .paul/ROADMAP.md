@@ -6,14 +6,14 @@ Brownfield PALS adoption for `pi-ptc-next`, focused on hashline-native runtime i
 ## Current Milestone
 **Milestone 21 — Code Execution Source Visibility UX**
 Status: 🚧 In Progress
-Phases: 1 of 4 complete
+Phases: 2 of 4 complete
 
 Focus: Make `code_execution` transparent in Pi TUI by showing generated Python source in a collapsed/expandable UI affordance, backed by a stable structured payload field for running, success, and failure states.
 
 | Phase | Name | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
 | 62 | Current Behavior Audit | 1/1 | ✅ Complete | 2026-05-14 |
-| 63 | Stable Source Payload Contract | 1/1 | 🚧 Planning complete | - |
+| 63 | Stable Source Payload Contract | 1/1 | ✅ Complete | 2026-05-14 |
 | 64 | Pi TUI Collapsed/Expanded Rendering | TBD | Not started | - |
 | 65 | Regression Tests and Docs | TBD | Not started | - |
 
@@ -23,7 +23,7 @@ Plans: `62-01-PLAN.md` (research; current behavior audit for code_execution sour
 
 ### Phase 63: Stable Source Payload Contract
 Focus: Ensure every `code_execution` invocation exposes source in a stable details/metadata field while keeping final result text compact and backward-compatible; cover running, success, and failure paths.
-Plans: `63-01-PLAN.md` (tdd; stable source payload/error/progress details contract) — UNIFY complete; PR #20 merge gate pending checks
+Plans: `63-01-PLAN.md` (tdd; stable source payload/error/progress details contract) — complete 2026-05-14; PR #20 squash-merged to `main` (`bde0db1`), CI + Socket checks SUCCESS
 
 ### Phase 64: Pi TUI Collapsed/Expanded Rendering
 Focus: Render Python source in Pi TUI as collapsed by default with a first-line preview; expand reveals full formatted source for running, completed success, and failed calls.
@@ -291,4 +291,4 @@ Suggested implementation branch from project docs:
 - `feat/hashline-native-interop`
 
 ---
-*Last updated: 2026-05-13 after Phase 59 UNIFY closeout (59-01-SUMMARY.md)*
+*Last updated: 2026-05-16 after Phase 63 merge-gate closeout (63-01-SUMMARY.md); transitioned to Phase 64 planning readiness*

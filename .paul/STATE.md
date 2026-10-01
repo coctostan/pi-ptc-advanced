@@ -7,12 +7,12 @@ See: `.paul/PROJECT.md`
 **Current focus:** Milestone 21 begins: make `code_execution` Python source visible in Pi TUI with collapsed/expanded rendering backed by stable details metadata.
 ## Current Position
 Milestone: Milestone 21 — Code Execution Source Visibility UX
-Phase: 63 of 65 (Stable Source Payload Contract)
-Plan: `.paul/phases/63-stable-source-payload-contract/63-01-PLAN.md`
-Status: Phase 63 UNIFY completed; GitHub Flow merge gate pending PR checks
-Last activity: 2026-05-14 — Phase 63 UNIFY reconciled stable `code_execution` source payload contract and opened PR #20; awaiting GitHub Flow checks/merge before phase transition.
+Phase: 64 of 65 (Pi TUI Collapsed/Expanded Rendering)
+Plan: Not started
+Status: Phase 63 complete; ready to plan Phase 64
+Last activity: 2026-05-16 — Verified PR #20 merged (squash `bde0db1`, CI + Socket checks SUCCESS), closed the Phase 63 merge gate, and transitioned to Phase 64 planning readiness.
 Progress:
-- Milestone 21 — Code Execution Source Visibility UX: [█████░░░░░] 50% (Phase 62 ✓; Phase 63 PLAN ✓ / APPLY ✓ / UNIFY ✓; Phase 64 ○; Phase 65 ○)
+- Milestone 21 — Code Execution Source Visibility UX: [█████░░░░░] 50% (Phase 62 ✓; Phase 63 ✓; Phase 64 ○; Phase 65 ○)
 - Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [██████████] 100% ✓ (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ✓)
 - Milestone 19 — Live Runtime Helper Hardening: [██████████] 100% ✓ (Phase 54 ✓; Phase 55 ✓; Phase 56 ✓; Phase 57 ✓)
 - Milestone 17 — Pi Compatibility and Prompt Integration Audit: [██████████] 100% ✓ (Phase 45 ✓, Phase 46 ✓, Phase 47 ✓, Phase 48 ✓)
@@ -60,7 +60,7 @@ Progress:
 Current loop state:
 ```text
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Phase 63 unify complete; merge gate pending PR checks]
+  ○        ○        ○     [Phase 63 complete; ready for Phase 64 PLAN]
 ```
 
 ## Accumulated Context
@@ -73,6 +73,8 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 63 PLAN created `.paul/phases/63-stable-source-payload-contract/63-01-PLAN.md` as a TDD plan for source-bearing success, partial, and failure details while deferring collapsed/expanded rendering to Phase 64.
 - Phase 63 APPLY added stable source-bearing structured details for `code_execution` success, partial updates, nested tool-call updates, and user-code Python failures; focused verification passed, while full-suite `npm test` retains pre-existing local Node `--experimental-transform-types` failures in hashline live tests.
 - Phase 63 UNIFY reconciled plan-vs-actual into `63-01-SUMMARY.md`, recorded post-unify module evidence, committed/pushed PR #20, and is blocked from phase transition only by GitHub Flow PR checks/merge gate.
+- 2026-05-16: PR #20 confirmed MERGED (squash `bde0db1` to `main`, 2026-05-14T16:45:24Z) with `Verify release baseline` and Socket Security checks SUCCESS; local `main` is already fast-forwarded and clean, closing the Phase 63 merge gate and completing the phase.
+- Note: two unrelated hotfix PRs (`#21` trim code_execution tool prompt, `#22` further trim) merged directly to `main` after PR #20 without PALS FIX lifecycle artifacts; out of Phase 63 scope, flagged here for visibility only.
 ### Decisions
 - Phase 55 normalized callable-wrapper contract guidance: direct callable Pi wrappers remain awaitable, `grep("pattern", path="...")` is supported in the runtime adapter, and Phase 56 keeps result/path/error semantics separate.
 - Phase 57 shipped `ptc.list_helpers()` as the curated `ptc.*` helper inventory distinct from live callable-tool discovery via `ptc.list_callable_tools()`.
@@ -185,19 +187,19 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - PR #15: MERGED — https://github.com/coctostan/pi-ptc-next/pull/15; squash merge `a574a6d` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote feature branch deleted by merge automation; local `main` fast-forwarded.
 - PR #16: MERGED — https://github.com/coctostan/pi-ptc-next/pull/16; squash merge `50f99a9` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote feature branch `feature/59-readme-docs-polish` deleted by merge automation; local `main` fast-forwarded (Phase 59).
 - PR #19: MERGED — https://github.com/coctostan/pi-ptc-advanced/pull/19; squash merge `3c573dd` to `main`; GitHub Actions `Verify release baseline` ×2 and Socket Security ×2 SUCCESS; remote feature branch deleted by merge automation; local `main` fast-forwarded (Phase 62).
+- PR #20: MERGED — https://github.com/coctostan/pi-ptc-advanced/pull/20; squash merge `bde0db1` to `main` (2026-05-14T16:45:24Z); GitHub Actions `Verify release baseline` and Socket Security checks SUCCESS; remote feature branch was not auto-deleted on merge, so local/remote `feature/63-stable-source-payload-contract` were cleaned up manually during Phase 63 transition verification on 2026-05-16; local `main` already fast-forwarded (Phase 63).
+- Note: PR #21 and PR #22 (unrelated `code_execution` prompt-trim hotfixes) merged to `main` after PR #20 outside the PALS FIX lifecycle; out of Phase 63 scope, recorded for traceability only.
 - Tags: `0.14.0` remains on the earlier Milestone 14 handoff checkpoint; no `0.16.0` tag created (publish remains manual)
 ## Session Continuity
-Last session: 2026-05-14
-Stopped at: Phase 63 PLAN created and pause handoff written; ready for APPLY.
-Next action: `/paul:apply .paul/phases/63-stable-source-payload-contract/63-01-PLAN.md`
-Resume file: `.paul/HANDOFF-2026-05-14-phase63-plan-ready-to-apply.md`
-wip_result: skipped — base-branch pause; uncommitted `.paul/*` lifecycle/plan changes remain in working tree
+Last session: 2026-05-16
+Stopped at: Phase 63 merge gate closed (PR #20 merged); transitioned to Phase 64 planning readiness.
+Next action: `/paul:plan` for Phase 64 (Pi TUI Collapsed/Expanded Rendering)
+Resume file: `.paul/ROADMAP.md`
+wip_result: n/a — clean working tree on `main` after merge-gate verification
 Resume context:
-- Milestone 21 active: Code Execution Source Visibility UX.
-- Phase 63 PLAN is ready for APPLY at `.paul/phases/63-stable-source-payload-contract/63-01-PLAN.md`.
-- PLAN includes the resolved Q1/Q2 decisions: user-code Python failures should become structured failed results because Pi drops thrown-error details, and `src/code-executor.ts` is inspect/test-first/no-op unless tests prove otherwise.
-- Prior active handoff archived to `.paul/handoffs/archive/HANDOFF-2026-05-14-phase63-ready-to-plan.md`.
-- Expected resume action: `/paul:apply .paul/phases/63-stable-source-payload-contract/63-01-PLAN.md`.
+- Milestone 21 active: Code Execution Source Visibility UX; Phase 63 is now complete (2 of 4 phases done).
+- Phase 64 should plan Pi TUI collapsed/expanded rendering against the stable `details.userCode` / `details.failure` contract documented in `63-01-SUMMARY.md`'s "Handoff to Phase 64" section.
+- Expected resume action: `/paul:plan` for Phase 64.
 
 ---
-*STATE.md — Updated for Phase 63 pause handoff (last updated: 2026-05-14)*
+*STATE.md — Updated for Phase 63 merge-gate closeout and Phase 64 transition (last updated: 2026-05-16)*
