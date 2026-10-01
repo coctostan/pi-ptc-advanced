@@ -47,3 +47,13 @@ The two PR failures therefore existed on the exact base in CI. Do not attribute 
 APPLY-LOG documents local Node v26.7.0 baseline 259 pass / 9 unsupported --experimental-transform-types failures -> 267 pass / same nine failures, focused 41/41. CI is configured for Node 22 and reveals actual hashline integration/fixture failures; these are not the local unsupported-option failure mechanism.
 
 CI remains a strict GitHub Flow blocker even when failures predate Phase 64. No merge-anyway, silent baseline waiver, source/README/CI edits, spec amendment, or Phase 65 transition authorized by these observations. Repair needs a separately scoped action after UNIFY routing; root-cause diagnosis is not complete.
+
+## Approved fix diagnosis — 65-01 side-loop (2026-10-01)
+
+Human `approve` subsequently authorized a scoped standard `/paul:fix`; it did not authorize merge or Phase 65 main-loop planning. Evidence: `../65-regression-tests-and-docs/65-01-FIX.md` and sibling `65-01-FIX-SUMMARY.md`.
+
+Correction to the original read-failure interpretation: `assert.deepEqual(readExample, expectedReadExample)` uses README as **actual** and normalized live payload as **expected**. README omits `continuation` and `symbol.tier`; the floating latest hashline checkout adds them. The original assertion excerpt remains valid, but the sentence describing its operands was reversed.
+
+Fresh run 36805443212 at 5f9a56f reproduced 274 pass / 2 fail. Isolated Node v22.23.1 reproduced the same two named failures locally. CI's v0.8.6 tag is absent (404); fallback cloned latest, whose schemas use `typebox` 1.x rather than this package's `@sinclair/typebox` validator. Compatible v0.8.16 / f1234813c5f2ea0a0476143b41a59cf2094e945b retains the existing read payload and Sinclair schema contracts. No runtime validation bypass or weakened README assertion is needed.
+
+Repair removes the floating fallback, verifies the exact tag commit before installing, and adds two fail-closed regression guards. Local `npm run verify:ci` with Node 22 / npm 10 and the canonical isolated pinned fixture passes: focused 29/29; full 278/278; release package metadata/tarball/installability; typecheck and diff hygiene. Live repaired-head CI remains pending at this evidence update; final receipt belongs to FIX-SUMMARY. Existing dependency findings and explicit merge-intent gate remain.

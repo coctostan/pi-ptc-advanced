@@ -4,13 +4,13 @@
 See: `.paul/PROJECT.md`
 
 **Core value:** `pi-ptc-next` should execute the same active Pi tool implementations that the user sees in chat.
-**Current focus:** Phase 64 reconciliation finalized; Phase 65 transition metadata prepared, not unlocked. PR #23 CI failure blocks GitHub Flow closure; separate CI fix scope and later explicit merge intent required.
+**Current focus:** Approved standard CI fix side-loop 65-01 (`R7 — no spec impact`) for Phase 64 PR #23. Phase 65 transition remains prepared only; no merge or main-loop planning authorization.
 ## Current Position
 Milestone: Milestone 21 — Code Execution Source Visibility UX
 Phase: 65 of 65 (Regression Tests and Docs) — prepared transition only; Phase 64 PR #23 gate unresolved
 Plan: Not started (Phase 65); previous plan `.paul/phases/64-pi-tui-collapsed-expanded-rendering/64-01-PLAN.md` reconciled
 Status: Phase 65 planning prepared but blocked by Phase 64 PR #23 CI/merge gate
-Last activity: 2026-10-01 — Human approved D1–D4 discard routes; finalized 64-01-SUMMARY, completed module history/reporting, prepared PROJECT/ROADMAP/STATE transition metadata. No intent amendments, CI waiver, repair or merge.
+Last activity: 2026-10-01 — Approved standard fix 65-01 repairs missing-tag / floating hashline fixture drift; two fail-closed guards RED -> GREEN. Node 22 baseline 274/2 -> 278/0; verify:ci, release package, TypeScript/YAML/diff checks pass; post-apply modules recorded. Push / live CI and post-unify finalization pending; main loop unchanged.
 Progress:
 - Milestone 21 — Code Execution Source Visibility UX: [███████░░░] 75% reconciled (Phases 62/63 ✓; Phase 64 PLAN/APPLY/reconciliation ✓, CI/merge pending; Phase 65 ○ prepared, blocked)
 - Milestone 20 — `pi-ptc-advanced` 1.0 Public NPM Release: [██████████] 100% ✓ (Phase 58 ✓; Phase 59 ✓; Phase 60 ✓; Phase 61 ✓)
@@ -182,6 +182,7 @@ PLAN ──▶ APPLY ──▶ UNIFY
 ### Fixes
 | Fix 45-02 (standard, PARTIAL): bump CI Actions `node-version` 20→22 to fix `.ts` test loader | Phase 45 side-loop | `.github/workflows/ci.yml`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX.md`, `.paul/phases/45-pi-api-and-documentation-delta-audit/45-02-FIX-SUMMARY.md` (commit `e777394`) |
 | Fix 45-03 (standard, PASS): close all 26 newly-visible CI failures — force-add 5 ungitignored eval fixtures, install `@ast-grep/cli` + `difftastic 0.69.0` on CI, clone `pi-hashline-readmap` as sibling repo with its own `node_modules` and export `PI_HASHLINE_READMAP_ROOT` | Phase 45 side-loop | `.github/workflows/ci.yml`, 5 `.pi/evals/ptc/{baselines,recipes}/*` files, FIX + FIX-SUMMARY (commits `623ad2f`, `142e3f1`, `38876f4`, `d19b426`, `15d95b3`); CI now 207/207 PASS, PR #1 mergeable |
+| Fix 65-01 (standard, APPLIED / LIVE CI PENDING): repair Phase 64 PR #23 fixture drift | Chain: R7 — no spec impact | Current Phase 65 prepared-only side-loop; main loop unchanged | `.github/workflows/ci.yml`, `test/ci-hashline-fixture.test.ts`, `65-01-FIX.md`, `65-01-FIX-SUMMARY.md`; Node 22 full 278/278, verify:ci pass, no merge authorization |
 
 ### Git State
 - Phase 50 UNIFY metadata merged to `main` via PR #6 squash merge at `5eee7cb`.
@@ -202,10 +203,10 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Phase 64: feature/64-pi-tui-collapsed-expanded-rendering holds product/config commits cab0658, 403e3cd, 01ed9ee plus finalized reconciliation / prepared transition metadata. PR #23 OPEN — https://github.com/coctostan/pi-ptc-advanced/pull/23; completed product checks Verify release baseline FAILURE, Socket SUCCESS. PR full 274 pass / 2 fail; exact main base had both failures. Phase metadata commit/push uses this feature branch; see git log for receipt. No local/main merge; CI-EVIDENCE is detailed source.
 ## Session Continuity
 Last session: 2026-10-01
-Stopped at: Phase 64 finalized reconciliation / prepared Phase 65 transition; strict PR #23 CI merge gate blocks live progression.
-Next action: Approve a separately scoped standard /paul:fix for Phase 64 PR #23 failing CI (read-payload fixture mismatch and real hashline interop Unknown type); no repair started.
-Resume file: `.paul/phases/64-pi-tui-collapsed-expanded-rendering/64-01-SUMMARY.md` (finalized reconciliation; merge gate blocked)
-wip_result: Phase 64 product/config commits pushed; reconciliation/transition metadata prepared on feature branch for PR #23. CI fix and merge intent remain unapproved; no Phase 65 planning begun.
+Stopped at: Approved standard fix 65-01 in progress; Phase 64 PR #23 CI/merge gate still blocks main-loop progression.
+Next action: Push scoped 65-01 repair and obtain passing live PR #23 checks, then finalize post-unify evidence once; explicit merge intent still required before Phase 65 main-loop planning.
+Resume file: `.paul/phases/65-regression-tests-and-docs/65-01-FIX-SUMMARY.md` (local fix verified; live CI pending; main loop unchanged)
+wip_result: Phase 64 reconciliation is complete. Scoped standard CI repair approved (`R7 — no spec impact`) and in progress on the existing PR branch; no runtime/payload/prompt/dependency contract changes. Merge intent remains unapproved; Phase 65 main-loop planning has not begun.
 Resume context:
 - Phase 64 reconciliation complete with D1–D4 discarded as intent changes; evidence retained, no CI waiver. Phase 65 ○○○ transition prepared only; Milestone 21 3/4 reconciled. Live next action remains Phase 64 PR #23 CI gate, not Phase 65 PLAN.
 - Success/running/failure/report visual batch uses `pi --no-extensions --extension /Users/maxwellnewman/pi/workspace/pi-ptc-next/src/index.ts --no-session`; no duplicate PTC extension.
