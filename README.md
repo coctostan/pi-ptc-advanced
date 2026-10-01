@@ -188,9 +188,28 @@ Common auto-routing signals:
 
 This behavior is enabled by default with `PTC_AUTO_ROUTE=true`.
 The `code_execution` tool is also surfaced through Pi prompt metadata: a one-line `promptSnippet` appears in the default `Available tools` section, and active-only `promptGuidelines` summarize when to prefer Python-backed batching versus direct tools. Auto-routing remains a conservative fallback for strong PTC-shaped prompts.
-Completed `code_execution` results keep the default tool row compact while preserving executed Python source in expanded details; recognized `ptc.report(...)` returns also get compact structured report rendering plus `details.report` for tests and evals.
-
 Use `nu` instead of `code_execution` for pipeline-style structured-data or filesystem-metadata analysis (`where`, `sort-by`, `group-by`, `first`, `histogram`). Use `code_execution` when the task needs custom per-item Python logic, stateful aggregation, complex output shapes, or multiple callable-tool calls orchestrated inside one local run.
+
+### Inspecting Python source
+
+In Pi TUI, source is collapsed by default: a compact preview shows only the **first physical line** (even if blank), not the first nonblank statement. Use Pi’s configurable tool-expansion action and the displayed hint to inspect the full, numbered Python source. This applies while running, after success, and for source-bearing Python failures; expanded running progress marks a valid current line with an arrow, while nested-call updates do not invent one. Terminal output or failure diagnostics appear before source.
+
+For example, submit this multiline code; the collapsed source preview shows `value = 2`, and expansion reveals both numbered lines:
+
+```python
+value = 2
+return {"value": value}
+```
+
+`details.userCode` stores the original ordered physical lines (`code.split("\n")`), including indentation, CRLF remnants and leading/trailing blanks. The TUI removes trailing CR characters for display without changing that metadata. Source-bearing failures also retain `details.failure`. These fields are structured metadata, not an appended source block in ordinary stdout/return output; diagnostic traceback excerpts may still include source lines.
+
+Recognized `ptc.report(...)` returns retain compact/expanded report rendering and `details.report`. Legacy or source-less results keep their existing fallback body: do not assume source is available for pre-execution validation or transport errors.
+
+Focused regression proof:
+
+```bash
+npm run build && node --test test/code-execution-source-visibility.test.ts
+```
 
 ## Why this exists
 
